@@ -4,6 +4,8 @@
     "format": "prettier -w ."
   },
   "dependencies": {
+    "clsx": "^2.1.1",
+    "date-fns-tz": "^3.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-simple-maps": "^3.0.0"
@@ -13,7 +15,8 @@
     "@types/react-dom": "^19.1.7",
     "@types/react-simple-maps": "^3.0.6",
     "parcel": "^2.15.4",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "typescript-plugin-css-modules": "^5.2.0"
   },
   "overrides": {
     "react-simple-maps": {

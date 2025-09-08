@@ -1,0 +1,69 @@
+.componentContainer {
+  box-sizing: border-box;
+  max-height: 100vh;
+  max-width: 100vw;
+  overflow: auto;
+  position: relative;
+}
+
+.componentContainer h3,
+.componentContainer h4 {
+  margin: 0;
+}
+
+.mapContainer {
+  height: 150%;
+  padding: 25%;
+  width: 150%;
+}
+
+.floatingAction {
+  position: absolute;
+}
+
+.sideDrawer {
+  background-color: white;
+  border: 1px solid black;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  height: 98%;
+  left: 0.5em;
+  opacity: 0.7;
+  padding: 1em;
+  perspective: 500px;
+  position: fixed;
+  top: 1%;
+  transition: 0.3s opacity;
+  width: 33%;
+}
+
+.sideDrawer:hover {
+  opacity: 1;
+}
+
+.sideDrawerUSState {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  overflow-y: auto;
+}
+
+.authorRow {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  font-size: 0.8em;
+  gap: 1em;
+}
+
+.authorRow > img {
+  aspect-ratio: 1 / 1;
+  flex: none;
+  height: 100px;
+  object-fit: cover;
+  width: 100px;
+}
+
+.authorDetails {
+  flex: 3;
+}

@@ -1,8 +1,142 @@
-interface AuthorLocation {}
+import type { ImgHTMLAttributes } from 'react';
 
-interface Author {
+export enum USState {
+  ALABAMA = 'Alabama',
+  ALASKA = 'Alaska',
+  ARIZONA = 'Arizona',
+  ARKANSAS = 'Arkansas',
+  CALIFORNIA = 'California',
+  COLORADO = 'Colorado',
+  CONNECTICUT = 'Connecticut',
+  DELAWARE = 'Delaware',
+  FLORIDA = 'Florida',
+  GEORGIA = 'Georgia',
+  HAWAII = 'Hawaii',
+  IDAHO = 'Idaho',
+  ILLINOIS = 'Illinois',
+  INDIANA = 'Indiana',
+  IOWA = 'Iowa',
+  KANSAS = 'Kansas',
+  KENTUCKY = 'Kentucky',
+  LOUISIANA = 'Louisiana',
+  MAINE = 'Maine',
+  MARYLAND = 'Maryland',
+  MASSACHUSSETTS = 'Massachussetts',
+  MICHIGAN = 'Michigan',
+  MINNESOTA = 'Minnesota',
+  MISSISSIPPI = 'Mississippi',
+  MISSOURI = 'Missouri',
+  MONTANA = 'Montana',
+  NEBRASKA = 'Nebraska',
+  NEVADA = 'Nevada',
+  NEW_HAMPSHIRE = 'New Hampshire',
+  NEW_JERSEY = 'New Jersey',
+  NEW_MEXICO = 'New Mexico',
+  NEW_YORK = 'New York',
+  NORTH_CAROLINA = 'North Carolina',
+  NORTH_DAKOTA = 'North Dakota',
+  OHIO = 'Ohio',
+  OKLAHOMA = 'Oklahoma',
+  OREGON = 'Oregon',
+  PENNSYLVANIA = 'Pennsylvania',
+  RHODE_ISLAND = 'Rhode Island',
+  SOUTH_CAROLINA = 'South Carolina',
+  SOUTH_DAKOTA = 'South Dakota',
+  TENNESSEE = 'Tennessee',
+  TEXAS = 'Texas',
+  UTAH = 'Utah',
+  VERMONT = 'Vermont',
+  VIRGINIA = 'Virginia',
+  WASHINGTON = 'Washington',
+  WEST_VIRGINIA = 'West Virginia',
+  WISCONSIN = 'Wisconsin',
+  WYOMING = 'Wyoming',
+}
+
+const EasternTimeZoneStates: Array<USState> = [
+  USState.CONNECTICUT,
+  USState.DELAWARE,
+  USState.FLORIDA,
+  USState.GEORGIA,
+  USState.INDIANA,
+  USState.KENTUCKY,
+  USState.MAINE,
+  USState.MARYLAND,
+  USState.MASSACHUSSETTS,
+  USState.MICHIGAN,
+  USState.NEW_HAMPSHIRE,
+  USState.NEW_JERSEY,
+  USState.NEW_YORK,
+  USState.NORTH_CAROLINA,
+  USState.OHIO,
+  USState.RHODE_ISLAND,
+  USState.SOUTH_CAROLINA,
+  USState.TENNESSEE,
+  USState.VERMONT,
+  USState.VIRGINIA,
+  USState.WEST_VIRGINIA,
+];
+
+const CentralTimeZoneStates: Array<USState> = [
+  USState.ALABAMA,
+  USState.ARKANSAS,
+  USState.ILLINOIS,
+  USState.IOWA,
+  USState.KANSAS,
+  USState.LOUISIANA,
+  USState.MINNESOTA,
+  USState.MISSISSIPPI,
+  USState.MISSOURI,
+  USState.NEBRASKA,
+  USState.NORTH_DAKOTA,
+  USState.OKLAHOMA,
+  USState.SOUTH_DAKOTA,
+  USState.TEXAS,
+  USState.WISCONSIN,
+];
+
+const NonWesternTimeZoneStates = [
+  ...EasternTimeZoneStates,
+  ...CentralTimeZoneStates,
+];
+
+const WesternTimeZoneStates: Array<USState> = Object.values(USState).filter(
+  (usState) => !NonWesternTimeZoneStates.includes(usState),
+);
+
+export const stateToTimezoneMap = new Map<USState, string>([
+  ...EasternTimeZoneStates.map((state) => [state, 'America/New_York'] as const),
+  ...CentralTimeZoneStates.map((state) => [state, 'America/Chicago'] as const),
+  ...WesternTimeZoneStates.map(
+    (state) => [state, 'America/Los_Angeles'] as const,
+  ),
+]);
+
+interface AuthorLocation {
+  state: USState;
+  /** Does not have to be the full address; city / town / village is fine. Called 'address' not to bias for city. */
+  address: string;
+}
+
+export interface Author {
   authorFirstName: string;
   authorLastName: string;
+
+  /** Preferred over first and last name if filled in. Use for those with middle names. */
+  authorFullName?: string;
+
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   birthDate: string;
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   deathDate: string;
+  /** Assume the timeline is ordered and birth date is first. */
+  timeline: Array<{
+    location: AuthorLocation;
+    /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
+    startDate: string;
+    /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
+    endDate: string;
+  }>;
+
+  portrait?: ImgHTMLAttributes<HTMLImageElement>;
 }
