@@ -118,6 +118,11 @@ interface AuthorLocation {
   address: string;
 }
 
+interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
+  /** Use to properly credit the photo source. */
+  attribution?: string;
+}
+
 export interface Author {
   authorFirstName: string;
   authorLastName: string;
@@ -138,5 +143,11 @@ export interface Author {
     endDate: string;
   }>;
 
-  portrait?: ImgHTMLAttributes<HTMLImageElement>;
+  portrait?: PortraitData;
+}
+
+export interface StateStore {
+  bornAuthors: Array<Author>;
+  deceasedAuthors: Array<Author>;
+  residingAuthors: Array<Author>;
 }

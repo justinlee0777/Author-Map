@@ -12,31 +12,40 @@
 }
 
 .mapContainer {
-  height: 150%;
+  height: 125%;
   padding: 25%;
-  width: 150%;
+  width: 125%;
 }
 
-.floatingAction {
-  position: absolute;
+.button {
+  align-items: center;
+  background-color: white;
+  border: 1px solid black;
+  display: flex;
+  cursor: pointer;
 }
 
 .sideDrawer {
   background-color: white;
   border: 1px solid black;
-  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
   height: 98%;
   left: 0.5em;
-  opacity: 0.7;
   padding: 1em;
-  perspective: 500px;
-  position: fixed;
   top: 1%;
-  transition: 0.3s opacity;
   width: 33%;
 }
 
+.floatingAction,
+.sideDrawer {
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+  opacity: 0.7;
+  perspective: 500px;
+  position: fixed;
+  transition: 0.3s opacity;
+}
+
+.floatingAction:hover,
 .sideDrawer:hover {
   opacity: 1;
 }
@@ -46,6 +55,17 @@
   flex-direction: column;
   gap: 1em;
   overflow-y: auto;
+}
+
+.closeSideDrawer {
+  align-self: flex-end;
+  position: sticky;
+  top: 0;
+}
+
+.magnificationSlider {
+  bottom: 2em;
+  right: 1em;
 }
 
 .authorRow {
@@ -66,4 +86,22 @@
 
 .authorDetails {
   flex: 3;
+}
+
+.filterPane {
+  right: 1em;
+  top: 1em;
+}
+
+.filterPane button {
+  font-size: 1em;
+}
+
+.highlightedFilter {
+  filter: brightness(85%);
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
 }

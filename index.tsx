@@ -16,8 +16,16 @@ const App = () => {
             state: USState.NEW_YORK,
             address: 'Huntington',
           },
-          startDate: '1819-05',
+          startDate: '1819-05-31',
           endDate: '1823',
+        },
+        {
+          location: {
+            state: USState.NEW_JERSEY,
+            address: 'Camden',
+          },
+          startDate: '1892-03-26',
+          endDate: '1892-03-26',
         },
       ],
       portrait: {
@@ -35,8 +43,16 @@ const App = () => {
             state: USState.NEW_YORK,
             address: 'New York City',
           },
-          startDate: '1819-08',
+          startDate: '1819-08-01',
           endDate: '1830',
+        },
+        {
+          location: {
+            state: USState.NEW_YORK,
+            address: 'New York City',
+          },
+          startDate: '1891-09-28',
+          endDate: '1891-09-28',
         },
       ],
       portrait: {
@@ -97,9 +113,45 @@ const App = () => {
           startDate: '1902-02-27',
           endDate: '1919',
         },
+        {
+          location: {
+            state: USState.NEW_YORK,
+            address: 'New York City',
+          },
+          startDate: '1968-12-20',
+          endDate: '1968-12-20',
+        },
       ],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/John_Steinbeck_1939_%28cropped%29.jpg/500px-John_Steinbeck_1939_%28cropped%29.jpg',
+      },
+    },
+    {
+      authorFirstName: 'Kurt',
+      authorLastName: 'Vonnegut',
+      authorFullName: 'Kurt Vonnegut, Jr',
+      birthDate: '1922-11-11',
+      deathDate: '2007-04-11',
+      timeline: [
+        {
+          location: {
+            state: USState.INDIANA,
+            address: 'Indianapolis',
+          },
+          startDate: '1922-11-11',
+          endDate: '1940',
+        },
+        {
+          location: {
+            state: USState.NEW_YORK,
+            address: 'New York City',
+          },
+          startDate: '2007-04-11',
+          endDate: '2007-04-11',
+        },
+      ],
+      portrait: {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg/330px-Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg',
       },
     },
   ];
