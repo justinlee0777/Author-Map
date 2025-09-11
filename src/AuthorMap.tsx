@@ -1,14 +1,14 @@
 import styles from './AuthorMap.module.css';
 
-import { useMemo, useState, type JSX } from 'react';
+import { Fragment, useMemo, useState, type JSX } from 'react';
 
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
-import { format, fromZonedTime } from 'date-fns-tz';
-import { MdAdd, MdClose, MdHorizontalRule } from 'react-icons/md';
+import { MdClose } from 'react-icons/md';
+import clsx from 'clsx';
+import { Tooltip } from 'react-tooltip';
 
 import { geography } from './consts/states.const';
-import { Author, StateStore, stateToTimezoneMap, USState } from './models';
-import clsx from 'clsx';
+import { Author, StateStore, USState } from './models';
 import { createStores } from './utils/stores';
 import { formatDate } from './utils/dates';
 
@@ -59,6 +59,8 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => createStores(authors), [authors]);
 
+  const tooltipId = useMemo(() => 'state-labels-tooptip', []);
+
   /*
   // Note: Do the Author's need an ID? First name and last name are unreliable. The object reference is enough, yes?
   const [highlightedAuthor, setHighlightedAuthor] = useState<Author | null>(null);
@@ -108,42 +110,51 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
             {(args) => {
               const geographies = args.geographies as Array<Geography>;
 
-              return geographies.map((geography) => {
-                return (
-                  <Geography
-                    key={geography.rsmKey}
-                    geography={geography}
-                    style={{
-                      default: {
-                        fill: '#FFFFFF', // white fill
-                        stroke: '#000000', // black border
-                        strokeWidth: 0.5, // border thickness
-                        outline: 'none',
-                      },
-                      hover: {
-                        fill: '#F0F0F0', // light gray on hover
-                        stroke: '#000000',
-                        strokeWidth: 0.5,
-                        outline: 'none',
-                      },
-                      pressed: {
-                        fill: '#D0D0D0', // darker gray when clicked
-                        stroke: '#000000',
-                        strokeWidth: 0.5,
-                        outline: 'none',
-                      },
-                    }}
-                    onClick={() => {
-                      const countyName = geography.properties.name;
+              const validAreas = new Set(Object.values(USState));
 
-                      setHighlightedState({
-                        name: countyName as USState,
-                        geography,
-                      });
-                    }}
-                  />
-                );
-              });
+              return geographies
+                .filter((geography) =>
+                  validAreas.has(geography.properties.name as USState),
+                )
+                .map((geography) => {
+                  const stateName = geography.properties.name;
+
+                  return (
+                    <Fragment key={geography.rsmKey}>
+                      <Geography
+                        data-tooltip-id={tooltipId}
+                        data-tooltip-content={geography.properties.name}
+                        geography={geography}
+                        style={{
+                          default: {
+                            fill: '#FFFFFF', // white fill
+                            stroke: '#000000', // black border
+                            strokeWidth: 0.5, // border thickness
+                            outline: 'none',
+                          },
+                          hover: {
+                            fill: '#F0F0F0', // light gray on hover
+                            stroke: '#000000',
+                            strokeWidth: 0.5,
+                            outline: 'none',
+                          },
+                          pressed: {
+                            fill: '#D0D0D0', // darker gray when clicked
+                            stroke: '#000000',
+                            strokeWidth: 0.5,
+                            outline: 'none',
+                          },
+                        }}
+                        onClick={() => {
+                          setHighlightedState({
+                            name: stateName as USState,
+                            geography,
+                          });
+                        }}
+                      />
+                    </Fragment>
+                  );
+                });
             }}
           </Geographies>
         </ComposableMap>
@@ -213,6 +224,7 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
               })}
         </div>
       )}
+      <Tooltip id={tooltipId} place="right" noArrow />
     </div>
   );
 }
