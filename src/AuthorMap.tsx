@@ -10,7 +10,7 @@ import { Tooltip } from 'react-tooltip';
 import { geography } from './consts/states.const';
 import { Author, StateStore, USState } from './models';
 import { createStores } from './utils/stores';
-import { formatDate } from './utils/dates';
+import { getAuthorName } from './utils/names';
 
 interface Geography {
   rsmKey: string;
@@ -42,6 +42,7 @@ interface Filters {
 /**
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
  * TODO: Might want to break this up into different components.
+ * TODO: Editing + export JSON
  */
 export function AuthorMap({ authors, className }: Props): JSX.Element {
   const [highlightedState, setHighlightedState] = useState<StateData | null>(
@@ -60,11 +61,6 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
   const statesData = useMemo(() => createStores(authors), [authors]);
 
   const tooltipId = useMemo(() => 'state-labels-tooptip', []);
-
-  /*
-  // Note: Do the Author's need an ID? First name and last name are unreliable. The object reference is enough, yes?
-  const [highlightedAuthor, setHighlightedAuthor] = useState<Author | null>(null);
-  */
 
   const filterPaneButtons = Object.values(EventType).map((value) => {
     return (
@@ -188,36 +184,14 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
             statesData
               .get(highlightedState.name)!
               [statesDataKey].map((author, i) => {
-                let dateString: string;
-
-                switch (filters.eventType) {
-                  case EventType.BIRTHS:
-                    dateString = formatDate(
-                      highlightedState.name,
-                      author.birthDate,
-                    );
-                    break;
-                  case EventType.DEATHS:
-                    dateString = formatDate(
-                      highlightedState.name,
-                      author.deathDate,
-                    );
-                    break;
-                  default:
-                    dateString = `${formatDate(highlightedState.name, author.birthDate)} - ${formatDate(highlightedState.name, author.deathDate)}`;
-                    break;
-                }
-
-                const authorName =
-                  author.authorFullName ??
-                  `${author.authorFirstName} ${author.authorLastName}`;
+                const authorName = getAuthorName(author);
 
                 return (
                   <div key={i} className={styles.authorRow}>
                     {author.portrait && <img {...author.portrait} />}
                     <div className={styles.authorDetails}>
                       <p>{authorName}</p>
-                      <p>{dateString}</p>
+                      <p>{author.relevantFormattedDate}</p>
                     </div>
                   </div>
                 );

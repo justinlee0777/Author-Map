@@ -14,6 +14,7 @@
 .mapContainer {
   height: 125%;
   padding: 25%;
+  transform-origin: center center;
   width: 125%;
 }
 

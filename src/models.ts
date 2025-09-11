@@ -146,8 +146,13 @@ export interface Author {
   portrait?: PortraitData;
 }
 
+export interface AuthorData extends Author {
+  id: Symbol;
+  relevantFormattedDate: string;
+}
+
 export interface StateStore {
-  bornAuthors: Array<Author>;
-  deceasedAuthors: Array<Author>;
-  residingAuthors: Array<Author>;
+  bornAuthors: Array<AuthorData>;
+  deceasedAuthors: Array<AuthorData>;
+  residingAuthors: Array<AuthorData>;
 }
