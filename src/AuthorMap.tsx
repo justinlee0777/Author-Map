@@ -1,6 +1,13 @@
 import styles from './AuthorMap.module.css';
 
-import { Fragment, useMemo, useState, type JSX } from 'react';
+import {
+  Fragment,
+  ReactNode,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from 'react';
 
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { MdClose } from 'react-icons/md';
@@ -11,6 +18,7 @@ import { geography } from './consts/states.const';
 import { Author, StateStore, USState } from './models';
 import { createStores } from './utils/stores';
 import { getAuthorName } from './utils/names';
+import { EditAuthorModal } from './components/EditAuthorModal';
 
 interface Geography {
   rsmKey: string;
@@ -43,8 +51,13 @@ interface Filters {
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
  * TODO: Might want to break this up into different components.
  * TODO: Editing + export JSON
+ * TODO: Overall timeline
+ * TODO: Import? JSON validate?
+ * TODO: Links to bibliography
  */
 export function AuthorMap({ authors, className }: Props): JSX.Element {
+  const componentRef = useRef<HTMLDivElement>(null);
+
   const [highlightedState, setHighlightedState] = useState<StateData | null>(
     null,
   );
@@ -56,6 +69,8 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
   const [lowerBound, upperBound, magIncrement] = useMemo(() => {
     return [0.2, 2, 0.2];
   }, [magnification]);
+
+  const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
 
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => createStores(authors), [authors]);
@@ -82,7 +97,7 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
   });
 
   let statesDataKey: keyof StateStore | undefined;
-  // TODO: If no filter is presented, find every author that had ever been in the state
+
   switch (filters.eventType) {
     case EventType.BIRTHS:
       statesDataKey = 'bornAuthors';
@@ -96,7 +111,10 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
   }
 
   return (
-    <div className={clsx(styles.componentContainer, className)}>
+    <div
+      className={clsx(styles.componentContainer, className)}
+      ref={componentRef}
+    >
       <div
         className={styles.mapContainer}
         style={{ transform: `scale(${magnification})` }}
@@ -184,7 +202,19 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
             statesData
               .get(highlightedState.name)!
               [statesDataKey].map((author, i) => {
-                const authorName = getAuthorName(author);
+                let authorName: ReactNode = getAuthorName(author);
+
+                if (author.link) {
+                  authorName = (
+                    <a
+                      href={author.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {authorName}
+                    </a>
+                  );
+                }
 
                 return (
                   <div key={i} className={styles.authorRow}>
@@ -193,12 +223,27 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
                       <p>{authorName}</p>
                       <p>{author.relevantFormattedDate}</p>
                     </div>
+
+                    <button
+                      className={clsx(styles.button, styles.editAuthor)}
+                      onClick={() => setEditingAuthor(author)}
+                    >
+                      Edit
+                    </button>
                   </div>
                 );
               })}
         </div>
       )}
       <Tooltip id={tooltipId} place="right" noArrow />
+
+      {editingAuthor && (
+        <EditAuthorModal
+          appElement={componentRef.current!}
+          opened={Boolean(editingAuthor)}
+          initialAuthor={editingAuthor}
+        />
+      )}
     </div>
   );
 }

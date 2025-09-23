@@ -133,7 +133,7 @@ export interface Author {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   birthDate: string;
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
-  deathDate: string;
+  deathDate?: string;
   /** Assume the timeline is ordered and birth date is first. */
   timeline: Array<{
     location: AuthorLocation;
@@ -143,6 +143,7 @@ export interface Author {
     endDate: string;
   }>;
 
+  link?: string;
   portrait?: PortraitData;
 }
 

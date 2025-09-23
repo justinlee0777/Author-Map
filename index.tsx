@@ -28,6 +28,7 @@ const App = () => {
           endDate: '1892-03-26',
         },
       ],
+      link: 'https://en.wikipedia.org/wiki/Walt_Whitman',
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Walt_Whitman_-_George_Collins_Cox.jpg/500px-Walt_Whitman_-_George_Collins_Cox.jpg',
       },

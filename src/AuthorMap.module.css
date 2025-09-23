@@ -75,6 +75,12 @@
   flex-direction: row;
   font-size: 0.8em;
   gap: 1em;
+  position: relative;
+}
+
+.authorRow:not(:last-of-type) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  padding-bottom: 1em;
 }
 
 .authorRow > img {
@@ -83,6 +89,21 @@
   height: 100px;
   object-fit: cover;
   width: 100px;
+}
+
+.editAuthor {
+  left: 0;
+  position: absolute;
+  top: 0;
+  transition: 0.3s opacity;
+}
+
+.authorRow .editAuthor {
+  opacity: 0;
+}
+
+.authorRow:hover .editAuthor {
+  opacity: 1;
 }
 
 .authorDetails {
