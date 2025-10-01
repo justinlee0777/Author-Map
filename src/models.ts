@@ -112,15 +112,38 @@ export const stateToTimezoneMap = new Map<USState, string>([
   ),
 ]);
 
-interface AuthorLocation {
+export const monthOptions: Array<{ label: string; value: number }> = [
+  { label: 'January', value: 1 },
+  { label: 'February', value: 2 },
+  { label: 'March', value: 3 },
+  { label: 'April', value: 4 },
+  { label: 'May', value: 5 },
+  { label: 'June', value: 6 },
+  { label: 'July', value: 7 },
+  { label: 'August', value: 8 },
+  { label: 'September', value: 9 },
+  { label: 'October', value: 10 },
+  { label: 'November', value: 11 },
+  { label: 'December', value: 12 },
+];
+
+export interface AuthorLocation {
   state: USState;
   /** Does not have to be the full address; city / town / village is fine. Called 'address' not to bias for city. */
   address: string;
 }
 
-interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
+export interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
   /** Use to properly credit the photo source. */
   attribution?: string;
+}
+
+export interface TimelineEvent {
+  location: AuthorLocation;
+  /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
+  startDate: string;
+  /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
+  endDate: string;
 }
 
 export interface Author {
@@ -135,20 +158,17 @@ export interface Author {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   deathDate?: string;
   /** Assume the timeline is ordered and birth date is first. */
-  timeline: Array<{
-    location: AuthorLocation;
-    /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
-    startDate: string;
-    /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
-    endDate: string;
-  }>;
+  timeline: Array<TimelineEvent>;
 
   link?: string;
   portrait?: PortraitData;
 }
 
-export interface AuthorData extends Author {
+export interface AuthorWithId extends Author {
   id: Symbol;
+}
+
+export interface AuthorData extends AuthorWithId {
   relevantFormattedDate: string;
 }
 

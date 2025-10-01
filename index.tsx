@@ -2,9 +2,10 @@ import ReactDOM from 'react-dom/client';
 
 import { AuthorMap } from './src/AuthorMap';
 import { Author, USState } from './src/models';
+import { useState } from 'react';
 
 const App = () => {
-  const hardcodedAuthors: Array<Author> = [
+  const [authors, setAuthors] = useState<Array<Author>>(() => [
     {
       authorFirstName: 'Walt',
       authorLastName: 'Whitman',
@@ -155,9 +156,9 @@ const App = () => {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg/330px-Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg',
       },
     },
-  ];
+  ]);
 
-  return <AuthorMap authors={hardcodedAuthors} />;
+  return <AuthorMap authors={authors} />;
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);

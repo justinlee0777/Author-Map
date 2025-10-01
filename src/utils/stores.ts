@@ -1,8 +1,23 @@
-import { Author, AuthorData, StateStore, USState } from '../models';
+import {
+  Author,
+  AuthorData,
+  AuthorWithId,
+  StateStore,
+  USState,
+} from '../models';
 import { formatDate } from './dates';
 import { getAuthorName } from './names';
 
-export function createStores(authors: Array<Author>): Map<USState, StateStore> {
+export function transformAuthors(authors: Array<Author>): Array<AuthorWithId> {
+  return authors.map((author) => ({
+    ...author,
+    id: Symbol(`ID for author ${getAuthorName(author)}`),
+  }));
+}
+
+export function createStores(
+  authors: Array<AuthorWithId>,
+): Map<USState, StateStore> {
   const map = new Map<USState, StateStore>([
     ...Object.values(USState).map(
       (stateName) =>
@@ -14,11 +29,6 @@ export function createStores(authors: Array<Author>): Map<USState, StateStore> {
   ]);
 
   for (const author of authors) {
-    const authorWithId: Omit<AuthorData, 'relevantFormattedDate'> = {
-      ...author,
-      id: Symbol(`ID for author ${getAuthorName(author)}`),
-    };
-
     // Birth state
     const birthEvent = author.timeline.at(0);
 
@@ -27,7 +37,7 @@ export function createStores(authors: Array<Author>): Map<USState, StateStore> {
       const store = map.get(state)!;
 
       store.bornAuthors.push({
-        ...authorWithId,
+        ...author,
         relevantFormattedDate: formatDate(state, author.birthDate),
       });
     }
@@ -40,7 +50,7 @@ export function createStores(authors: Array<Author>): Map<USState, StateStore> {
       const store = map.get(state)!;
 
       store.deceasedAuthors.push({
-        ...authorWithId,
+        ...author,
         relevantFormattedDate: formatDate(state, author.deathDate),
       });
     }
@@ -51,7 +61,7 @@ export function createStores(authors: Array<Author>): Map<USState, StateStore> {
       const store = map.get(state)!;
 
       const addedAuthor = store.residingAuthors.find(
-        (residingAuthor) => residingAuthor.id === authorWithId.id,
+        (residingAuthor) => residingAuthor.id === author.id,
       );
 
       const formattedDateRange = `${formatDate(state, event.startDate)} - ${formatDate(state, event.endDate)}`;
@@ -60,7 +70,7 @@ export function createStores(authors: Array<Author>): Map<USState, StateStore> {
         addedAuthor.relevantFormattedDate = `${addedAuthor.relevantFormattedDate}, ${formattedDateRange}`;
       } else {
         store.residingAuthors.push({
-          ...authorWithId,
+          ...author,
           relevantFormattedDate: formattedDateRange,
         });
       }

@@ -3,6 +3,8 @@ import styles from './AuthorMap.module.css';
 import {
   Fragment,
   ReactNode,
+  useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -15,10 +17,17 @@ import clsx from 'clsx';
 import { Tooltip } from 'react-tooltip';
 
 import { geography } from './consts/states.const';
-import { Author, StateStore, USState } from './models';
-import { createStores } from './utils/stores';
+import {
+  Author,
+  AuthorData,
+  AuthorWithId,
+  StateStore,
+  USState,
+} from './models';
+import { createStores, transformAuthors } from './utils/stores';
 import { getAuthorName } from './utils/names';
-import { EditAuthorModal } from './components/EditAuthorModal';
+import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
+import cloneDeep from 'lodash-es/cloneDeep';
 
 interface Geography {
   rsmKey: string;
@@ -31,6 +40,8 @@ interface Props {
   authors: Array<Author>;
 
   className?: string;
+  onAuthorAdded?: (author: Author) => void | Promise<void>;
+  onAuthorUpdate?: (changedAuthor: Author) => void | Promise<void>;
 }
 
 interface StateData {
@@ -54,9 +65,21 @@ interface Filters {
  * TODO: Overall timeline
  * TODO: Import? JSON validate?
  * TODO: Links to bibliography
+ * TODO: Nicer version of timeline
+ * TODO: Need to reorder timeline
  */
-export function AuthorMap({ authors, className }: Props): JSX.Element {
+export function AuthorMap({
+  authors,
+  className,
+  onAuthorUpdate,
+}: Props): JSX.Element {
   const componentRef = useRef<HTMLDivElement>(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const [cachedAuthors, setCachedAuthors] = useState<Array<AuthorWithId>>(
+    transformAuthors(authors),
+  );
 
   const [highlightedState, setHighlightedState] = useState<StateData | null>(
     null,
@@ -70,12 +93,22 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
     return [0.2, 2, 0.2];
   }, [magnification]);
 
-  const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
+  const [editingAuthor, setEditingAuthor] = useState<AuthorData | null>(null);
 
   // TODO: If it's a lot of data, do async? Return a promise?
-  const statesData = useMemo(() => createStores(authors), [authors]);
+  const [statesData, setStatesData] = useState(createStores(cachedAuthors));
 
-  const tooltipId = useMemo(() => 'state-labels-tooptip', []);
+  const updateAuthors = useCallback((newAuthors: Array<Author>) => {
+    const newCachedAuthors = transformAuthors(newAuthors);
+    setCachedAuthors(newCachedAuthors);
+    setStatesData(createStores(newCachedAuthors));
+  }, []);
+
+  useEffect(() => {
+    updateAuthors(authors);
+  }, [authors]);
+
+  const tooltipId = useMemo(() => 'state-labels-tooltip', []);
 
   const filterPaneButtons = Object.values(EventType).map((value) => {
     return (
@@ -242,6 +275,27 @@ export function AuthorMap({ authors, className }: Props): JSX.Element {
           appElement={componentRef.current!}
           opened={Boolean(editingAuthor)}
           initialAuthor={editingAuthor}
+          onClose={() => setEditingAuthor(null)}
+          onSubmit={async (author) => {
+            setLoading(true);
+
+            try {
+              await onAuthorUpdate?.(author);
+
+              const authorIndex = cachedAuthors.findIndex(
+                (cachedAuthor) => cachedAuthor.id === editingAuthor.id,
+              );
+              updateAuthors([
+                ...cachedAuthors.slice(0, authorIndex),
+                author,
+                ...cachedAuthors.slice(authorIndex + 1),
+              ]);
+            } finally {
+              setLoading(false);
+            }
+
+            setEditingAuthor(null);
+          }}
         />
       )}
     </div>

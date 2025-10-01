@@ -1,0 +1,33 @@
+.datePicker {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.column label,
+.dateKnown label {
+  font-size: 0.8em;
+}
+
+.column input {
+  width: 100%;
+}
+
+.dateKnown {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+.hint {
+  font-size: 0.5em;
+}
