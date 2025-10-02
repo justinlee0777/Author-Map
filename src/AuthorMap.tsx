@@ -118,10 +118,17 @@ export function AuthorMap({
           [styles.highlightedFilter]: filters.eventType === value,
         })}
         onClick={() => {
-          setFilters({
-            ...filters,
-            eventType: value,
-          });
+          if (filters.eventType !== value) {
+            setFilters({
+              ...filters,
+              eventType: value,
+            });
+          } else {
+            setFilters({
+              ...filters,
+              eventType: undefined,
+            });
+          }
         }}
       >
         {value}
@@ -254,7 +261,23 @@ export function AuthorMap({
                     {author.portrait && <img {...author.portrait} />}
                     <div className={styles.authorDetails}>
                       <p>{authorName}</p>
-                      <p>{author.relevantFormattedDate}</p>
+                      {author.events.map(
+                        ({ date, context, address }, index) => {
+                          return (
+                            <Fragment key={index}>
+                              <div className={styles.relevantEvent}>
+                                <div className={styles.relevantEventContext}>
+                                  <p>
+                                    <b>{date}</b>
+                                  </p>
+                                  <p>{address}</p>
+                                </div>
+                                {!filters.eventType && <span>{context}</span>}
+                              </div>
+                            </Fragment>
+                          );
+                        },
+                      )}
                     </div>
 
                     <button

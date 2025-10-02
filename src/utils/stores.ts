@@ -2,7 +2,9 @@ import {
   Author,
   AuthorData,
   AuthorWithId,
+  MilestoneEvent,
   StateStore,
+  TimelineEvent,
   USState,
 } from '../models';
 import { formatDate } from './dates';
@@ -29,50 +31,92 @@ export function createStores(
   ]);
 
   for (const author of authors) {
-    // Birth state
-    const birthEvent = author.timeline.at(0);
+    let fullTimeline: Array<MilestoneEvent | TimelineEvent> = [
+      ...author.timeline,
+    ];
 
-    if (birthEvent && birthEvent.startDate === author.birthDate) {
-      const state = birthEvent.location.state;
+    // Birth state
+    const birthEvent = author.birthDate;
+
+    const state = birthEvent.location.state;
+
+    if (state) {
       const store = map.get(state)!;
 
       store.bornAuthors.push({
         ...author,
-        relevantFormattedDate: formatDate(state, author.birthDate),
+        events: [
+          {
+            date: formatDate(state, birthEvent.date),
+            context: 'Birth',
+            address: birthEvent.location.address,
+          },
+        ],
       });
     }
 
+    fullTimeline = [{ ...birthEvent, notes: 'Birth' }, ...fullTimeline];
+
     // Death state
-    const deathEvent = author.timeline.at(-1);
+    const deathEvent = author.deathDate;
 
-    if (deathEvent && deathEvent.endDate === author.deathDate) {
+    if (deathEvent) {
       const state = deathEvent.location.state;
-      const store = map.get(state)!;
 
-      store.deceasedAuthors.push({
-        ...author,
-        relevantFormattedDate: formatDate(state, author.deathDate),
-      });
+      if (state) {
+        const store = map.get(state)!;
+
+        store.deceasedAuthors.push({
+          ...author,
+          events: [
+            {
+              date: formatDate(state, deathEvent.date),
+              context: 'Death',
+              address: deathEvent.location.address,
+            },
+          ],
+        });
+      }
+
+      fullTimeline = [...fullTimeline, { ...deathEvent, notes: 'Death' }];
     }
 
     // Residing states
-    author.timeline.forEach((event) => {
+    fullTimeline.forEach((event) => {
       const state = event.location.state;
-      const store = map.get(state)!;
+      if (state) {
+        const store = map.get(state)!;
 
-      const addedAuthor = store.residingAuthors.find(
-        (residingAuthor) => residingAuthor.id === author.id,
-      );
+        const addedAuthor = store.residingAuthors.find(
+          (residingAuthor) => residingAuthor.id === author.id,
+        );
 
-      const formattedDateRange = `${formatDate(state, event.startDate)} - ${formatDate(state, event.endDate)}`;
+        let formattedDateRange: string;
 
-      if (addedAuthor) {
-        addedAuthor.relevantFormattedDate = `${addedAuthor.relevantFormattedDate}, ${formattedDateRange}`;
-      } else {
-        store.residingAuthors.push({
-          ...author,
-          relevantFormattedDate: formattedDateRange,
-        });
+        if ('date' in event) {
+          formattedDateRange = formatDate(state, event.date);
+        } else {
+          formattedDateRange = `${formatDate(state, event.startDate)} - ${formatDate(state, event.endDate)}`;
+        }
+
+        if (addedAuthor) {
+          addedAuthor.events = addedAuthor.events.concat({
+            date: formattedDateRange,
+            context: event.notes ?? '',
+            address: event.location.address,
+          });
+        } else {
+          store.residingAuthors.push({
+            ...author,
+            events: [
+              {
+                date: formattedDateRange,
+                context: event.notes ?? '',
+                address: event.location.address,
+              },
+            ],
+          });
+        }
       }
     });
   }

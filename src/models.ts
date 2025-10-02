@@ -128,7 +128,8 @@ export const monthOptions: Array<{ label: string; value: number }> = [
 ];
 
 export interface AuthorLocation {
-  state: USState;
+  /** If this is omitted, it is assumed the event did not take place in the States; therefore, the event is not formally recorded in the map. */
+  state?: USState;
   /** Does not have to be the full address; city / town / village is fine. Called 'address' not to bias for city. */
   address: string;
 }
@@ -138,12 +139,21 @@ export interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
   attribution?: string;
 }
 
-export interface TimelineEvent {
+export interface BaseTimelineEvent {
   location: AuthorLocation;
-  /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
+  /** Additional comments on the event. */
+  notes?: string;
+}
+export interface TimelineEvent extends BaseTimelineEvent {
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   startDate: string;
-  /** ISO YYYY-MM datestring. Any more precision seems unneeded. */
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   endDate: string;
+}
+
+export interface MilestoneEvent extends BaseTimelineEvent {
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
+  date: string;
 }
 
 export interface Author {
@@ -154,10 +164,10 @@ export interface Author {
   authorFullName?: string;
 
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
-  birthDate: string;
+  birthDate: MilestoneEvent;
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
-  deathDate?: string;
-  /** Assume the timeline is ordered and birth date is first. */
+  deathDate?: MilestoneEvent;
+  /** Assume the timeline is ordered. Birth and death dates are redundant. */
   timeline: Array<TimelineEvent>;
 
   link?: string;
@@ -169,7 +179,11 @@ export interface AuthorWithId extends Author {
 }
 
 export interface AuthorData extends AuthorWithId {
-  relevantFormattedDate: string;
+  events: Array<{
+    date: string;
+    context: string;
+    address: string;
+  }>;
 }
 
 export interface StateStore {

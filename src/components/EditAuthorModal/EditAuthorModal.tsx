@@ -6,10 +6,17 @@ import { Formik, useFormikContext } from 'formik';
 import Modal from 'react-modal';
 import cloneDeep from 'lodash-es/cloneDeep';
 
-import { Author, TimelineEvent, USState } from '../../models';
+import {
+  Author,
+  BaseTimelineEvent,
+  MilestoneEvent,
+  TimelineEvent,
+  USState,
+} from '../../models';
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
 import { DatePicker } from '../DatePicker/DatePicker';
 import { MdClear } from 'react-icons/md';
+import { TimelineEvent as TimelineEventComponent } from './TimelineEvent/TimelineEvent';
 
 interface Props {
   appElement: HTMLElement;
@@ -54,79 +61,69 @@ export function EditAuthorModal({
     [],
   );
 
-  const TimelineEventComponent: (props: TimelineEventProps) => JSX.Element =
+  const TimelineEventField: (props: TimelineEventProps) => JSX.Element =
     useMemo(() => {
       return ({ item, index, RemoveButton }) => {
-        const { handleChange, setFieldValue, values } =
-          useFormikContext<Author>();
-
-        let header: string;
-
-        if (index === 0) {
-          header = 'Birth';
-        } else if (values.deathDate && values.timeline.length - 1 === index) {
-          header = 'Death';
-        } else {
-          header = 'Event';
-        }
+        const { handleChange, setFieldValue } = useFormikContext<Author>();
 
         const inputId = `timeline-event-${index}`;
 
         return (
-          <div className={styles.timelineEvent}>
-            <h4>
-              {header} <RemoveButton item={item} index={index} />
-            </h4>
+          <TimelineEventComponent
+            id={inputId}
+            dateKeys={[
+              { keyName: 'startDate', label: 'Start Date' },
+              { keyName: 'endDate', label: 'End Date' },
+            ]}
+            RemoveButton={() => <RemoveButton item={item} index={index} />}
+            headerText="Event"
+            fieldName={`timeline.${index}`}
+            item={item as BaseTimelineEvent}
+            setFieldValue={setFieldValue}
+            handleChange={handleChange}
+          />
+        );
+      };
+    }, []);
 
-            <label>State</label>
-            <select
-              name={`timeline.${index}.location.state`}
-              required
-              value={item.location?.state}
-              onChange={handleChange}
-            >
-              {Object.values(USState).map((usState) => {
-                return (
-                  <option key={usState} value={usState}>
-                    {usState}
-                  </option>
-                );
-              })}
-            </select>
+  const BirthField: ({ item }: { item: MilestoneEvent }) => JSX.Element =
+    useMemo(() => {
+      return ({ item }) => {
+        const { handleChange, setFieldValue } = useFormikContext<Author>();
 
-            <label>Address</label>
-            <input
-              name={`timeline.${index}.location.state.address`}
-              type="text"
-              required
-              value={item.location?.address}
-              onChange={handleChange}
-            />
-            <p className={styles.hint}>
-              The address can be partial. For example, the vast majority of
-              locations will only have city.
-            </p>
+        const inputId = `birth-event`;
 
-            <label>Start Date</label>
-            <DatePicker
-              id={`${inputId}-start`}
-              value={item.startDate}
-              required
-              onChange={(newValue) =>
-                setFieldValue(`timeline.${index}.startDate`, newValue)
-              }
-            />
+        return (
+          <TimelineEventComponent
+            id={inputId}
+            dateKeys={[{ keyName: 'date', label: 'Date' }]}
+            headerText="Birth"
+            fieldName={`birthDate`}
+            item={item as BaseTimelineEvent}
+            setFieldValue={setFieldValue}
+            handleChange={handleChange}
+          />
+        );
+      };
+    }, []);
 
-            <label>End Date</label>
-            <DatePicker
-              id={`${inputId}-end`}
-              value={item.endDate}
-              required
-              onChange={(newValue) =>
-                setFieldValue(`timeline.${index}.endDate`, newValue)
-              }
-            />
-          </div>
+  const DeathField: ({ item }: { item: MilestoneEvent }) => JSX.Element =
+    useMemo(() => {
+      return ({ item }) => {
+        const { handleChange, setFieldValue } = useFormikContext<Author>();
+
+        const inputId = `death-event`;
+
+        return (
+          <TimelineEventComponent
+            id={inputId}
+            dateKeys={[{ keyName: 'date', label: 'Date' }]}
+            headerText="Death"
+            fieldName={`deathDate`}
+            item={item as BaseTimelineEvent}
+            setFieldValue={setFieldValue}
+            handleChange={handleChange}
+          />
         );
       };
     }, []);
@@ -200,22 +197,6 @@ export function EditAuthorModal({
                 onChange={handleChange}
               />
 
-              <label htmlFor={birthDateId}>Birth date</label>
-              <DatePicker
-                id={birthDateId}
-                value={values.birthDate}
-                required
-                onChange={(newValue) => setFieldValue('birthDate', newValue)}
-              />
-
-              <label htmlFor={deathDateId}>Death date</label>
-              <DatePicker
-                id={deathDateId}
-                value={values.deathDate}
-                required
-                onChange={(newValue) => setFieldValue('deathDate', newValue)}
-              />
-
               <label htmlFor={referenceUrlId}>Reference URL</label>
               <input
                 id={referenceUrlId}
@@ -225,6 +206,10 @@ export function EditAuthorModal({
                 onChange={handleChange}
               />
 
+              <BirthField item={values.birthDate!} />
+
+              <DeathField item={values.deathDate!} />
+
               <label>Timeline</label>
               <DynamicList<Partial<TimelineEvent>>
                 classes={{
@@ -232,7 +217,7 @@ export function EditAuthorModal({
                   listItems: styles.timelineEvents,
                 }}
                 items={values.timeline ?? []}
-                ItemTemplate={TimelineEventComponent}
+                ItemTemplate={TimelineEventField}
                 trackItem={({ index }) => {
                   return index.toString();
                 }}

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "parcel index.html",
+    "start": "rm -rf .parcel-cache && parcel index.html",
     "format": "prettier -w ."
   },
   "dependencies": {
