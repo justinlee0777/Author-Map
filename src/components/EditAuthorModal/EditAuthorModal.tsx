@@ -98,7 +98,7 @@ export function EditAuthorModal({
             id={inputId}
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Birth"
-            fieldName={`birthDate`}
+            fieldName="birthDate"
             item={item as BaseTimelineEvent}
             setFieldValue={setFieldValue}
             handleChange={handleChange}
@@ -119,7 +119,7 @@ export function EditAuthorModal({
             id={inputId}
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Death"
-            fieldName={`deathDate`}
+            fieldName="deathDate"
             item={item as BaseTimelineEvent}
             setFieldValue={setFieldValue}
             handleChange={handleChange}

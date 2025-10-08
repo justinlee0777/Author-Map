@@ -1,6 +1,6 @@
 import styles from './TimelineEvent.module.css';
 
-import { ChangeEvent, Fragment, JSX } from 'react';
+import { ChangeEvent, Fragment, JSX, useMemo } from 'react';
 
 import { BaseTimelineEvent, USState } from '../../../models';
 import { DatePicker } from '../../DatePicker/DatePicker';
@@ -48,14 +48,20 @@ export function TimelineEvent({
     );
   });
 
+  const [stateId, addressId] = useMemo(
+    () => [`${id}-state`, `${id}-address`],
+    [id],
+  );
+
   return (
     <div id={id} className={styles.timelineEvent}>
       <h4>
         {headerText} <RemoveButton />
       </h4>
 
-      <label>State</label>
+      <label htmlFor={stateId}>State</label>
       <select
+        id={stateId}
         name={`${fieldName}.location.state`}
         required
         value={item.location?.state}
@@ -70,8 +76,9 @@ export function TimelineEvent({
         })}
       </select>
 
-      <label>Address</label>
+      <label htmlFor={addressId}>Address</label>
       <input
+        id={addressId}
         name={`${fieldName}.location.state.address`}
         type="text"
         required

@@ -23,9 +23,9 @@ export function DatePicker({
     return /\d{4}-\d{2}-\d{2}/.test(value ?? '');
   });
 
-  const [fullDateId, monthId, yearId] = useMemo(
-    () => [`${id}-full-date`, `${id}-month`, `${id}-year`],
-    [],
+  const [fullDateId, monthId, yearId, dateKnownId] = useMemo(
+    () => [`${id}-full-date`, `${id}-month`, `${id}-year`, `${id}-date-known`],
+    [id],
   );
 
   let inputs: ReactNode;
@@ -113,11 +113,12 @@ export function DatePicker({
 
       <div className={styles.dateKnown}>
         <input
+          id={dateKnownId}
           type="checkbox"
           checked={dayKnown}
           onChange={(event) => setDayKnown(event.target.checked)}
         />
-        <label>I know the exact date</label>
+        <label htmlFor={dateKnownId}>I know the exact date</label>
       </div>
     </div>
   );
