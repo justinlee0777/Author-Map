@@ -8,7 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
-  type JSX,
+  JSX,
 } from 'react';
 
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
@@ -27,7 +27,6 @@ import {
 import { createStores, transformAuthors } from './utils/stores';
 import { getAuthorName } from './utils/names';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
-import cloneDeep from 'lodash-es/cloneDeep';
 
 interface Geography {
   rsmKey: string;

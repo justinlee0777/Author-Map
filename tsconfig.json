@@ -15,6 +15,6 @@
     "noEmit": true,
     "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
-  "include": ["src", "pages", "globals.d.ts", "package-test"],
-  "exclude": ["node_modules", "dist", "dev"]
+  "include": ["src", "globals.d.ts"],
+  "exclude": ["node_modules", "dist", ".parcel-cache"]
 }

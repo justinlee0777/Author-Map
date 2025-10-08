@@ -1,8 +1,20 @@
 {
+  "name": "author-map-ui",
+  "version": "0.0.0-beta.1",
+  "type": "module",
   "scripts": {
     "start": "rm -rf .parcel-cache && parcel index.html",
     "format": "prettier -w .",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "build": "rm -rf dist && rollup -c",
+    "publish": "npm run build && npm publish ./dist"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js",
+      "types": "./index.d.ts"
+    }
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -16,6 +28,9 @@
     "react-tooltip": "^5.29.1"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.2",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@testing-library/react": "^16.3.0",
     "@types/jest": "^30.0.0",
     "@types/lodash-es": "^4.17.12",
@@ -29,6 +44,9 @@
     "parcel": "^2.15.4",
     "prettier": "^3.6.2",
     "react": "^19.2.0",
+    "rollup": "^4.52.4",
+    "rollup-plugin-postcss": "^4.0.2",
+    "style-inject": "^0.3.0",
     "ts-jest": "^29.4.4",
     "typescript-plugin-css-modules": "^5.2.0"
   },
