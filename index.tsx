@@ -142,7 +142,7 @@ const App = () => {
     },
   ]);
 
-  return <AuthorMap authors={authors} />;
+  return <AuthorMap className="authorMap" authors={authors} />;
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);

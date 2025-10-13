@@ -11,7 +11,12 @@ import {
   JSX,
 } from 'react';
 
-import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  ZoomableGroup,
+} from 'react-simple-maps';
 import { MdClose } from 'react-icons/md';
 import clsx from 'clsx';
 import { Tooltip } from 'react-tooltip';
@@ -57,6 +62,11 @@ interface Filters {
   eventType?: EventType;
 }
 
+interface MapPosition {
+  coordinates: [number, number];
+  zoom: number;
+}
+
 /**
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
  * TODO: Might want to break this up into different components.
@@ -76,6 +86,11 @@ export function AuthorMap({
 
   const [loading, setLoading] = useState(false);
 
+  const [position, setPosition] = useState<MapPosition>({
+    coordinates: [-97, 38],
+    zoom: 1,
+  });
+
   const [cachedAuthors, setCachedAuthors] = useState<Array<AuthorWithId>>(
     transformAuthors(authors),
   );
@@ -87,10 +102,6 @@ export function AuthorMap({
   const [magnification, setMagnification] = useState<number>(1);
 
   const [filters, setFilters] = useState<Filters>({});
-
-  const [lowerBound, upperBound, magIncrement] = useMemo(() => {
-    return [0.2, 2, 0.2];
-  }, [magnification]);
 
   const [editingAuthor, setEditingAuthor] = useState<AuthorData | null>(null);
 
@@ -154,62 +165,67 @@ export function AuthorMap({
       className={clsx(styles.componentContainer, className)}
       ref={componentRef}
     >
-      <div
-        className={styles.mapContainer}
-        style={{ transform: `scale(${magnification})` }}
-      >
+      <div className={styles.mapContainer}>
         <ComposableMap projection="geoAlbersUsa">
-          <Geographies geography={geography}>
-            {(args) => {
-              const geographies = args.geographies as Array<Geography>;
+          <ZoomableGroup
+            center={position.coordinates}
+            zoom={position.zoom}
+            onMoveEnd={setPosition}
+            minZoom={0.8}
+            maxZoom={8}
+          >
+            <Geographies geography={geography}>
+              {(args) => {
+                const geographies = args.geographies as Array<Geography>;
 
-              const validAreas = new Set(Object.values(USState));
+                const validAreas = new Set(Object.values(USState));
 
-              return geographies
-                .filter((geography) =>
-                  validAreas.has(geography.properties.name as USState),
-                )
-                .map((geography) => {
-                  const stateName = geography.properties.name;
+                return geographies
+                  .filter((geography) =>
+                    validAreas.has(geography.properties.name as USState),
+                  )
+                  .map((geography) => {
+                    const stateName = geography.properties.name;
 
-                  return (
-                    <Fragment key={geography.rsmKey}>
-                      <Geography
-                        data-tooltip-id={tooltipId}
-                        data-tooltip-content={geography.properties.name}
-                        geography={geography}
-                        style={{
-                          default: {
-                            fill: '#FFFFFF', // white fill
-                            stroke: '#000000', // black border
-                            strokeWidth: 0.5, // border thickness
-                            outline: 'none',
-                          },
-                          hover: {
-                            fill: '#F0F0F0', // light gray on hover
-                            stroke: '#000000',
-                            strokeWidth: 0.5,
-                            outline: 'none',
-                          },
-                          pressed: {
-                            fill: '#D0D0D0', // darker gray when clicked
-                            stroke: '#000000',
-                            strokeWidth: 0.5,
-                            outline: 'none',
-                          },
-                        }}
-                        onClick={() => {
-                          setHighlightedState({
-                            name: stateName as USState,
-                            geography,
-                          });
-                        }}
-                      />
-                    </Fragment>
-                  );
-                });
-            }}
-          </Geographies>
+                    return (
+                      <Fragment key={geography.rsmKey}>
+                        <Geography
+                          data-tooltip-id={tooltipId}
+                          data-tooltip-content={geography.properties.name}
+                          geography={geography}
+                          style={{
+                            default: {
+                              fill: '#FFFFFF', // white fill
+                              stroke: '#000000', // black border
+                              strokeWidth: 0.5, // border thickness
+                              outline: 'none',
+                            },
+                            hover: {
+                              fill: '#F0F0F0', // light gray on hover
+                              stroke: '#000000',
+                              strokeWidth: 0.5,
+                              outline: 'none',
+                            },
+                            pressed: {
+                              fill: '#D0D0D0', // darker gray when clicked
+                              stroke: '#000000',
+                              strokeWidth: 0.5,
+                              outline: 'none',
+                            },
+                          }}
+                          onClick={() => {
+                            setHighlightedState({
+                              name: stateName as USState,
+                              geography,
+                            });
+                          }}
+                        />
+                      </Fragment>
+                    );
+                  });
+              }}
+            </Geographies>
+          </ZoomableGroup>
         </ComposableMap>
       </div>
       <div
@@ -217,7 +233,7 @@ export function AuthorMap({
       >
         {filterPaneButtons}
       </div>
-      <input
+      {/*<input
         className={clsx(styles.floatingAction, styles.magnificationSlider)}
         type="range"
         min={lowerBound}
@@ -227,7 +243,7 @@ export function AuthorMap({
         onChange={(event) => {
           setMagnification(Number(event.currentTarget.value));
         }}
-      />
+      />*/}
       {highlightedState && (
         <div className={clsx(styles.sideDrawer, styles.sideDrawerUSState)}>
           <button

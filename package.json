@@ -7,7 +7,7 @@
     "format": "prettier -w .",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "build": "rm -rf dist && rollup -c",
-    "publish": "npm run build && npm publish ./dist"
+    "publish": "npm publish ./dist"
   },
   "exports": {
     ".": {
