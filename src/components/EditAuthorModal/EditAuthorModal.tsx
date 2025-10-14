@@ -148,15 +148,15 @@ export function EditAuthorModal({
           return (
             <form className={styles.editAuthorForm} onSubmit={handleSubmit}>
               <button
-                className={styles.closeModal}
+                className={styles.editAuthorCloseModal}
                 type="button"
                 onClick={onClose}
               >
                 <MdClear />
               </button>
-              <div className={styles.portraitRow}>
+              <div className={styles.editAuthorPortraitRow}>
                 <img src={values.portrait?.src} />
-                <div className={styles.portraitDetails}>
+                <div className={styles.editAuthorPortraitDetails}>
                   <label htmlFor={portraitId}>Portrait</label>
                   <input
                     id={portraitId}
@@ -213,8 +213,8 @@ export function EditAuthorModal({
               <label>Timeline</label>
               <DynamicList<Partial<TimelineEvent>>
                 classes={{
-                  component: styles.timelineEventsContainer,
-                  listItems: styles.timelineEvents,
+                  component: styles.editAuthorTimelineEventsContainer,
+                  listItems: styles.editAuthorTimelineEvents,
                 }}
                 items={values.timeline ?? []}
                 ItemTemplate={TimelineEventField}

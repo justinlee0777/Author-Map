@@ -26,7 +26,7 @@
   opacity: 0.3;
 }
 
-.closeModal {
+.editAuthorCloseModal {
   align-items: center;
   background-color: transparent;
   border: none;
@@ -40,7 +40,7 @@
   width: 2em;
 }
 
-.closeModal:hover {
+.editAuthorCloseModal:hover {
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -50,14 +50,14 @@
   }
 }
 
-.portraitRow {
+.editAuthorPortraitRow {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 1em;
 }
 
-.portraitRow > img {
+.editAuthorPortraitRow > img {
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   flex: none;
@@ -65,25 +65,25 @@
   width: 200px;
 }
 
-.portraitDetails {
+.editAuthorPortraitDetails {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 1em;
 }
 
-.timelineEventsContainer {
+.editAuthorTimelineEventsContainer {
   border: 1px solid black;
   box-sizing: border-box;
   padding: 1em;
 }
 
-.timelineEvents > *:not(:last-of-type) {
+.editAuthorTimelineEvents > *:not(:last-of-type) {
   border-bottom: 1px solid black;
   padding-bottom: 1em;
 }
 
-.hint {
+.editAuthorHint {
   font-size: 0.5em;
   margin: 0;
 }

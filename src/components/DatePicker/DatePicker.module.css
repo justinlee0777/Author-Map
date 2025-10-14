@@ -5,29 +5,29 @@
   gap: 1em;
 }
 
-.column {
+.datePickerColumn {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 0.5em;
 }
 
-.column label,
-.dateKnown label {
+.datePickerColumn label,
+.datePickerDateKnown label {
   font-size: 0.8em;
 }
 
-.column input {
+.datePickerColumn input {
   width: 100%;
 }
 
-.dateKnown {
+.datePickerDateKnown {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 0.5em;
 }
 
-.hint {
+.datePickerHint {
   font-size: 0.5em;
 }

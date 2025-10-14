@@ -9,7 +9,7 @@
   overflow-y: auto;
 }
 
-.button {
+.dynamicListButton {
   align-items: center;
   background-color: transparent;
   border: none;
@@ -21,16 +21,16 @@
   transition: 0.3s box-shadow;
 }
 
-.button:hover {
+.dynamicListButton:hover {
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-.addButton {
+.dynamicListAddButton {
   font-size: 1em;
   height: 2em;
 }
 
-.removeButton {
+.dynamicListRemoveButton {
   border-radius: 50%;
   font-size: 1em;
   height: 1.5em;

@@ -41,7 +41,10 @@ export function DynamicList<ItemType>({
       return (
         <button
           type="button"
-          className={clsx(styles.button, styles.removeButton)}
+          className={clsx(
+            styles.dynamicListButton,
+            styles.dynamicListRemoveButton,
+          )}
           onClick={() => {
             onRemove?.(index);
           }}
@@ -68,7 +71,7 @@ export function DynamicList<ItemType>({
         })}
       </div>
       <button
-        className={clsx(styles.button, styles.addButton)}
+        className={clsx(styles.dynamicListButton, styles.dynamicListAddButton)}
         type="button"
         onClick={onAdd}
       >

@@ -76,6 +76,7 @@ interface MapPosition {
  * TODO: Links to bibliography
  * TODO: Nicer version of timeline
  * TODO: Need to reorder timeline
+ * TODO: Accept a stream?
  */
 export function AuthorMap({
   authors,

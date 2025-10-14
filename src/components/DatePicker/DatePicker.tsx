@@ -32,7 +32,7 @@ export function DatePicker({
 
   if (dayKnown) {
     inputs = (
-      <div className={styles.column}>
+      <div className={styles.datePickerColumn}>
         <input
           id={fullDateId}
           type="date"
@@ -62,7 +62,7 @@ export function DatePicker({
 
     inputs = (
       <>
-        <div className={styles.column}>
+        <div className={styles.datePickerColumn}>
           <label htmlFor={yearId}>Year</label>
           <input
             id={yearId}
@@ -81,12 +81,12 @@ export function DatePicker({
               onChange(finalDate);
             }}
           />
-          <p className={styles.hint}>
+          <p className={styles.datePickerHint}>
             Only years between 1000 and 2999 are allowed, inclusive.
           </p>
         </div>
 
-        <div className={styles.column}>
+        <div className={styles.datePickerColumn}>
           <label htmlFor={monthId}>Month</label>
           <select
             id={monthId}
@@ -111,7 +111,7 @@ export function DatePicker({
     <div className={styles.datePicker}>
       {inputs}
 
-      <div className={styles.dateKnown}>
+      <div className={styles.datePickerDateKnown}>
         <input
           id={dateKnownId}
           type="checkbox"
