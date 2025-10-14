@@ -1,4 +1,5 @@
 import styles from './AuthorMap.module.css';
+import commonStyles from './common.module.css';
 
 import {
   Fragment,
@@ -32,6 +33,7 @@ import {
 import { createStores, transformAuthors } from './utils/stores';
 import { getAuthorName } from './utils/names';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
+import { StateDrawer } from './components/StateDrawer/StateDrawer';
 
 interface Geography {
   rsmKey: string;
@@ -96,11 +98,9 @@ export function AuthorMap({
     transformAuthors(authors),
   );
 
-  const [highlightedState, setHighlightedState] = useState<StateData | null>(
+  const [highlightedState, setHighlightedState] = useState<USState | null>(
     null,
   );
-
-  const [magnification, setMagnification] = useState<number>(1);
 
   const [filters, setFilters] = useState<Filters>({});
 
@@ -125,7 +125,7 @@ export function AuthorMap({
     return (
       <button
         key={value}
-        className={clsx(styles.button, {
+        className={clsx(commonStyles.button, {
           [styles.highlightedFilter]: filters.eventType === value,
         })}
         onClick={() => {
@@ -147,7 +147,7 @@ export function AuthorMap({
     );
   });
 
-  let statesDataKey: keyof StateStore | undefined;
+  let statesDataKey: keyof StateStore;
 
   switch (filters.eventType) {
     case EventType.BIRTHS:
@@ -160,7 +160,7 @@ export function AuthorMap({
       statesDataKey = 'residingAuthors';
       break;
   }
-
+  console.log('highlightedState', highlightedState);
   return (
     <div
       className={clsx(styles.componentContainer, className)}
@@ -215,10 +215,7 @@ export function AuthorMap({
                             },
                           }}
                           onClick={() => {
-                            setHighlightedState({
-                              name: stateName as USState,
-                              geography,
-                            });
+                            setHighlightedState(stateName as USState);
                           }}
                         />
                       </Fragment>
@@ -230,82 +227,23 @@ export function AuthorMap({
         </ComposableMap>
       </div>
       <div
-        className={clsx(styles.floatingAction, styles.tabs, styles.filterPane)}
+        className={clsx(
+          commonStyles.floatingAction,
+          styles.tabs,
+          styles.filterPane,
+        )}
       >
         {filterPaneButtons}
       </div>
-      {/*<input
-        className={clsx(styles.floatingAction, styles.magnificationSlider)}
-        type="range"
-        min={lowerBound}
-        max={upperBound}
-        step={magIncrement}
-        value={magnification}
-        onChange={(event) => {
-          setMagnification(Number(event.currentTarget.value));
-        }}
-      />*/}
       {highlightedState && (
-        <div className={clsx(styles.sideDrawer, styles.sideDrawerUSState)}>
-          <button
-            className={clsx(styles.button, styles.closeSideDrawer)}
-            onClick={() => setHighlightedState(null)}
-          >
-            <MdClose />
-          </button>
-          <h3>{highlightedState.name}</h3>
-          {statesDataKey &&
-            statesData
-              .get(highlightedState.name)!
-              [statesDataKey].map((author, i) => {
-                let authorName: ReactNode = getAuthorName(author);
-
-                if (author.link) {
-                  authorName = (
-                    <a
-                      href={author.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {authorName}
-                    </a>
-                  );
-                }
-
-                return (
-                  <div key={i} className={styles.authorRow}>
-                    {author.portrait && <img {...author.portrait} />}
-                    <div className={styles.authorDetails}>
-                      <p>{authorName}</p>
-                      {author.events.map(
-                        ({ date, context, address }, index) => {
-                          return (
-                            <Fragment key={index}>
-                              <div className={styles.relevantEvent}>
-                                <div className={styles.relevantEventContext}>
-                                  <p>
-                                    <b>{date}</b>
-                                  </p>
-                                  <p>{address}</p>
-                                </div>
-                                {!filters.eventType && <span>{context}</span>}
-                              </div>
-                            </Fragment>
-                          );
-                        },
-                      )}
-                    </div>
-
-                    <button
-                      className={clsx(styles.button, styles.editAuthor)}
-                      onClick={() => setEditingAuthor(author)}
-                    >
-                      Edit
-                    </button>
-                  </div>
-                );
-              })}
-        </div>
+        <StateDrawer
+          usState={highlightedState}
+          statesData={statesData}
+          statesDataKey={statesDataKey}
+          showContext={!filters.eventType}
+          onClose={() => setHighlightedState(null)}
+          onEdit={setEditingAuthor}
+        />
       )}
       <Tooltip id={tooltipId} place="right" noArrow />
 

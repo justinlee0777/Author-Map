@@ -1,0 +1,90 @@
+.stateDrawer {
+  background-color: white;
+  border: 1px solid black;
+  box-sizing: border-box;
+  height: 98%;
+  left: 0.5em;
+  padding: 1em;
+  top: 1%;
+  width: 33%;
+}
+
+@media (max-width: 800px) {
+  .stateDrawer {
+    width: 66%;
+  }
+}
+
+.stateDrawerUSState {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  overflow-y: auto;
+}
+
+.stateDrawerClose {
+  align-self: flex-end;
+  position: sticky;
+  top: 0;
+}
+
+.stateDrawerRelevantEvent {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.stateDrawerRelevantEventContext {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.stateDrawerRelevantEventContext p {
+  margin: 0;
+}
+
+.stateDrawerAuthorRow {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  font-size: 0.8em;
+  gap: 1em;
+  position: relative;
+}
+
+.stateDrawerAuthorRow:not(:last-of-type) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  padding-bottom: 1em;
+}
+
+.stateDrawerAuthorRow > img {
+  aspect-ratio: 1 / 1;
+  flex: none;
+  height: 100px;
+  object-fit: cover;
+  width: 100px;
+}
+
+.stateDrawerAuthorDetails {
+  display: flex;
+  flex: 3;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.stateDrawerEdit {
+  left: 0;
+  position: absolute;
+  top: 0;
+  transition: 0.3s opacity;
+}
+
+.stateDrawerAuthorRow .stateDrawerEdit {
+  opacity: 0;
+}
+
+.stateDrawerAuthorRow:hover .stateDrawerEdit {
+  opacity: 1;
+}
