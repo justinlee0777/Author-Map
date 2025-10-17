@@ -60,6 +60,8 @@ interface MapPosition {
  * This is not pure. This will internally update authors.
  * This is up for debate. The component cannot know what changes are made to the 'authors' prop. Therefore, for any change,
  * every author needs to be scanned and the stores need to be updated. This can be costly for performance.
+ * TODO: There is a strategy to block data change if the external datastore fails, but there also needs to be a fallback strategy
+ * if the client prefers to update now and correct later.
  *
  *
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
