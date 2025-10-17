@@ -30,8 +30,16 @@ interface Props {
   authors: Array<Author>;
 
   className?: string;
-  onAuthorAdded?: (author: Author) => void | Promise<void>;
-  onAuthorUpdate?: (changedAuthor: Author) => void | Promise<void>;
+  /**
+   * Used to update an external dataset.
+   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
+   */
+  syncAuthorAdded?: (author: Author) => void | Promise<void>;
+  /**
+   * Used to update an external dataset.
+   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
+   */
+  syncAuthorUpdate?: (changedAuthor: Author) => void | Promise<void>;
 }
 
 enum EventType {
@@ -52,10 +60,6 @@ interface MapPosition {
  * This is not pure. This will internally update authors.
  * This is up for debate. The component cannot know what changes are made to the 'authors' prop. Therefore, for any change,
  * every author needs to be scanned and the stores need to be updated. This can be costly for performance.
- * A possible workaround, if anyone ever needs it, is to pass a prop insisting author changes are pure.
- * A weakness of the design is that, if an operation by the client fails, the data will remain unchanged ex. an API call to save
- * is rejected.
- *
  *
  *
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
@@ -71,8 +75,8 @@ interface MapPosition {
 export function AuthorMap({
   authors,
   className,
-  onAuthorUpdate,
-  onAuthorAdded,
+  syncAuthorAdded,
+  syncAuthorUpdate,
 }: Props): JSX.Element {
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -235,12 +239,14 @@ export function AuthorMap({
                 date: '',
                 location: {
                   address: '',
+                  state: highlightedState,
                 },
               },
               deathDate: {
                 date: '',
                 location: {
                   address: '',
+                  state: highlightedState,
                 },
               },
             });
@@ -257,9 +263,12 @@ export function AuthorMap({
           onClose={() => setEditingAuthor(null)}
           onSubmit={async (author) => {
             setLoading(true);
+
+            const updating = Boolean(author.id);
+
             try {
-              await onAuthorUpdate?.(author);
-              if (author.id) {
+              if (updating) {
+                await syncAuthorUpdate?.(author);
                 statesData.update(author);
               } else {
                 author = {
@@ -267,13 +276,22 @@ export function AuthorMap({
                   id: Symbol(`ID for ${getAuthorName(author)}`),
                 };
 
-                await onAuthorAdded?.(author);
+                await syncAuthorAdded?.(author);
 
                 statesData.add(author);
               }
+
+              setEditingAuthor(null);
+            } catch (error) {
+              console.error(
+                `Author could not be ${updating ? 'updated' : 'added'}.`,
+                error,
+              );
+              alert(
+                `Author could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+              );
             } finally {
               setLoading(false);
-              setEditingAuthor(null);
             }
           }}
         />

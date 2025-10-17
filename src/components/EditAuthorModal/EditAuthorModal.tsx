@@ -4,17 +4,15 @@ import { JSX, useMemo, useState } from 'react';
 
 import { Formik, useFormikContext } from 'formik';
 import Modal from 'react-modal';
-import cloneDeep from 'lodash-es/cloneDeep';
+import { PulseLoader } from 'react-spinners';
 
 import {
   Author,
   BaseTimelineEvent,
   MilestoneEvent,
   TimelineEvent,
-  USState,
 } from '../../models';
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
-import { DatePicker } from '../DatePicker/DatePicker';
 import { MdClear } from 'react-icons/md';
 import { TimelineEvent as TimelineEventComponent } from './TimelineEvent/TimelineEvent';
 
@@ -234,8 +232,8 @@ export function EditAuthorModal({
                 }}
               />
 
-              <button type="submit" disabled={!isValid || disabled}>
-                Submit
+              <button type="submit" disabled={!isValid || disabled || loading}>
+                {loading ? <PulseLoader size="1em" /> : 'Submit'}
               </button>
             </form>
           );

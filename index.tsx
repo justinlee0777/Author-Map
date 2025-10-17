@@ -148,7 +148,20 @@ const App = () => {
     },
   ]);
 
-  return <AuthorMap className="authorMap" authors={authors} />;
+  return (
+    <AuthorMap
+      className="authorMap"
+      authors={authors}
+      syncAuthorUpdate={async (author) => {
+        console.log('author updated', author);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }}
+      syncAuthorAdded={(author) => {
+        console.log('author added', author);
+      }}
+    />
+  );
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
