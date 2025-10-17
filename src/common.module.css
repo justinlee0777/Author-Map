@@ -1,3 +1,20 @@
+.sideDrawer {
+  background-color: white;
+  border: 1px solid black;
+  box-sizing: border-box;
+  height: 98%;
+  left: 0.5em;
+  padding: 1em;
+  top: 1%;
+  width: 33%;
+}
+
+@media (max-width: 800px) {
+  .sideDrawer {
+    width: 66%;
+  }
+}
+
 .floatingAction,
 .sideDrawer {
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
@@ -16,6 +33,11 @@
   align-items: center;
   background-color: white;
   border: 1px solid black;
-  display: flex;
   cursor: pointer;
+  display: flex;
+  transition: 0.3s box-shadow;
+}
+
+.button:hover {
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
 }

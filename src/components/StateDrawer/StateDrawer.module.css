@@ -1,24 +1,19 @@
-.stateDrawer {
-  background-color: white;
-  border: 1px solid black;
-  box-sizing: border-box;
-  height: 98%;
-  left: 0.5em;
-  padding: 1em;
-  top: 1%;
-  width: 33%;
-}
-
-@media (max-width: 800px) {
-  .stateDrawer {
-    width: 66%;
-  }
-}
-
 .stateDrawerUSState {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 1em;
+  padding-bottom: 3em;
+}
+
+.stateDrawerUSState > h3 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.stateDrawerList {
   overflow-y: auto;
 }
 
@@ -87,4 +82,20 @@
 
 .stateDrawerAuthorRow:hover .stateDrawerEdit {
   opacity: 1;
+}
+
+.stateDrawerAdd {
+  align-items: center;
+  border-radius: 50%;
+  bottom: 1em;
+  box-sizing: border-box;
+  display: flex;
+  font-size: 1rem;
+  height: 24px;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0;
+  position: absolute;
+  right: 1em;
+  width: 24px;
 }

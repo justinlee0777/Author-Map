@@ -21,7 +21,7 @@ export enum USState {
   LOUISIANA = 'Louisiana',
   MAINE = 'Maine',
   MARYLAND = 'Maryland',
-  MASSACHUSSETTS = 'Massachussetts',
+  MASSACHUSSETTS = 'Massachusetts',
   MICHIGAN = 'Michigan',
   MINNESOTA = 'Minnesota',
   MISSISSIPPI = 'Mississippi',
@@ -157,6 +157,11 @@ export interface MilestoneEvent extends BaseTimelineEvent {
 }
 
 export interface Author {
+  /**
+   * Highly recommended for update operations, in case authors have name collision. Also highly recommended for performance.
+   */
+  id: string | Symbol;
+
   authorFirstName: string;
   authorLastName: string;
 
@@ -174,11 +179,7 @@ export interface Author {
   portrait?: PortraitData;
 }
 
-export interface AuthorWithId extends Author {
-  id: Symbol;
-}
-
-export interface AuthorData extends AuthorWithId {
+export interface AuthorData extends Author {
   events: Array<{
     date: string;
     context: string;

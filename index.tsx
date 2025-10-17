@@ -7,6 +7,30 @@ import { useState } from 'react';
 const App = () => {
   const [authors, setAuthors] = useState<Array<Author>>(() => [
     {
+      id: Symbol('ID for Herman Melville'),
+      authorFirstName: 'Herman',
+      authorLastName: 'Melville',
+      birthDate: {
+        location: {
+          state: USState.NEW_YORK,
+          address: 'New York City',
+        },
+        date: '1819-08-01',
+      },
+      deathDate: {
+        location: {
+          state: USState.NEW_YORK,
+          address: 'New York City',
+        },
+        date: '1891-09-28',
+      },
+      timeline: [],
+      portrait: {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Herman_Melville_by_Joseph_O_Eaton.jpg/500px-Herman_Melville_by_Joseph_O_Eaton.jpg',
+      },
+    },
+    {
+      id: Symbol('ID for Walt Whitman'),
       authorFirstName: 'Walt',
       authorLastName: 'Whitman',
       birthDate: {
@@ -30,28 +54,7 @@ const App = () => {
       },
     },
     {
-      authorFirstName: 'Herman',
-      authorLastName: 'Melville',
-      birthDate: {
-        location: {
-          state: USState.NEW_YORK,
-          address: 'New York City',
-        },
-        date: '1819-08-01',
-      },
-      deathDate: {
-        location: {
-          state: USState.NEW_YORK,
-          address: 'New York City',
-        },
-        date: '1891-09-28',
-      },
-      timeline: [],
-      portrait: {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Herman_Melville_by_Joseph_O_Eaton.jpg/500px-Herman_Melville_by_Joseph_O_Eaton.jpg',
-      },
-    },
-    {
+      id: Symbol('ID for Gertrude Stein'),
       authorFirstName: 'Gertrude',
       authorLastName: 'Stein',
       birthDate: {
@@ -73,6 +76,7 @@ const App = () => {
       },
     },
     {
+      id: Symbol('ID for Thomas Eliot'),
       authorFirstName: 'Thomas',
       authorLastName: 'Eliot',
       authorFullName: 'T. S. Eliot',
@@ -95,29 +99,7 @@ const App = () => {
       },
     },
     {
-      authorFirstName: 'John',
-      authorLastName: 'Steinbeck',
-      authorFullName: 'John Ernst Steinbeck',
-      birthDate: {
-        location: {
-          state: USState.CALIFORNIA,
-          address: 'Salinas',
-        },
-        date: '1902-02-27',
-      },
-      deathDate: {
-        location: {
-          state: USState.NEW_YORK,
-          address: 'New York City',
-        },
-        date: '1968-12-20',
-      },
-      timeline: [],
-      portrait: {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/John_Steinbeck_1939_%28cropped%29.jpg/500px-John_Steinbeck_1939_%28cropped%29.jpg',
-      },
-    },
-    {
+      id: Symbol('ID for Kurt Vonnegut'),
       authorFirstName: 'Kurt',
       authorLastName: 'Vonnegut',
       authorFullName: 'Kurt Vonnegut, Jr',
@@ -138,6 +120,30 @@ const App = () => {
       timeline: [],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg/330px-Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg',
+      },
+    },
+    {
+      id: Symbol('ID for John Steinbeck'),
+      authorFirstName: 'John',
+      authorLastName: 'Steinbeck',
+      authorFullName: 'John Ernst Steinbeck',
+      birthDate: {
+        location: {
+          state: USState.CALIFORNIA,
+          address: 'Salinas',
+        },
+        date: '1902-02-27',
+      },
+      deathDate: {
+        location: {
+          state: USState.NEW_YORK,
+          address: 'New York City',
+        },
+        date: '1968-12-20',
+      },
+      timeline: [],
+      portrait: {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/John_Steinbeck_1939_%28cropped%29.jpg/500px-John_Steinbeck_1939_%28cropped%29.jpg',
       },
     },
   ]);

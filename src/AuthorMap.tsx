@@ -1,16 +1,7 @@
 import styles from './AuthorMap.module.css';
 import commonStyles from './common.module.css';
 
-import {
-  Fragment,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  JSX,
-} from 'react';
+import { Fragment, useMemo, useRef, useState, JSX } from 'react';
 
 import {
   ComposableMap,
@@ -18,22 +9,15 @@ import {
   Geography,
   ZoomableGroup,
 } from 'react-simple-maps';
-import { MdClose } from 'react-icons/md';
 import clsx from 'clsx';
 import { Tooltip } from 'react-tooltip';
 
 import { geography } from './consts/states.const';
-import {
-  Author,
-  AuthorData,
-  AuthorWithId,
-  StateStore,
-  USState,
-} from './models';
-import { createStores, transformAuthors } from './utils/stores';
-import { getAuthorName } from './utils/names';
+import { Author, StateStore, USState } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { StateDrawer } from './components/StateDrawer/StateDrawer';
+import { getAuthorName } from './utils/names';
+import { AuthorStores } from './utils/stores';
 
 interface Geography {
   rsmKey: string;
@@ -48,11 +32,6 @@ interface Props {
   className?: string;
   onAuthorAdded?: (author: Author) => void | Promise<void>;
   onAuthorUpdate?: (changedAuthor: Author) => void | Promise<void>;
-}
-
-interface StateData {
-  name: USState;
-  geography: Geography;
 }
 
 enum EventType {
@@ -70,6 +49,15 @@ interface MapPosition {
 }
 
 /**
+ * This is not pure. This will internally update authors.
+ * This is up for debate. The component cannot know what changes are made to the 'authors' prop. Therefore, for any change,
+ * every author needs to be scanned and the stores need to be updated. This can be costly for performance.
+ * A possible workaround, if anyone ever needs it, is to pass a prop insisting author changes are pure.
+ * A weakness of the design is that, if an operation by the client fails, the data will remain unchanged ex. an API call to save
+ * is rejected.
+ *
+ *
+ *
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
  * TODO: Might want to break this up into different components.
  * TODO: Editing + export JSON
@@ -84,6 +72,7 @@ export function AuthorMap({
   authors,
   className,
   onAuthorUpdate,
+  onAuthorAdded,
 }: Props): JSX.Element {
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -94,29 +83,19 @@ export function AuthorMap({
     zoom: 1,
   });
 
-  const [cachedAuthors, setCachedAuthors] = useState<Array<AuthorWithId>>(
-    transformAuthors(authors),
-  );
-
   const [highlightedState, setHighlightedState] = useState<USState | null>(
     null,
   );
 
   const [filters, setFilters] = useState<Filters>({});
 
-  const [editingAuthor, setEditingAuthor] = useState<AuthorData | null>(null);
+  const [editingAuthor, setEditingAuthor] = useState<Partial<Author> | null>(
+    null,
+  );
 
   // TODO: If it's a lot of data, do async? Return a promise?
-  const [statesData, setStatesData] = useState(createStores(cachedAuthors));
-
-  const updateAuthors = useCallback((newAuthors: Array<Author>) => {
-    const newCachedAuthors = transformAuthors(newAuthors);
-    setCachedAuthors(newCachedAuthors);
-    setStatesData(createStores(newCachedAuthors));
-  }, []);
-
-  useEffect(() => {
-    updateAuthors(authors);
+  const statesData = useMemo(() => {
+    return new AuthorStores(authors);
   }, [authors]);
 
   const tooltipId = useMemo(() => 'state-labels-tooltip', []);
@@ -160,7 +139,7 @@ export function AuthorMap({
       statesDataKey = 'residingAuthors';
       break;
   }
-  console.log('highlightedState', highlightedState);
+
   return (
     <div
       className={clsx(styles.componentContainer, className)}
@@ -243,6 +222,29 @@ export function AuthorMap({
           showContext={!filters.eventType}
           onClose={() => setHighlightedState(null)}
           onEdit={setEditingAuthor}
+          onAddAuthor={() => {
+            setEditingAuthor({
+              authorFirstName: '',
+              authorLastName: '',
+              authorFullName: '',
+              timeline: [],
+              portrait: {
+                src: '',
+              },
+              birthDate: {
+                date: '',
+                location: {
+                  address: '',
+                },
+              },
+              deathDate: {
+                date: '',
+                location: {
+                  address: '',
+                },
+              },
+            });
+          }}
         />
       )}
       <Tooltip id={tooltipId} place="right" noArrow />
@@ -255,23 +257,24 @@ export function AuthorMap({
           onClose={() => setEditingAuthor(null)}
           onSubmit={async (author) => {
             setLoading(true);
-
             try {
               await onAuthorUpdate?.(author);
+              if (author.id) {
+                statesData.update(author);
+              } else {
+                author = {
+                  ...author,
+                  id: Symbol(`ID for ${getAuthorName(author)}`),
+                };
 
-              const authorIndex = cachedAuthors.findIndex(
-                (cachedAuthor) => cachedAuthor.id === editingAuthor.id,
-              );
-              updateAuthors([
-                ...cachedAuthors.slice(0, authorIndex),
-                author,
-                ...cachedAuthors.slice(authorIndex + 1),
-              ]);
+                await onAuthorAdded?.(author);
+
+                statesData.add(author);
+              }
             } finally {
               setLoading(false);
+              setEditingAuthor(null);
             }
-
-            setEditingAuthor(null);
           }}
         />
       )}

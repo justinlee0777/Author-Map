@@ -79,7 +79,7 @@ export function TimelineEvent({
       <label htmlFor={addressId}>Address</label>
       <input
         id={addressId}
-        name={`${fieldName}.location.state.address`}
+        name={`${fieldName}.location.address`}
         type="text"
         required
         value={item.location?.address}

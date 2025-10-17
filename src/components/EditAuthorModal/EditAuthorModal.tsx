@@ -91,11 +91,9 @@ export function EditAuthorModal({
       return ({ item }) => {
         const { handleChange, setFieldValue } = useFormikContext<Author>();
 
-        const inputId = `birth-event`;
-
         return (
           <TimelineEventComponent
-            id={inputId}
+            id={birthDateId}
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Birth"
             fieldName="birthDate"
@@ -112,11 +110,9 @@ export function EditAuthorModal({
       return ({ item }) => {
         const { handleChange, setFieldValue } = useFormikContext<Author>();
 
-        const inputId = `death-event`;
-
         return (
           <TimelineEventComponent
-            id={inputId}
+            id={deathDateId}
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Death"
             fieldName="deathDate"
@@ -155,7 +151,9 @@ export function EditAuthorModal({
                 <MdClear />
               </button>
               <div className={styles.editAuthorPortraitRow}>
-                <img src={values.portrait?.src} />
+                <div className={styles.editAuthorPortraitContainer}>
+                  {values.portrait?.src && <img src={values.portrait?.src} />}
+                </div>
                 <div className={styles.editAuthorPortraitDetails}>
                   <label htmlFor={portraitId}>Portrait</label>
                   <input

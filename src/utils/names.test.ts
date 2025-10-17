@@ -5,6 +5,7 @@ describe('getAuthorName()', () => {
   test('should always provide the full name', () => {
     expect(
       getAuthorName({
+        id: Symbol('ID for John Smith'),
         authorFirstName: 'John',
         authorLastName: 'Smith',
         authorFullName: 'John T. Smith',
@@ -23,6 +24,7 @@ describe('getAuthorName()', () => {
   test('should provide a constructed name', () => {
     expect(
       getAuthorName({
+        id: Symbol('ID for John Smith'),
         authorFirstName: 'John',
         authorLastName: 'Smith',
         birthDate: {

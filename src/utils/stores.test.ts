@@ -1,8 +1,8 @@
 import { Author, USState } from '../models';
-import { createStores, transformAuthors } from './stores';
 
 const authors: Array<Author> = [
   {
+    id: Symbol('ID for John Smith'),
     authorFirstName: 'John',
     authorLastName: 'Smith',
     birthDate: {
@@ -15,6 +15,7 @@ const authors: Array<Author> = [
     timeline: [],
   },
   {
+    id: Symbol('ID for Alan Smithee'),
     authorFirstName: 'Alan',
     authorLastName: 'Smithee',
     birthDate: {
@@ -27,6 +28,7 @@ const authors: Array<Author> = [
     timeline: [],
   },
   {
+    id: Symbol('ID for John Doe'),
     authorFirstName: 'John',
     authorLastName: 'Doe',
     birthDate: {
@@ -50,23 +52,9 @@ const authors: Array<Author> = [
   },
 ];
 
-describe('transformAuthors()', () => {
-  test('should assign an ID for each author', () => {
-    const transformedAuthors = transformAuthors(authors);
-
-    expect(transformedAuthors.length).toBe(3);
-
-    for (const author of transformedAuthors) {
-      expect(author.id).toBeDefined();
-    }
-  });
-});
-
 describe('createStores()', () => {
   test('should sort and populate author data', () => {
-    const transformedAuthors = transformAuthors(authors);
-
-    const stores = createStores(transformedAuthors);
+    const stores = createStores(authors);
 
     const alabamaStore = stores.get(USState.ALABAMA)!;
 
