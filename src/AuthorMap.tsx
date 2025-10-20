@@ -255,7 +255,12 @@ export function AuthorMap({
           }}
         />
       )}
-      <Tooltip id={tooltipId} place="right" noArrow />
+      <Tooltip
+        id={tooltipId}
+        className={styles.authorMapTooltip}
+        place="right"
+        noArrow
+      />
 
       {editingAuthor && (
         <EditAuthorModal
@@ -273,11 +278,6 @@ export function AuthorMap({
                 await syncAuthorUpdate?.(author);
                 statesData.update(author);
               } else {
-                author = {
-                  ...author,
-                  id: Symbol(`ID for ${getAuthorName(author)}`),
-                };
-
                 await syncAuthorAdded?.(author);
 
                 statesData.add(author);
