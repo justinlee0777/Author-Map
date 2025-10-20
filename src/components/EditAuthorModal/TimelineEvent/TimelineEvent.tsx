@@ -63,7 +63,6 @@ export function TimelineEvent({
       <select
         id={stateId}
         name={`${fieldName}.location.state`}
-        required
         value={item.location?.state}
         onChange={handleChange}
       >

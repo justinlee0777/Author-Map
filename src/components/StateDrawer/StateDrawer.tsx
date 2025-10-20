@@ -73,10 +73,8 @@ export function StateDrawer({
                     <Fragment key={index}>
                       <div className={styles.stateDrawerRelevantEvent}>
                         <div className={styles.stateDrawerRelevantEventContext}>
-                          {showContext && <span>{context}</span>}
-                          <p>
-                            <b>{date}</b>
-                          </p>
+                          {showContext && <b>{context}</b>}
+                          <p>{date}</p>
                           <p>{address}</p>
                         </div>
                       </div>
