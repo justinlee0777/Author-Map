@@ -64,6 +64,7 @@ interface MapPosition {
  * if the client prefers to update now and correct later.
  *
  *
+ * TODO: Groups? ex. Nobel Prize winners?
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
  * TODO: Might want to break this up into different components.
  * TODO: Editing + export JSON

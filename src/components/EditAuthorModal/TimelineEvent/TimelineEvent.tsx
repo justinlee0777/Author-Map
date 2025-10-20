@@ -67,6 +67,7 @@ export function TimelineEvent({
         value={item.location?.state}
         onChange={handleChange}
       >
+        <option></option>
         {Object.values(USState).map((usState) => {
           return (
             <option key={usState} value={usState}>

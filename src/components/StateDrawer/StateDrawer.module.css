@@ -6,6 +6,10 @@
   padding-bottom: 3em;
 }
 
+.stateDrawerUSState p {
+  margin: 0;
+}
+
 .stateDrawerUSState > h3 {
   align-items: center;
   display: flex;

@@ -65,7 +65,7 @@ export function StateDrawer({
               key={authorKeyGenerator.getKey(author.id)}
               className={styles.stateDrawerAuthorRow}
             >
-              {author.portrait && <img {...author.portrait} />}
+              {author.portrait && <img {...author.portrait} loading="lazy" />}
               <div className={styles.stateDrawerAuthorDetails}>
                 <p>{authorName}</p>
                 {author.events.map(({ date, context, address }, index) => {
@@ -73,12 +73,12 @@ export function StateDrawer({
                     <Fragment key={index}>
                       <div className={styles.stateDrawerRelevantEvent}>
                         <div className={styles.stateDrawerRelevantEventContext}>
+                          {showContext && <span>{context}</span>}
                           <p>
                             <b>{date}</b>
                           </p>
                           <p>{address}</p>
                         </div>
-                        {showContext && <span>{context}</span>}
                       </div>
                     </Fragment>
                   );
