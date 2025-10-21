@@ -18,6 +18,7 @@ interface Props {
 
   RemoveButton?: () => JSX.Element;
   headerText?: string;
+  required?: boolean;
 }
 
 export function TimelineEvent({
@@ -28,6 +29,7 @@ export function TimelineEvent({
   setFieldValue,
   handleChange,
   headerText = 'Event',
+  required,
   RemoveButton = () => <></>,
 }: Props): JSX.Element {
   const dateFields = dateKeys.map(({ keyName, label }) => {
@@ -39,7 +41,7 @@ export function TimelineEvent({
         <DatePicker
           id={dateFieldId}
           value={(item as any)[keyName]}
-          required
+          required={required}
           onChange={(newValue) =>
             setFieldValue(`${fieldName}.${keyName}`, newValue)
           }
@@ -81,7 +83,7 @@ export function TimelineEvent({
         id={addressId}
         name={`${fieldName}.location.address`}
         type="text"
-        required
+        required={required}
         value={item.location?.address}
         onChange={handleChange}
       />

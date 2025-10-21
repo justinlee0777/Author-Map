@@ -69,6 +69,7 @@ export function EditAuthorModal({
         return (
           <TimelineEventComponent
             id={inputId}
+            required={true}
             dateKeys={[
               { keyName: 'startDate', label: 'Start Date' },
               { keyName: 'endDate', label: 'End Date' },
@@ -92,6 +93,7 @@ export function EditAuthorModal({
         return (
           <TimelineEventComponent
             id={birthDateId}
+            required={true}
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Birth"
             fieldName="birthDate"
@@ -111,6 +113,7 @@ export function EditAuthorModal({
         return (
           <TimelineEventComponent
             id={deathDateId}
+            required={false}
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Death"
             fieldName="deathDate"
