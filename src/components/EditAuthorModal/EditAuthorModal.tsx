@@ -46,6 +46,7 @@ export function EditAuthorModal({
     birthDateId,
     deathDateId,
     referenceUrlId,
+    deceasedId,
   ] = useMemo(
     () => [
       'portraitInput',
@@ -55,6 +56,7 @@ export function EditAuthorModal({
       'birthDateInput',
       'deathDateInput',
       'referenceUrlInput',
+      'deceasedInput',
     ],
     [],
   );
@@ -113,7 +115,7 @@ export function EditAuthorModal({
         return (
           <TimelineEventComponent
             id={deathDateId}
-            required={false}
+            required={true}
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Death"
             fieldName="deathDate"
@@ -207,9 +209,30 @@ export function EditAuthorModal({
 
               <BirthField item={values.birthDate!} />
 
-              <DeathField item={values.deathDate!} />
+              <div className={styles.editAuthorDeceasedRow}>
+                <input
+                  id={deceasedId}
+                  type="checkbox"
+                  checked={Boolean(values.deathDate)}
+                  onChange={(event) => {
+                    if (event.currentTarget.checked) {
+                      setFieldValue('deathDate', {
+                        date: '',
+                        location: {
+                          address: '',
+                        },
+                      });
+                    } else {
+                      setFieldValue('deathDate', undefined);
+                    }
+                  }}
+                />
+                <label htmlFor={deceasedId}>Deceased?</label>
+              </div>
 
-              <label>Timeline</label>
+              {values.deathDate && <DeathField item={values.deathDate!} />}
+
+              <label className={styles.editAuthorTimelineLabel}>Timeline</label>
               <DynamicList<Partial<TimelineEvent>>
                 classes={{
                   component: styles.editAuthorTimelineEventsContainer,

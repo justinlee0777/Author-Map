@@ -16,7 +16,6 @@ import { geography } from './consts/states.const';
 import { Author, StateStore, USState } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { StateDrawer } from './components/StateDrawer/StateDrawer';
-import { getAuthorName } from './utils/names';
 import { AuthorStores } from './utils/stores';
 
 interface Geography {
@@ -242,13 +241,6 @@ export function AuthorMap({
                 src: '',
               },
               birthDate: {
-                date: '',
-                location: {
-                  address: '',
-                  state: highlightedState,
-                },
-              },
-              deathDate: {
                 date: '',
                 location: {
                   address: '',
