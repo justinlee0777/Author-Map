@@ -1,7 +1,7 @@
 import styles from './AuthorMap.module.css';
 import commonStyles from './common.module.css';
 
-import { Fragment, useMemo, useRef, useState, JSX } from 'react';
+import { Fragment, useMemo, useRef, useState, JSX, useCallback } from 'react';
 
 import {
   ComposableMap,
@@ -102,6 +102,31 @@ export function AuthorMap({
     null,
   );
 
+  const STATE_COLORS = useMemo(
+    () => [
+      '#F6E8C3',
+      '#D8B365',
+      '#5AB4AC',
+      '#C7EAE5',
+      '#F5F5F5',
+      '#E0ECF4',
+      '#A8DDB5',
+      '#D9F0A3',
+      '#FEE08B',
+      '#F1B6DA',
+    ],
+    [],
+  );
+
+  const getColor = useCallback(
+    (stateName: string) => {
+      return STATE_COLORS[
+        Math.abs(stateName.charCodeAt(0)) % STATE_COLORS.length
+      ];
+    },
+    [STATE_COLORS],
+  );
+
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => {
     return new AuthorStores(authors);
@@ -180,11 +205,11 @@ export function AuthorMap({
                       <Fragment key={geography.rsmKey}>
                         <Geography
                           data-tooltip-id={tooltipId}
-                          data-tooltip-content={geography.properties.name}
+                          data-tooltip-content={stateName}
                           geography={geography}
                           style={{
                             default: {
-                              fill: '#FFFFFF', // white fill
+                              fill: getColor(stateName), // white fill
                               stroke: '#000000', // black border
                               strokeWidth: 0.5, // border thickness
                               outline: 'none',

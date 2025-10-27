@@ -22,9 +22,15 @@
 }
 
 .stateDrawerClose {
+  align-items: center;
   align-self: flex-end;
+  border-radius: 50%;
+  display: flex;
+  font-size: 1em;
+  height: 1.5em;
   position: sticky;
   top: 0;
+  width: 1.5em;
 }
 
 .stateDrawerRelevantEvent {
