@@ -3,27 +3,15 @@ import commonStyles from './common.module.css';
 
 import { Fragment, useMemo, useRef, useState, JSX, useCallback } from 'react';
 
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-  ZoomableGroup,
-} from 'react-simple-maps';
 import clsx from 'clsx';
 import { Tooltip } from 'react-tooltip';
 
-import { geography } from './consts/states.const';
-import { Author, StateStore, USState } from './models';
+import { Author, AuthorEventType, StateStore, USState } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { StateDrawer } from './components/StateDrawer/StateDrawer';
 import { AuthorStores } from './utils/stores';
-
-interface Geography {
-  rsmKey: string;
-  properties: {
-    name: string;
-  };
-}
+import { Tabs } from './components/Tabs/Tabs';
+import { AuthorMapView } from './components/AuthorMapView/AuthorMapView';
 
 interface Props {
   authors: Array<Author>;
@@ -41,18 +29,9 @@ interface Props {
   syncAuthorUpdate?: (changedAuthor: Author) => void | Promise<void>;
 }
 
-enum EventType {
-  BIRTHS = 'Births',
-  DEATHS = 'Deaths',
-}
-
-interface Filters {
-  eventType?: EventType;
-}
-
-interface MapPosition {
-  coordinates: [number, number];
-  zoom: number;
+enum ViewType {
+  MAP = 'Map',
+  LIST = 'List',
 }
 
 /**
@@ -64,6 +43,7 @@ interface MapPosition {
  *
  *
  * TODO: Groups? ex. Nobel Prize winners? Genre?
+ * TODO: Search?
  * TODO: Discussion system?
  * TODO: Full timeline
  * TODO: Show who is in a state on hover? Need to see some data early
@@ -87,44 +67,10 @@ export function AuthorMap({
 
   const [loading, setLoading] = useState(false);
 
-  const [position, setPosition] = useState<MapPosition>({
-    coordinates: [-97, 38],
-    zoom: 1,
-  });
-
-  const [highlightedState, setHighlightedState] = useState<USState | null>(
-    null,
-  );
-
-  const [filters, setFilters] = useState<Filters>({});
+  const [viewType, setViewType] = useState<ViewType>(ViewType.MAP);
 
   const [editingAuthor, setEditingAuthor] = useState<Partial<Author> | null>(
     null,
-  );
-
-  const STATE_COLORS = useMemo(
-    () => [
-      '#F6E8C3',
-      '#D8B365',
-      '#5AB4AC',
-      '#C7EAE5',
-      '#F5F5F5',
-      '#E0ECF4',
-      '#A8DDB5',
-      '#D9F0A3',
-      '#FEE08B',
-      '#F1B6DA',
-    ],
-    [],
-  );
-
-  const getColor = useCallback(
-    (stateName: string) => {
-      return STATE_COLORS[
-        Math.abs(stateName.charCodeAt(0)) % STATE_COLORS.length
-      ];
-    },
-    [STATE_COLORS],
   );
 
   // TODO: If it's a lot of data, do async? Return a promise?
@@ -132,155 +78,29 @@ export function AuthorMap({
     return new AuthorStores(authors);
   }, [authors]);
 
-  const tooltipId = useMemo(() => 'state-labels-tooltip', []);
-
-  const filterPaneButtons = Object.values(EventType).map((value) => {
-    return (
-      <button
-        key={value}
-        className={clsx(commonStyles.button, {
-          [styles.highlightedFilter]: filters.eventType === value,
-        })}
-        onClick={() => {
-          if (filters.eventType !== value) {
-            setFilters({
-              ...filters,
-              eventType: value,
-            });
-          } else {
-            setFilters({
-              ...filters,
-              eventType: undefined,
-            });
-          }
-        }}
-      >
-        {value}
-      </button>
-    );
-  });
-
-  let statesDataKey: keyof StateStore;
-
-  switch (filters.eventType) {
-    case EventType.BIRTHS:
-      statesDataKey = 'bornAuthors';
-      break;
-    case EventType.DEATHS:
-      statesDataKey = 'deceasedAuthors';
-      break;
-    default:
-      statesDataKey = 'residingAuthors';
-      break;
-  }
-
   return (
     <div
       className={clsx(styles.componentContainer, className)}
       ref={componentRef}
     >
       <div className={styles.mapContainer}>
-        <ComposableMap projection="geoAlbersUsa">
-          <ZoomableGroup
-            center={position.coordinates}
-            zoom={position.zoom}
-            onMoveEnd={setPosition}
-            minZoom={0.8}
-            maxZoom={8}
-          >
-            <Geographies geography={geography}>
-              {(args) => {
-                const geographies = args.geographies as Array<Geography>;
-
-                const validAreas = new Set(Object.values(USState));
-
-                return geographies
-                  .filter((geography) =>
-                    validAreas.has(geography.properties.name as USState),
-                  )
-                  .map((geography) => {
-                    const stateName = geography.properties.name;
-
-                    return (
-                      <Fragment key={geography.rsmKey}>
-                        <Geography
-                          data-tooltip-id={tooltipId}
-                          data-tooltip-content={stateName}
-                          geography={geography}
-                          style={{
-                            default: {
-                              fill: getColor(stateName), // white fill
-                              stroke: '#000000', // black border
-                              strokeWidth: 0.5, // border thickness
-                              outline: 'none',
-                            },
-                            hover: {
-                              fill: '#F0F0F0', // light gray on hover
-                              stroke: '#000000',
-                              strokeWidth: 0.5,
-                              outline: 'none',
-                            },
-                            pressed: {
-                              fill: '#D0D0D0', // darker gray when clicked
-                              stroke: '#000000',
-                              strokeWidth: 0.5,
-                              outline: 'none',
-                            },
-                          }}
-                          onClick={() => {
-                            setHighlightedState(stateName as USState);
-                          }}
-                        />
-                      </Fragment>
-                    );
-                  });
-              }}
-            </Geographies>
-          </ZoomableGroup>
-        </ComposableMap>
-      </div>
-      <div
-        className={clsx(
-          commonStyles.floatingAction,
-          styles.tabs,
-          styles.filterPane,
-        )}
-      >
-        {filterPaneButtons}
-      </div>
-      {highlightedState && (
-        <StateDrawer
-          usState={highlightedState}
+        <AuthorMapView
           statesData={statesData}
-          statesDataKey={statesDataKey}
-          showContext={!filters.eventType}
-          onClose={() => setHighlightedState(null)}
-          onEdit={setEditingAuthor}
-          onAddAuthor={() => {
-            setEditingAuthor({
-              authorFirstName: '',
-              authorLastName: '',
-              authorFullName: '',
-              timeline: [],
-              portrait: {
-                src: '',
-              },
-              birthDate: {
-                date: '',
-                location: {
-                  address: '',
-                  state: highlightedState,
-                },
-              },
-            });
-          }}
+          onAuthorEdit={setEditingAuthor}
         />
-      )}
-      <Tooltip
-        id={tooltipId}
-        className={styles.authorMapTooltip}
-        place="right"
-        noArrow
+      </div>
+      <Tabs<ViewType>
+        className={clsx(commonStyles.floatingAction, styles.viewSwitch)}
+        highlightedValue={viewType}
+        values={Object.values(ViewType).map((value) => ({
+          value,
+          label: value,
+        }))}
+        onChange={(value) => {
+          if (value) {
+            setViewType(value);
+          }
+        }}
       />
 
       {editingAuthor && (

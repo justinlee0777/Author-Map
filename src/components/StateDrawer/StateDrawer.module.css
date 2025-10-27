@@ -33,55 +33,6 @@
   width: 1.5em;
 }
 
-.stateDrawerRelevantEvent {
-  align-items: flex-start;
-  display: flex;
-  flex-direction: row;
-  gap: 1em;
-}
-
-.stateDrawerRelevantEventContext {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
-}
-
-.stateDrawerRelevantEventContext p {
-  margin: 0;
-}
-
-.stateDrawerAuthorRow {
-  display: flex;
-  flex-direction: row;
-  font-size: 0.8em;
-  gap: 1em;
-  position: relative;
-}
-
-.stateDrawerAuthorRow:not(:last-of-type) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-  padding-bottom: 1em;
-}
-
-.stateDrawerAuthorRow:not(:first-of-type) {
-  padding: 1em 0;
-}
-
-.stateDrawerAuthorRow > img {
-  aspect-ratio: 1 / 1;
-  flex: none;
-  height: 100px;
-  object-fit: cover;
-  width: 100px;
-}
-
-.stateDrawerAuthorDetails {
-  display: flex;
-  flex: 3;
-  flex-direction: column;
-  gap: 1em;
-}
-
 .stateDrawerEdit {
   left: 0;
   position: absolute;

@@ -9,12 +9,10 @@
   margin: 0;
 }
 
-.mapContainer {
-  height: 100%;
-}
-
+.mapContainer,
 .mapContainer > svg {
   height: 100%;
+  width: 100%;
 }
 
 .magnificationSlider {
@@ -22,24 +20,9 @@
   right: 1em;
 }
 
-.filterPane {
-  right: 1em;
+.viewSwitch {
+  flex-direction: row;
+  left: 50%;
   top: 1em;
-}
-
-.filterPane button {
-  font-size: 1em;
-}
-
-.highlightedFilter {
-  filter: brightness(85%);
-}
-
-.tabs {
-  display: flex;
-  flex-direction: column;
-}
-
-.authorMapTooltip {
-  /* This must be kept for client convenience. */
+  transform: translateX(-50%);
 }

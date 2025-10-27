@@ -2,20 +2,22 @@ import styles from './StateDrawer.module.css';
 import commonStyles from '../../common.module.css';
 
 import clsx from 'clsx';
-import { Fragment, JSX, ReactNode, useMemo } from 'react';
-import { AuthorData, StateStore, USState } from '../../models';
+import { JSX, ReactNode, useMemo } from 'react';
+import { Author, AuthorEventType, StateStore, USState } from '../../models';
 import { AuthorStores, createKeyGenerator } from '../../utils/stores';
 import { MdAdd, MdClose } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
+import { AuthorRow } from '../AuthorRow/AuthorRow';
 
 interface Props {
   usState: USState;
   statesData: AuthorStores;
   statesDataKey: keyof StateStore;
 
+  eventType?: AuthorEventType;
   showContext?: boolean;
   onClose?: () => void;
-  onEdit?: (authorData: AuthorData) => void;
+  onEdit?: (author: Author) => void;
   onAddAuthor?: () => void;
 }
 
@@ -23,6 +25,7 @@ export function StateDrawer({
   usState,
   statesData,
   statesDataKey,
+  eventType,
   showContext,
   onClose,
   onEdit,
@@ -61,35 +64,20 @@ export function StateDrawer({
           }
 
           return (
-            <div
+            <AuthorRow
               key={authorKeyGenerator.getKey(author.id)}
               className={styles.stateDrawerAuthorRow}
+              author={author}
+              eventType={eventType}
+              showContext={showContext}
             >
-              {author.portrait && <img {...author.portrait} loading="lazy" />}
-              <div className={styles.stateDrawerAuthorDetails}>
-                <p>{authorName}</p>
-                {author.events.map(({ date, context, address }, index) => {
-                  return (
-                    <Fragment key={index}>
-                      <div className={styles.stateDrawerRelevantEvent}>
-                        <div className={styles.stateDrawerRelevantEventContext}>
-                          {showContext && <b>{context}</b>}
-                          <p>{date}</p>
-                          <p>{address}</p>
-                        </div>
-                      </div>
-                    </Fragment>
-                  );
-                })}
-              </div>
-
               <button
                 className={clsx(commonStyles.button, styles.stateDrawerEdit)}
                 onClick={() => onEdit?.(author)}
               >
                 Edit
               </button>
-            </div>
+            </AuthorRow>
           );
         })}
       </div>

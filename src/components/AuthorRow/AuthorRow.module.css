@@ -1,0 +1,48 @@
+.authorRow {
+  display: flex;
+  flex-direction: row;
+  font-size: 0.8em;
+  gap: 1em;
+  position: relative;
+}
+
+.authorRow:not(:last-of-type) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  padding-bottom: 1em;
+}
+
+.authorRow:not(:first-of-type) {
+  padding: 1em 0;
+}
+
+.authorRow > img {
+  aspect-ratio: 1 / 1;
+  flex: none;
+  height: 100px;
+  object-fit: cover;
+  width: 100px;
+}
+
+.authorRowDetails {
+  display: flex;
+  flex: 3;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.authorRowRelevantEvent {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.authorRowRelevantEventContext {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.authorRowRelevantEventContext p {
+  margin: 0;
+}

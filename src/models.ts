@@ -134,6 +134,11 @@ export interface AuthorLocation {
   address: string;
 }
 
+export enum AuthorEventType {
+  BIRTHS = 'Births',
+  DEATHS = 'Deaths',
+}
+
 export interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
   /** Use to properly credit the photo source. */
   attribution?: string;
@@ -173,22 +178,14 @@ export interface Author {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   deathDate?: MilestoneEvent;
   /** Assume the timeline is ordered. Birth and death dates are redundant. */
-  timeline: Array<TimelineEvent>;
+  timeline: Array<TimelineEvent | MilestoneEvent>;
 
   link?: string;
   portrait?: PortraitData;
 }
 
-export interface AuthorData extends Author {
-  events: Array<{
-    date: string;
-    context: string;
-    address: string;
-  }>;
-}
-
 export interface StateStore {
-  bornAuthors: Array<AuthorData>;
-  deceasedAuthors: Array<AuthorData>;
-  residingAuthors: Array<AuthorData>;
+  bornAuthors: Array<Author>;
+  deceasedAuthors: Array<Author>;
+  residingAuthors: Array<Author>;
 }

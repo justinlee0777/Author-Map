@@ -1,6 +1,5 @@
 import {
   Author,
-  AuthorData,
   MilestoneEvent,
   StateStore,
   TimelineEvent,
@@ -10,7 +9,7 @@ import { formatDate } from './dates';
 
 export class AuthorStores {
   private map: Map<USState, StateStore>;
-  private internalRegistry: Set<Author['id']>;
+  private internalRegistry: Map<Author['id'], Author>;
 
   constructor(authors: Array<Author>) {
     this.map = new Map<USState, StateStore>([
@@ -23,11 +22,15 @@ export class AuthorStores {
       ),
     ]);
 
-    this.internalRegistry = new Set();
+    this.internalRegistry = new Map();
 
     for (const author of authors) {
       this.add(author);
     }
+  }
+
+  getAll(): Array<Author> {
+    return Array.from(this.internalRegistry.values());
   }
 
   get(state: USState): StateStore {
@@ -55,21 +58,10 @@ export class AuthorStores {
         return birthEventDate < new Date(author.birthDate.date);
       });
 
-      const finalAuthor: AuthorData = {
-        ...author,
-        events: [
-          {
-            date: formatDate(state, birthEvent.date),
-            context: 'Birth',
-            address: birthEvent.location.address,
-          },
-        ],
-      };
-
       if (succeedingIndex === -1) {
-        store.bornAuthors.push(finalAuthor);
+        store.bornAuthors.push(author);
       } else {
-        store.bornAuthors.splice(succeedingIndex, 0, finalAuthor);
+        store.bornAuthors.splice(succeedingIndex, 0, author);
       }
     }
 
@@ -90,21 +82,10 @@ export class AuthorStores {
           return deathEventDate < new Date(author.deathDate!.date);
         });
 
-        const finalAuthor: AuthorData = {
-          ...author,
-          events: [
-            {
-              date: formatDate(state, deathEvent.date),
-              context: 'Death',
-              address: deathEvent.location.address,
-            },
-          ],
-        };
-
         if (succeedingIndex === -1) {
-          store.deceasedAuthors.push(finalAuthor);
+          store.deceasedAuthors.push(author);
         } else {
-          store.deceasedAuthors.splice(succeedingIndex, 0, finalAuthor);
+          store.deceasedAuthors.splice(succeedingIndex, 0, author);
         }
       }
 
@@ -117,40 +98,17 @@ export class AuthorStores {
       if (state) {
         const store = map.get(state)!;
 
-        const addedAuthor = store.residingAuthors.find(
-          (residingAuthor) => residingAuthor.id === author.id,
-        );
-
-        let formattedDateRange: string;
-
-        if ('date' in event) {
-          formattedDateRange = formatDate(state, event.date);
-        } else {
-          formattedDateRange = `${formatDate(state, event.startDate)} - ${formatDate(state, event.endDate)}`;
-        }
-
-        if (addedAuthor) {
-          addedAuthor.events = addedAuthor.events.concat({
-            date: formattedDateRange,
-            context: event.notes ?? '',
-            address: event.location.address,
-          });
-        } else {
-          store.residingAuthors.push({
-            ...author,
-            events: [
-              {
-                date: formattedDateRange,
-                context: event.notes ?? '',
-                address: event.location.address,
-              },
-            ],
-          });
+        if (
+          !store.residingAuthors.find(
+            (residingAuthor) => residingAuthor.id === author.id,
+          )
+        ) {
+          store.residingAuthors.push(author);
         }
       }
     });
 
-    this.internalRegistry.add(author.id);
+    this.internalRegistry.set(author.id, author);
   }
 
   update(author: Author): void {

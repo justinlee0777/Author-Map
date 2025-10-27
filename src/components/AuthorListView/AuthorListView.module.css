@@ -1,0 +1,4 @@
+.authorListView {
+  display: flex;
+  flex-direction: column;
+}
