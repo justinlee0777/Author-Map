@@ -5,7 +5,13 @@ import {
   TimelineEvent,
   USState,
 } from '../models';
-import { formatDate } from './dates';
+import { getAuthorName } from './names';
+
+export interface AuthorSort {
+  name?: boolean;
+  birth?: boolean;
+  death?: boolean;
+}
 
 export class AuthorStores {
   private map: Map<USState, StateStore>;
@@ -29,8 +35,37 @@ export class AuthorStores {
     }
   }
 
-  getAll(): Array<Author> {
-    return Array.from(this.internalRegistry.values());
+  getAll(sort: AuthorSort = { name: true }): Array<Author> {
+    const authors = Array.from(this.internalRegistry.values());
+
+    if (sort.name) {
+      return authors.sort((a, b) =>
+        getAuthorName(a).localeCompare(getAuthorName(b)),
+      );
+    } else if (sort.birth) {
+      return authors.sort(
+        (a, b) =>
+          new Date(a.birthDate.date).valueOf() -
+          new Date(b.birthDate.date).valueOf(),
+      );
+    } else if (sort.death) {
+      return authors.sort((a, b) => {
+        if (!(a.deathDate || b.deathDate)) {
+          return 0;
+        } else if (!a.deathDate) {
+          return 1;
+        } else if (!b.deathDate) {
+          return -1;
+        } else {
+          return (
+            new Date(a.deathDate.date).valueOf() -
+            new Date(b.deathDate.date).valueOf()
+          );
+        }
+      });
+    } else {
+      return authors;
+    }
   }
 
   get(state: USState): StateStore {

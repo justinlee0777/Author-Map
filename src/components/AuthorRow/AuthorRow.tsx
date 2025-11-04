@@ -33,7 +33,7 @@ export function AuthorRow({
     <div className={clsx(styles.authorRow, className)}>
       {author.portrait && <img {...author.portrait} loading="lazy" />}
       <div className={styles.authorRowDetails}>
-        <h3>{authorName}</h3>
+        <h4>{authorName}</h4>
         {events.map(({ notes, dateContext, location }, index) => {
           return (
             <Fragment key={index}>

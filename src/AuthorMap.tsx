@@ -1,17 +1,15 @@
 import styles from './AuthorMap.module.css';
 import commonStyles from './common.module.css';
 
-import { Fragment, useMemo, useRef, useState, JSX, useCallback } from 'react';
-
+import { useMemo, useRef, useState, JSX } from 'react';
 import clsx from 'clsx';
-import { Tooltip } from 'react-tooltip';
 
-import { Author, AuthorEventType, StateStore, USState } from './models';
+import { Author } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
-import { StateDrawer } from './components/StateDrawer/StateDrawer';
 import { AuthorStores } from './utils/stores';
 import { Tabs } from './components/Tabs/Tabs';
 import { AuthorMapView } from './components/AuthorMapView/AuthorMapView';
+import { AuthorListView } from './components/AuthorListView/AuthorListView';
 
 interface Props {
   authors: Array<Author>;
@@ -78,17 +76,29 @@ export function AuthorMap({
     return new AuthorStores(authors);
   }, [authors]);
 
+  let viewElement: JSX.Element;
+
+  switch (viewType) {
+    case ViewType.MAP:
+      viewElement = (
+        <AuthorMapView
+          statesData={statesData}
+          onAuthorEdit={setEditingAuthor}
+        />
+      );
+      break;
+    case ViewType.LIST:
+    default:
+      viewElement = <AuthorListView statesData={statesData} />;
+      break;
+  }
+
   return (
     <div
       className={clsx(styles.componentContainer, className)}
       ref={componentRef}
     >
-      <div className={styles.mapContainer}>
-        <AuthorMapView
-          statesData={statesData}
-          onAuthorEdit={setEditingAuthor}
-        />
-      </div>
+      <div className={styles.mapContainer}>{viewElement}</div>
       <Tabs<ViewType>
         className={clsx(commonStyles.floatingAction, styles.viewSwitch)}
         highlightedValue={viewType}

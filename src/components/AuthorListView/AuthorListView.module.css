@@ -1,4 +1,49 @@
 .authorListView {
+  align-items: flex-start;
+  display: flex;
+  height: 85vh;
+  flex-direction: row;
+  gap: 1em;
+  left: 50%;
+  padding-top: 3em;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: max(85vw, 600px);
+}
+
+.authorListViewEntries {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 1em;
+}
+
+.authorListViewStateSection {
+  padding-bottom: 1em;
+}
+
+.authorListViewStateSection > h3 {
+  border-bottom: 1px solid black;
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+.authorListViewType,
+.authorListViewEventType {
+  flex-direction: column;
+  right: 1em;
+  top: 1em;
+}
+
+.authorListViewSettings {
   display: flex;
   flex-direction: column;
+  gap: 1em;
+}
+
+.authorListViewSettings > h2 {
+  font-size: 1.25em;
 }
