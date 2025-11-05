@@ -173,6 +173,9 @@ export interface Author {
   /** Preferred over first and last name if filled in. Use for those with middle names. */
   authorFullName?: string;
 
+  /** Preferred over all names. */
+  authorDisplayName?: string;
+
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   birthDate: MilestoneEvent;
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */

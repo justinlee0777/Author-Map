@@ -43,6 +43,7 @@ export function EditAuthorModal({
     authorFirstNameId,
     authorLastNameId,
     authorFullNameId,
+    authorDisplayedNameId,
     birthDateId,
     deathDateId,
     referenceUrlId,
@@ -53,6 +54,7 @@ export function EditAuthorModal({
       'authorFirstNameInput',
       'authorLastNameInput',
       'authorFullNameInput',
+      'authorDisplayNameInput',
       'birthDateInput',
       'deathDateInput',
       'referenceUrlInput',
@@ -195,6 +197,17 @@ export function EditAuthorModal({
                 type="text"
                 name="authorFullName"
                 value={values.authorFullName}
+                onChange={handleChange}
+              />
+
+              <label htmlFor={authorDisplayedNameId}>
+                Displayed author name
+              </label>
+              <input
+                id={authorDisplayedNameId}
+                type="text"
+                name="authorDisplayName"
+                value={values.authorDisplayName}
                 onChange={handleChange}
               />
 

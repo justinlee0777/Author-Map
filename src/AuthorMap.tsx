@@ -10,6 +10,7 @@ import { AuthorStores } from './utils/stores';
 import { Tabs } from './components/Tabs/Tabs';
 import { AuthorMapView } from './components/AuthorMapView/AuthorMapView';
 import { AuthorListView } from './components/AuthorListView/AuthorListView';
+import { getAuthorName } from './utils/names';
 
 interface Props {
   authors: Array<Author>;
@@ -18,6 +19,7 @@ interface Props {
   /**
    * Used to update an external dataset.
    * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
+   * TODO: How should IDs be handled?
    */
   syncAuthorAdded?: (author: Author) => void | Promise<void>;
   /**
@@ -135,6 +137,10 @@ export function AuthorMap({
                 statesData.update(author);
               } else {
                 await syncAuthorAdded?.(author);
+
+                if (!author.id) {
+                  author.id = Symbol(`ID for ${getAuthorName(author)}`);
+                }
 
                 statesData.add(author);
               }
