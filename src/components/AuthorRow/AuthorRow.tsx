@@ -31,7 +31,9 @@ export function AuthorRow({
 
   return (
     <div className={clsx(styles.authorRow, className)}>
-      {author.portrait && <img {...author.portrait} loading="lazy" />}
+      {author.portrait && author.portrait.src && (
+        <img {...author.portrait} loading="lazy" />
+      )}
       <div className={styles.authorRowDetails}>
         <h4>{authorName}</h4>
         {events.map(({ notes, dateContext, location }, index) => {

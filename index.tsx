@@ -159,6 +159,8 @@ const App = () => {
       }}
       syncAuthorAdded={(author) => {
         console.log('author added', author);
+
+        author.id = Symbol();
       }}
     />
   );

@@ -12,6 +12,16 @@
   width: max(85vw, 600px);
 }
 
+.authorListViewAdd {
+  border: none;
+  border-radius: 0;
+  padding: 1em 0.5em;
+}
+
+.authorListViewEdit {
+  align-self: center;
+}
+
 .authorListViewEntries {
   display: flex;
   flex: 1;
@@ -19,6 +29,7 @@
   height: 100%;
   overflow-y: auto;
   padding: 0 1em;
+  position: relative;
 }
 
 .authorListViewStateSection {

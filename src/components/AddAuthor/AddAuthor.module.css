@@ -1,0 +1,11 @@
+.addAuthor {
+  align-items: center;
+  border-radius: 50%;
+  box-sizing: border-box;
+  display: flex;
+  font-size: 1rem;
+  gap: 0.5em;
+  height: 24px;
+  justify-content: center;
+  padding: 0;
+}

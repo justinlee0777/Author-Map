@@ -89,7 +89,12 @@ export function AuthorMap({
       break;
     case ViewType.LIST:
     default:
-      viewElement = <AuthorListView statesData={statesData} />;
+      viewElement = (
+        <AuthorListView
+          statesData={statesData}
+          onAuthorEdit={setEditingAuthor}
+        />
+      );
       break;
   }
 

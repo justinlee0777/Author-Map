@@ -10,11 +10,14 @@ import {
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
-import { AuthorEventType, StateStore, USState } from '../../models';
+import { Author, AuthorEventType, StateStore, USState } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
+import { AddAuthor } from '../AddAuthor/AddAuthor';
 
 interface Props {
   statesData: AuthorStores;
+
+  onAuthorEdit?: (author: Partial<Author>) => void;
 }
 
 enum AuthorListViewType {
@@ -28,7 +31,29 @@ enum SortType {
   DEATH = 'Death',
 }
 
-export function AuthorListView({ statesData }: Props): JSX.Element {
+function AuthorListRow({
+  author,
+  onEdit,
+}: {
+  author: Author;
+  onEdit: () => void;
+}): JSX.Element {
+  return (
+    <AuthorRow author={author}>
+      <button
+        className={clsx(commonStyles.button, styles.authorListViewEdit)}
+        onClick={onEdit}
+      >
+        Edit
+      </button>
+    </AuthorRow>
+  );
+}
+
+export function AuthorListView({
+  statesData,
+  onAuthorEdit,
+}: Props): JSX.Element {
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   const [viewType, setViewType] = useState<AuthorListViewType>(
@@ -113,9 +138,10 @@ export function AuthorListView({ statesData }: Props): JSX.Element {
 
       listElements = statesData.getAll(arg).map((author) => {
         return (
-          <AuthorRow
+          <AuthorListRow
             key={authorKeyGenerator.getKey(author.id)}
             author={author}
+            onEdit={() => onAuthorEdit?.(author)}
           />
         );
       });
@@ -132,9 +158,10 @@ export function AuthorListView({ statesData }: Props): JSX.Element {
               <h3>{usState}</h3>
               {authors.map((author) => {
                 return (
-                  <AuthorRow
+                  <AuthorListRow
                     key={authorKeyGenerator.getKey(author.id)}
                     author={author}
+                    onEdit={() => onAuthorEdit?.(author)}
                   />
                 );
               })}
@@ -171,6 +198,30 @@ export function AuthorListView({ statesData }: Props): JSX.Element {
         />
 
         {filterElements}
+
+        <AddAuthor
+          className={styles.authorListViewAdd}
+          children={{
+            right: 'Add author',
+          }}
+          onClick={() => {
+            onAuthorEdit?.({
+              authorFirstName: '',
+              authorLastName: '',
+              authorFullName: '',
+              timeline: [],
+              portrait: {
+                src: '',
+              },
+              birthDate: {
+                date: '',
+                location: {
+                  address: '',
+                },
+              },
+            });
+          }}
+        />
       </div>
     </div>
   );

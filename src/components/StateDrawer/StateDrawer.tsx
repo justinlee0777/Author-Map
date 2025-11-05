@@ -8,6 +8,7 @@ import { AuthorStores, createKeyGenerator } from '../../utils/stores';
 import { MdAdd, MdClose } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
+import { AddAuthor } from '../AddAuthor/AddAuthor';
 
 interface Props {
   usState: USState;
@@ -35,12 +36,7 @@ export function StateDrawer({
 
   return (
     <div className={clsx(styles.stateDrawerUSState, commonStyles.sideDrawer)}>
-      <button
-        className={clsx(commonStyles.button, styles.stateDrawerAdd)}
-        onClick={onAddAuthor}
-      >
-        <MdAdd />
-      </button>
+      <AddAuthor className={styles.stateDrawerAdd} onClick={onAddAuthor} />
       <h3>
         {usState}
 
