@@ -1,5 +1,12 @@
-import { Author, AuthorEventType, BaseTimelineEvent, USState } from '../models';
+import {
+  Author,
+  AuthorEventType,
+  BaseTimelineEvent,
+  MilestoneEvent,
+  USState,
+} from '../models';
 import { formatDate } from './dates';
+import { getAuthorName } from './names';
 
 interface EventFilters {
   usState?: USState;
@@ -61,6 +68,19 @@ export function getEvents(
     if (filters.eventType) {
       events = events.filter((event) => event.eventType === filters.eventType);
     }
+  }
+
+  return events;
+}
+
+export function getMilestoneEvents(author: Author): Array<MilestoneEvent> {
+  let events: Array<MilestoneEvent> = [
+    { ...author.birthDate, notes: 'Birth' },
+    ...author.timeline.filter((event) => 'date' in event),
+  ];
+
+  if (author.deathDate) {
+    events = events.concat({ ...author.deathDate, notes: 'Death' });
   }
 
   return events;

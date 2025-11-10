@@ -11,6 +11,7 @@ import { Tabs } from './components/Tabs/Tabs';
 import { AuthorMapView } from './components/AuthorMapView/AuthorMapView';
 import { AuthorListView } from './components/AuthorListView/AuthorListView';
 import { getAuthorName } from './utils/names';
+import { AuthorTimelineView } from './components/AuthorTimelineView/AuthorTimelineView';
 
 interface Props {
   authors: Array<Author>;
@@ -32,6 +33,7 @@ interface Props {
 enum ViewType {
   MAP = 'Map',
   LIST = 'List',
+  TIMELINE = 'Timeline',
 }
 
 /**
@@ -90,13 +92,16 @@ export function AuthorMap({
       );
       break;
     case ViewType.LIST:
-    default:
       viewElement = (
         <AuthorListView
           statesData={statesData}
           onAuthorEdit={setEditingAuthor}
         />
       );
+      break;
+    case ViewType.TIMELINE:
+    default:
+      viewElement = <AuthorTimelineView statesData={statesData} />;
       break;
   }
 

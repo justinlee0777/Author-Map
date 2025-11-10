@@ -1,7 +1,15 @@
 import { stateToTimezoneMap, USState } from '../models';
 import { format, fromZonedTime } from 'date-fns-tz';
 
-export function formatDate(date: string, stateName?: USState): string {
+interface OptionalArgs {
+  dateOnly?: boolean;
+}
+
+export function formatDate(
+  date: string,
+  stateName?: USState,
+  { dateOnly }: OptionalArgs = {},
+): string {
   let dateFormat: string;
 
   const onlyYearRegex = /^\d{4}$/,
@@ -11,6 +19,8 @@ export function formatDate(date: string, stateName?: USState): string {
     dateFormat = 'y';
   } else if (yearAndMonthRegex.test(date)) {
     dateFormat = 'LLLL, y';
+  } else if (dateOnly) {
+    dateFormat = 'LLLL dd';
   } else {
     dateFormat = 'LLLL dd, y';
   }

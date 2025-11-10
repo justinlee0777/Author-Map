@@ -1,0 +1,82 @@
+.authorTimelineView {
+  box-sizing: border-box;
+  height: 100vh;
+  padding: 4em 0 2em 0;
+  position: relative;
+}
+
+.authorTimelineViewEntries {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  height: 100%;
+  list-style-type: none;
+  overflow-y: auto;
+  position: relative;
+}
+
+.authorTimelineViewEntry {
+  align-items: center;
+  display: grid;
+  grid-template-columns: min-content min-content 1fr;
+  gap: 0 1em;
+}
+
+.authorTimelineViewYear {
+  align-self: flex-start;
+  position: sticky;
+  top: 1em;
+  width: 100px;
+}
+
+.authorTimelineEventDate {
+  grid-column: 1;
+}
+
+.authorTimelineEntryBisector {
+  border-left: 1px solid black;
+  grid-column: 2;
+  height: 100%;
+  justify-self: center;
+}
+
+.authorTimelineViewEntryBullet {
+  background-color: black;
+  border-radius: 50%;
+  height: 1em;
+  margin-bottom: 1em;
+  width: 1em;
+}
+
+.authorTimelineViewEntryDetails {
+  align-self: flex-start;
+  justify-self: start;
+  padding-bottom: 1em;
+}
+
+.authorTimelineViewEntryDetails > p {
+  margin: 0;
+}
+
+.authorTimelineViewEventType {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: 1em;
+  top: 4em;
+}
+
+.authorTimelineViewAuthorHeader {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.authorTimelineViewPortrait {
+  border-radius: 50%;
+  height: 3em;
+  object-fit: cover;
+  overflow: hidden;
+  width: 3em;
+}

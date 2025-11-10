@@ -161,6 +161,8 @@ export interface MilestoneEvent extends BaseTimelineEvent {
   date: string;
 }
 
+export type AuthorTimelineEvent = TimelineEvent | MilestoneEvent;
+
 export interface Author {
   /**
    * Highly recommended for update operations, in case authors have name collision. Also highly recommended for performance.
