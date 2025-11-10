@@ -1,17 +1,22 @@
 import styles from './AuthorTimelineView.module.css';
 
-import { Fragment, JSX, useMemo } from 'react';
+import { Fragment, JSX, useMemo, useState } from 'react';
 import { AuthorStores } from '../../utils/stores';
 import clsx from 'clsx';
 import { formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
 import { getMilestoneEvents } from '../../utils/events';
 import { Author, MilestoneEvent } from '../../models';
+import { Radiogroup } from '../Radiogroup/Radiogroup';
 
 interface Props {
   statesData: AuthorStores;
 
   className?: string;
+}
+
+interface AppearanceSettings {
+  removeEmptyYears?: boolean;
 }
 
 /**
@@ -37,8 +42,7 @@ export function AuthorTimelineView({
         );
       });
 
-    const firstDate = authorEvents.at(0)!,
-      endDate = authorEvents.at(-1)!;
+    const firstDate = authorEvents.at(0)!;
 
     const yearStart = new Date(firstDate.event.date).getFullYear();
 
@@ -62,6 +66,8 @@ export function AuthorTimelineView({
     return [map, yearStart, new Date().getFullYear()];
   }, [statesData]);
 
+  const [settings, setSettings] = useState<AppearanceSettings>({});
+
   const eventElements: Array<JSX.Element> = [],
     eventsIterator = authorEventsByYear.entries();
 
@@ -79,6 +85,8 @@ export function AuthorTimelineView({
       [, authorEvents] = currentEvents.value;
 
       currentEvents = eventsIterator.next();
+    } else if (settings.removeEmptyYears) {
+      continue;
     }
 
     eventElements.push(
@@ -118,6 +126,45 @@ export function AuthorTimelineView({
   return (
     <div className={clsx(styles.authorTimelineView, className)}>
       <ul className={styles.authorTimelineViewEntries}>{eventElements}</ul>
+      <div className={styles.authorTimelineViewSettings}>
+        <Radiogroup<keyof AppearanceSettings>
+          className={styles.authorTimelineViewAppearance}
+          header="Appearance"
+          id="timeline-settings"
+          type="checkbox"
+          options={[
+            {
+              label: 'Remove empty years',
+              value: 'removeEmptyYears',
+            },
+          ]}
+          selected={Object.entries(settings).reduce(
+            (acc, [key, value]) => {
+              if (value) {
+                return acc.concat(key as keyof AppearanceSettings);
+              } else {
+                return acc;
+              }
+            },
+            [] as Array<keyof AppearanceSettings>,
+          )}
+          onChange={(value) => {
+            setSettings((currentSettings) => {
+              if (value in currentSettings) {
+                return {
+                  ...currentSettings,
+                  [value]: !currentSettings[value],
+                };
+              } else {
+                return {
+                  ...currentSettings,
+                  [value]: true,
+                };
+              }
+            });
+          }}
+        />
+      </div>
     </div>
   );
 }

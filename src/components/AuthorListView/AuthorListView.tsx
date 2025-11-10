@@ -75,6 +75,7 @@ export function AuthorListView({
           key="sorting"
           header="Sorting"
           id="author-list-sorting"
+          type="radio"
           options={Object.values(SortType).map((value) => ({
             value,
             label: value,

@@ -1,3 +1,7 @@
 .radiogroup {
   padding: 0.5em;
 }
+
+.radioLabel {
+  margin-left: 0.5em;
+}

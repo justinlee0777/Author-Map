@@ -1,12 +1,23 @@
 .authorTimelineView {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
   height: 100vh;
-  padding: 4em 0 2em 0;
+  padding: 4em 1em 2em 1em;
   position: relative;
+}
+
+.authorTimelineViewSettings {
+  flex: none;
+}
+
+.authorTimelineViewAppearance {
 }
 
 .authorTimelineViewEntries {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 1em;
   height: 100%;
