@@ -144,17 +144,20 @@ export interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
   attribution?: string;
 }
 
-export interface BaseTimelineEvent {
-  location: AuthorLocation;
-  /** Additional comments on the event. */
-  notes?: string;
-}
-export interface TimelineEvent extends BaseTimelineEvent {
+export interface TimeSpan {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   startDate: string;
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   endDate: string;
 }
+
+export interface BaseTimelineEvent {
+  location: AuthorLocation;
+  /** Additional comments on the event. */
+  notes?: string;
+}
+
+export interface TimelineEvent extends BaseTimelineEvent, TimeSpan {}
 
 export interface MilestoneEvent extends BaseTimelineEvent {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
@@ -162,6 +165,22 @@ export interface MilestoneEvent extends BaseTimelineEvent {
 }
 
 export type AuthorTimelineEvent = TimelineEvent | MilestoneEvent;
+
+/**
+ * Does not refer to a group in a physical sense. "Group" is arbitrary and can refer to any possible interesting category.
+ * For example, "Jewish American writers", "Belonging to the Harlem Renaissance", "pre-Republic", etc.
+ */
+export interface AuthorGroup {
+  /**
+   * Highly recommended for update operations, in case authors have name collision. Also highly recommended for performance.
+   */
+  id: string | Symbol;
+
+  /** Assumed to be unique. */
+  name: string;
+  description: string;
+  span?: TimeSpan;
+}
 
 export interface Author {
   /**
@@ -187,6 +206,8 @@ export interface Author {
 
   link?: string;
   portrait?: PortraitData;
+
+  groups?: Array<AuthorGroup>;
 }
 
 export interface StateStore {

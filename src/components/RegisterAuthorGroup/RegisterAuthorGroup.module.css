@@ -1,0 +1,13 @@
+.registerAuthorGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.registerAuthorGroupCreate {
+  border: none;
+  box-sizing: border-box;
+  font-size: 1em;
+  justify-content: center;
+  padding: 0.5em 3em;
+}

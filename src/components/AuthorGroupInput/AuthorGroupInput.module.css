@@ -1,0 +1,53 @@
+.authorGroupInput {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.authorGroupInput > h4,
+.authorGroupInput > p {
+  margin: 0;
+}
+
+.authorGroupInputNoneMessage {
+  font-size: 0.8em;
+}
+
+.authorGroupCreateGroup {
+  border: none;
+  font-size: 1em;
+  gap: 0.5em;
+  margin-left: auto;
+}
+
+.authorGroupInputNewGroupLabel {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  font-size: 1.1em;
+  font-weight: bold;
+  justify-content: space-between;
+  margin: 1em 0;
+}
+
+.authorGroupInputNewGroupLabel > button {
+  border: none;
+}
+
+.authorGroupInputTags {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.authorGroupInputTag {
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row;
+  font-size: 0.8em;
+  gap: 0.5em;
+  justify-self: flex-start;
+  padding: 0.5em;
+}

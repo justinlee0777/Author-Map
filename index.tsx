@@ -1,10 +1,33 @@
 import ReactDOM from 'react-dom/client';
 
 import { AuthorMap } from './src/AuthorMap';
-import { Author, USState } from './src/models';
+import { Author, AuthorGroup, USState } from './src/models';
 import { useState } from 'react';
 
 const App = () => {
+  const [groups, setGroups] = useState<Array<AuthorGroup>>([
+    {
+      id: Symbol('ID for American Renaissance'),
+      name: 'American Renaissance',
+      description:
+        'The American Renaissance period in American literature ran from about 1830 to around the Civil War. A central term in American studies, the American Renaissance was for a while considered synonymous with American Romanticism and was closely associated with Transcendentalism.',
+      span: {
+        startDate: '1830',
+        endDate: '1860',
+      },
+    },
+    {
+      id: Symbol('ID for Harlem Renaissance'),
+      name: 'Harlem Renaissance',
+      description:
+        'The Harlem Renaissance was an intellectual and cultural movement of African-American music, dance, art, fashion, literature, theater, politics, and scholarship centered in Harlem, Manhattan, New York City, spanning the 1920s and 1930s.',
+      span: {
+        startDate: '1918',
+        endDate: '1929',
+      },
+    },
+  ]);
+
   const [authors, setAuthors] = useState<Array<Author>>(() => [
     {
       id: Symbol('ID for Herman Melville'),
@@ -28,6 +51,7 @@ const App = () => {
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Herman_Melville_by_Joseph_O_Eaton.jpg/500px-Herman_Melville_by_Joseph_O_Eaton.jpg',
       },
+      groups: [groups[0]],
     },
     {
       id: Symbol('ID for Walt Whitman'),
@@ -52,6 +76,7 @@ const App = () => {
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Walt_Whitman_-_George_Collins_Cox.jpg/500px-Walt_Whitman_-_George_Collins_Cox.jpg',
       },
+      groups: [groups[0]],
     },
     {
       id: Symbol('ID for Gertrude Stein'),
@@ -152,6 +177,7 @@ const App = () => {
     <AuthorMap
       className="authorMap"
       authors={authors}
+      groups={groups}
       syncAuthorUpdate={async (author) => {
         console.log('author updated', author);
 
@@ -162,6 +188,9 @@ const App = () => {
 
         author.id = Symbol();
       }}
+      onGroupCreated={(group) =>
+        setGroups((currentGroups) => currentGroups.concat({ ...group, id: Symbol(`Group ID for ${group.name}`) }))
+      }
     />
   );
 };

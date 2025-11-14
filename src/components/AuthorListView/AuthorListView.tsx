@@ -3,6 +3,7 @@ import styles from './AuthorListView.module.css';
 
 import { Fragment, JSX, useMemo, useState } from 'react';
 import {
+  AuthorFilter,
   AuthorSort,
   AuthorStores,
   createKeyGenerator,
@@ -123,21 +124,23 @@ export function AuthorListView({
 
   switch (viewType) {
     case AuthorListViewType.AUTHOR:
-      const arg: AuthorSort = {};
+      const sortArg: AuthorSort = {},
+        filterArg: AuthorFilter = {};
 
       switch (sortType) {
         case SortType.NAME:
-          arg.name = true;
+          sortArg.name = true;
           break;
         case SortType.BIRTH:
-          arg.birth = true;
+          sortArg.birth = true;
           break;
         case SortType.DEATH:
-          arg.death = true;
+          sortArg.death = true;
+          filterArg.deceasedOnly = true;
           break;
       }
 
-      listElements = statesData.getAll(arg).map((author) => {
+      listElements = statesData.getAll(sortArg, filterArg).map((author) => {
         return (
           <AuthorListRow
             key={authorKeyGenerator.getKey(author.id)}
@@ -199,30 +202,6 @@ export function AuthorListView({
         />
 
         {filterElements}
-
-        <AddAuthor
-          className={styles.authorListViewAdd}
-          children={{
-            right: 'Add author',
-          }}
-          onClick={() => {
-            onAuthorEdit?.({
-              authorFirstName: '',
-              authorLastName: '',
-              authorFullName: '',
-              timeline: [],
-              portrait: {
-                src: '',
-              },
-              birthDate: {
-                date: '',
-                location: {
-                  address: '',
-                },
-              },
-            });
-          }}
-        />
       </div>
     </div>
   );

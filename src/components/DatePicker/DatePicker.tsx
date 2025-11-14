@@ -11,6 +11,10 @@ interface Props
   id: string;
 
   onChange: (value: string) => void;
+
+  disabled?: boolean;
+
+  ref?: (state: { isValid: boolean }) => void;
 }
 
 export function DatePicker({
@@ -18,6 +22,8 @@ export function DatePicker({
   id,
   onChange,
   required,
+  disabled,
+  ref,
 }: Props): JSX.Element {
   const [dayKnown, setDayKnown] = useState<boolean>(() => {
     return /\d{4}-\d{2}-\d{2}/.test(value ?? '');
@@ -38,6 +44,7 @@ export function DatePicker({
           type="date"
           value={value}
           required={required}
+          disabled={disabled}
           onChange={(event) => {
             const dateValue = event.target.value;
 
@@ -47,17 +54,11 @@ export function DatePicker({
       </div>
     );
   } else {
-    const dateRegex = /(\d{4})(?:-(\d{2}))?/;
-
     let year: string = '',
       month: string = '';
 
     if (value) {
-      const result = dateRegex.exec(value);
-
-      if (result) {
-        [, year, month] = result;
-      }
+      [year = '', month = ''] = value.split('-');
     }
 
     inputs = (
@@ -68,13 +69,14 @@ export function DatePicker({
             id={yearId}
             type="text"
             required={required}
-            value={year}
             pattern="^[1-2][0-9][0-9][0-9]$"
+            value={year}
             title="Only years between 1000 and 2999 are allowed, inclusive."
+            disabled={disabled}
             onChange={(event) => {
               event.preventDefault();
 
-              const yearValue = event.target.value.padStart(4, '0');
+              const yearValue = event.target.value;
 
               const finalDate = month ? `${yearValue}-${month}` : yearValue;
 
@@ -92,6 +94,7 @@ export function DatePicker({
             id={monthId}
             value={month}
             onChange={(event) => onChange(`${year}-${event.target.value}`)}
+            disabled={disabled}
           >
             <option></option>
             {monthOptions.map(({ label, value }) => {
@@ -108,7 +111,18 @@ export function DatePicker({
   }
 
   return (
-    <div className={styles.datePicker}>
+    <div
+      className={styles.datePicker}
+      ref={(element) => {
+        if (element && ref) {
+          ref({
+            isValid: [...(element.querySelectorAll('input') ?? [])].every(
+              (inputElement) => inputElement.checkValidity(),
+            ),
+          });
+        }
+      }}
+    >
       {inputs}
 
       <div className={styles.datePickerDateKnown}>
@@ -117,6 +131,7 @@ export function DatePicker({
           type="checkbox"
           checked={dayKnown}
           onChange={(event) => setDayKnown(event.target.checked)}
+          disabled={disabled}
         />
         <label htmlFor={dateKnownId}>I know the exact date</label>
       </div>

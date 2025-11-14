@@ -24,7 +24,7 @@ interface Props<ItemType> {
   };
   addText?: string;
   onAdd?: () => void;
-  onRemove?: (index: number) => void;
+  onRemove?: (props: ItemData<ItemType>) => void;
 }
 
 export function DynamicList<ItemType>({
@@ -37,7 +37,7 @@ export function DynamicList<ItemType>({
   onRemove,
 }: Props<ItemType>): JSX.Element {
   const RemoveButton = useCallback(
-    ({ index }: ItemData<ItemType>) => {
+    (props: ItemData<ItemType>) => {
       return (
         <button
           type="button"
@@ -46,7 +46,7 @@ export function DynamicList<ItemType>({
             styles.dynamicListRemoveButton,
           )}
           onClick={() => {
-            onRemove?.(index);
+            onRemove?.(props);
           }}
         >
           <MdClear />
@@ -70,14 +70,19 @@ export function DynamicList<ItemType>({
           );
         })}
       </div>
-      <button
-        className={clsx(styles.dynamicListButton, styles.dynamicListAddButton)}
-        type="button"
-        onClick={onAdd}
-      >
-        <MdAdd />
-        {addText}
-      </button>
+      {onAdd && (
+        <button
+          className={clsx(
+            styles.dynamicListButton,
+            styles.dynamicListAddButton,
+          )}
+          type="button"
+          onClick={onAdd}
+        >
+          <MdAdd />
+          {addText}
+        </button>
+      )}
     </div>
   );
 }

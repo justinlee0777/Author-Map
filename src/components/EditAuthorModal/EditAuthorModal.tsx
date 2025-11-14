@@ -8,6 +8,7 @@ import { PulseLoader } from 'react-spinners';
 
 import {
   Author,
+  AuthorGroup,
   BaseTimelineEvent,
   MilestoneEvent,
   TimelineEvent,
@@ -15,6 +16,7 @@ import {
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
 import { MdClear } from 'react-icons/md';
 import { TimelineEvent as TimelineEventComponent } from './TimelineEvent/TimelineEvent';
+import { AuthorGroupInput } from '../AuthorGroupInput/AuthorGroupInput';
 
 interface Props {
   appElement: HTMLElement;
@@ -23,6 +25,7 @@ interface Props {
   disabled?: boolean;
   onSubmit?: (author: Author) => void | Promise<void>;
   onClose?: () => void;
+  onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
   initialAuthor?: Partial<Author>;
 }
 
@@ -34,6 +37,7 @@ export function EditAuthorModal({
   disabled,
   onSubmit,
   onClose,
+  onGroupCreated,
   initialAuthor = {},
 }: Props): JSX.Element {
   const [loading, setLoading] = useState(false);
@@ -157,7 +161,9 @@ export function EditAuthorModal({
               </button>
               <div className={styles.editAuthorPortraitRow}>
                 <div className={styles.editAuthorPortraitContainer}>
-                  {values.portrait?.src && <img src={values.portrait?.src} />}
+                  {values.portrait?.src && (
+                    <img src={values.portrait?.src} loading="lazy" />
+                  )}
                 </div>
                 <div className={styles.editAuthorPortraitDetails}>
                   <label htmlFor={portraitId}>Portrait</label>
@@ -171,7 +177,7 @@ export function EditAuthorModal({
                 </div>
               </div>
 
-              <label htmlFor={authorFirstNameId}>Author first name</label>
+              <label htmlFor={authorFirstNameId}>Author first name *</label>
               <input
                 id={authorFirstNameId}
                 type="text"
@@ -181,7 +187,7 @@ export function EditAuthorModal({
                 onChange={handleChange}
               />
 
-              <label htmlFor={authorLastNameId}>Author last name</label>
+              <label htmlFor={authorLastNameId}>Author last name *</label>
               <input
                 id={authorLastNameId}
                 type="text"
@@ -263,11 +269,30 @@ export function EditAuthorModal({
                     timeline.concat({} as TimelineEvent),
                   );
                 }}
-                onRemove={(index) => {
+                onRemove={({ index }) => {
                   setFieldValue('timeline', [
                     ...values.timeline!.slice(0, index),
                     ...values.timeline!.slice(index + 1),
                   ]);
+                }}
+              />
+
+              <h4>Groups</h4>
+
+              <AuthorGroupInput
+                className={styles.editAuthorGroupsContainer}
+                values={values.groups ?? []}
+                registerAuthorGroup={async (group) => {
+                  setLoading(true);
+
+                  try {
+                    onGroupCreated?.(group);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                onChange={(groups) => {
+                  setFieldValue('groups', groups);
                 }}
               />
 

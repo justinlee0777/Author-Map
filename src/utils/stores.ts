@@ -13,6 +13,10 @@ export interface AuthorSort {
   death?: boolean;
 }
 
+export interface AuthorFilter {
+  deceasedOnly?: boolean;
+}
+
 export class AuthorStores {
   private map: Map<USState, StateStore>;
   private internalRegistry: Map<Author['id'], Author>;
@@ -35,8 +39,15 @@ export class AuthorStores {
     }
   }
 
-  getAll(sort: AuthorSort = { name: true }): Array<Author> {
-    const authors = Array.from(this.internalRegistry.values());
+  getAll(
+    sort: AuthorSort = { name: true },
+    { deceasedOnly }: AuthorFilter = {},
+  ): Array<Author> {
+    let authors = Array.from(this.internalRegistry.values());
+
+    if (deceasedOnly) {
+      authors = authors.filter((author) => !author.deathDate);
+    }
 
     if (sort.name) {
       return authors.sort((a, b) =>

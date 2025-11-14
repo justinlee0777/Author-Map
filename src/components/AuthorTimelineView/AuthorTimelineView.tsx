@@ -6,13 +6,16 @@ import clsx from 'clsx';
 import { formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
 import { getMilestoneEvents } from '../../utils/events';
-import { Author, MilestoneEvent } from '../../models';
+import { Author, AuthorGroup, MilestoneEvent } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
+import { AddAuthor } from '../AddAuthor/AddAuthor';
 
 interface Props {
   statesData: AuthorStores;
 
+  groups?: Array<AuthorGroup>;
   className?: string;
+  onAuthorEdit?: (author: Partial<Author>) => void;
 }
 
 interface AppearanceSettings {
@@ -21,50 +24,46 @@ interface AppearanceSettings {
 
 /**
  * TODO: Infinite scroll
+ * TODO: Filter by months? Allow a day / month / year filter?
+ * TODO: Major events? Declaration of independence? Emancipation proclamation? etc?
  */
 export function AuthorTimelineView({
   statesData,
   className,
+  onAuthorEdit,
 }: Props): JSX.Element {
-  const [authorEventsByYear, startingYear, endingYear]: [
-    Map<number, Array<{ author: Author; event: MilestoneEvent }>>,
-    number,
-    number,
-  ] = useMemo(() => {
-    const authorEvents = statesData
-      .getAll()
-      .flatMap((author) =>
-        getMilestoneEvents(author).map((event) => ({ author, event })),
-      )
-      .sort((a, b) => {
-        return (
-          new Date(a.event.date).valueOf() - new Date(b.event.date).valueOf()
-        );
-      });
-
-    const firstDate = authorEvents.at(0)!;
-
-    const yearStart = new Date(firstDate.event.date).getFullYear();
-
-    const map = new Map<
-      number,
-      Array<{ author: Author; event: MilestoneEvent }>
-    >();
-
-    authorEvents.forEach((authorEvent) => {
-      const { event } = authorEvent;
-
-      const year = new Date(event.date).getFullYear();
-
-      if (map.has(year)) {
-        map.get(year)!.push(authorEvent);
-      } else {
-        map.set(year, [authorEvent]);
-      }
+  const authorEvents = statesData
+    .getAll()
+    .flatMap((author) =>
+      getMilestoneEvents(author).map((event) => ({ author, event })),
+    )
+    .sort((a, b) => {
+      return (
+        new Date(a.event.date).valueOf() - new Date(b.event.date).valueOf()
+      );
     });
 
-    return [map, yearStart, new Date().getFullYear()];
-  }, [statesData]);
+  const firstDate = authorEvents.at(0)!;
+
+  const startingYear = new Date(firstDate.event.date).getFullYear(),
+    endingYear = new Date().getFullYear();
+
+  const authorEventsByYear = new Map<
+    number,
+    Array<{ author: Author; event: MilestoneEvent }>
+  >();
+
+  authorEvents.forEach((authorEvent) => {
+    const { event } = authorEvent;
+
+    const year = new Date(event.date).getFullYear();
+
+    if (authorEventsByYear.has(year)) {
+      authorEventsByYear.get(year)!.push(authorEvent);
+    } else {
+      authorEventsByYear.set(year, [authorEvent]);
+    }
+  });
 
   const [settings, setSettings] = useState<AppearanceSettings>({});
 
@@ -107,10 +106,11 @@ export function AuthorTimelineView({
               <div className={styles.authorTimelineViewEntryDetails}>
                 <h4 className={styles.authorTimelineViewAuthorHeader}>
                   {getAuthorName(author)}
-                  {author.portrait && (
+                  {author.portrait?.src && (
                     <img
                       className={styles.authorTimelineViewPortrait}
                       {...author.portrait}
+                      loading="lazy"
                     />
                   )}
                 </h4>

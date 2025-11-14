@@ -1,28 +1,41 @@
-.componentContainer {
+.authorMapComponentContainer {
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
 }
 
-.componentContainer h3,
-.componentContainer h4 {
+.authorMapComponentContainer h3,
+.authorMapComponentContainer h4 {
   margin: 0;
 }
 
-.mapContainer,
-.mapContainer > svg {
+.authorMapContainer,
+.authorMapContainer > svg {
   height: 100%;
   width: 100%;
 }
 
-.magnificationSlider {
+.authorMapMagnificationSlider {
   bottom: 2em;
   right: 1em;
 }
 
-.viewSwitch {
+.authorMapViewSwitch {
   flex-direction: row;
   left: 50%;
   top: 1em;
   transform: translateX(-50%);
+}
+
+.authorMapAddButtons {
+  bottom: 1em;
+  display: flex;
+  flex-direction: column;
+  right: 1em;
+}
+
+.authorMapAddButtons > button {
+  border: none;
+  border-radius: 0;
+  padding: 1em;
 }
