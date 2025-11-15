@@ -189,7 +189,12 @@ const App = () => {
         author.id = Symbol();
       }}
       onGroupCreated={(group) =>
-        setGroups((currentGroups) => currentGroups.concat({ ...group, id: Symbol(`Group ID for ${group.name}`) }))
+        setGroups((currentGroups) =>
+          currentGroups.concat({
+            ...group,
+            id: Symbol(`Group ID for ${group.name}`),
+          }),
+        )
       }
     />
   );

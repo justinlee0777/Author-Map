@@ -54,7 +54,7 @@ enum ViewType {
  * if the client prefers to update now and correct later.
  *
  *
- * TODO: Groups? ex. Nobel Prize winners? Genre? Harlem Renaissance? Genre (class literature)? Etc?
+ * TODO: Groups view? ex. Nobel Prize winners? Genre? Harlem Renaissance? Genre (class literature)? Etc?
  * TODO: Search?
  * TODO: Discussion system?
  * TODO: Full timeline

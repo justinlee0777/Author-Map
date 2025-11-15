@@ -1,7 +1,7 @@
 import commonStyles from '../../common.module.css';
 import styles from './AuthorListView.module.css';
 
-import { Fragment, JSX, useMemo, useState } from 'react';
+import { Fragment, JSX, useContext, useMemo, useState } from 'react';
 import {
   AuthorFilter,
   AuthorSort,
@@ -11,9 +11,16 @@ import {
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
-import { Author, AuthorEventType, StateStore, USState } from '../../models';
+import {
+  Author,
+  AuthorEventType,
+  AuthorGroup,
+  StateStore,
+  USState,
+} from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
-import { AddAuthor } from '../AddAuthor/AddAuthor';
+import { AuthorGroupContext } from '../../contexts';
+import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 
 interface Props {
   statesData: AuthorStores;
@@ -66,6 +73,12 @@ export function AuthorListView({
   );
 
   const [sortType, setSortType] = useState<SortType>(SortType.NAME);
+
+  const [filteringGroup, setFilteringGroup] = useState<AuthorGroup | null>(
+    null,
+  );
+
+  const [groupsFilterId] = useMemo(() => ['groups-filter'], []);
 
   let filterElements: Array<JSX.Element>;
 
@@ -140,7 +153,15 @@ export function AuthorListView({
           break;
       }
 
-      listElements = statesData.getAll(sortArg, filterArg).map((author) => {
+      let authors = statesData.getAll(sortArg, filterArg);
+
+      if (filteringGroup) {
+        authors = authors.filter((author) =>
+          author.groups?.includes(filteringGroup),
+        );
+      }
+
+      listElements = authors.map((author) => {
         return (
           <AuthorListRow
             key={authorKeyGenerator.getKey(author.id)}
@@ -152,7 +173,13 @@ export function AuthorListView({
       break;
     case AuthorListViewType.STATE:
       listElements = Object.values(USState).map((usState) => {
-        const authors = statesData.get(usState)[statesDataKey];
+        let authors = statesData.get(usState)[statesDataKey];
+
+        if (filteringGroup) {
+          authors = authors.filter((author) =>
+            author.groups?.includes(filteringGroup),
+          );
+        }
 
         if (authors.length === 0) {
           return <Fragment key={usState}></Fragment>;
@@ -202,6 +229,12 @@ export function AuthorListView({
         />
 
         {filterElements}
+
+        <SelectAuthorGroup
+          id={groupsFilterId}
+          label="Groups"
+          onSelect={setFilteringGroup}
+        />
       </div>
     </div>
   );

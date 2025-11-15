@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import { formatDate } from '../../utils/dates';
 import { createKeyGenerator } from '../../utils/stores';
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
+import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 
 interface Props {
   values: Array<AuthorGroup>;
@@ -64,38 +65,18 @@ export function AuthorGroupInput({
   } else {
     content = (
       <>
-        <label htmlFor={selectAuthorGroupId}>Pick group</label>
-        <select
+        <SelectAuthorGroup
           id={selectAuthorGroupId}
-          onChange={(event) => {
-            if (event.currentTarget.value) {
-              const index = Number(event.currentTarget.value);
-
-              const group = groups[index];
-
-              if (values.every((addedGroup) => addedGroup.id !== group.id)) {
-                onChange(values.concat(group));
-              }
+          label="Pick group"
+          onSelect={(group) => {
+            if (
+              group &&
+              values.every((addedGroup) => addedGroup.id !== group.id)
+            ) {
+              onChange(values.concat(group));
             }
           }}
-        >
-          <option></option>
-          {groups.map((group, index) => {
-            const { id, name, span, description } = group;
-
-            let spanString: string | undefined;
-
-            if (span) {
-              spanString = `${formatDate(span.startDate)} - ${formatDate(span.endDate)}`;
-            }
-
-            return (
-              <option key={keyGenerator.getKey(id)} value={index}>
-                {name} {spanString}: {description.slice(0, 100)}
-              </option>
-            );
-          })}
-        </select>
+        />
       </>
     );
   }

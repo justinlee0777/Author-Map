@@ -36,7 +36,7 @@
 .stateDrawerEdit {
   left: 0;
   position: absolute;
-  top: 0;
+  top: 1em;
   transition: 0.3s opacity;
 }
 

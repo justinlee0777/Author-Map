@@ -24,7 +24,7 @@
 
 .authorListViewEntries {
   display: flex;
-  flex: 1;
+  flex: 3;
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
@@ -51,8 +51,10 @@
 
 .authorListViewSettings {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 1em;
+  min-width: 0;
 }
 
 .authorListViewSettings > h2 {
