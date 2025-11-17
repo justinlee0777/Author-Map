@@ -157,7 +157,7 @@ export function AuthorListView({
 
       if (filteringGroup) {
         authors = authors.filter((author) =>
-          author.groups?.includes(filteringGroup),
+          author.groups?.includes(filteringGroup.id),
         );
       }
 
@@ -177,7 +177,7 @@ export function AuthorListView({
 
         if (filteringGroup) {
           authors = authors.filter((author) =>
-            author.groups?.includes(filteringGroup),
+            author.groups?.includes(filteringGroup.id),
           );
         }
 

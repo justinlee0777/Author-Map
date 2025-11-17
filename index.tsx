@@ -51,7 +51,7 @@ const App = () => {
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Herman_Melville_by_Joseph_O_Eaton.jpg/500px-Herman_Melville_by_Joseph_O_Eaton.jpg',
       },
-      groups: [groups[0]],
+      groups: [groups[0].id],
     },
     {
       id: Symbol('ID for Walt Whitman'),
@@ -76,7 +76,7 @@ const App = () => {
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Walt_Whitman_-_George_Collins_Cox.jpg/500px-Walt_Whitman_-_George_Collins_Cox.jpg',
       },
-      groups: [groups[0]],
+      groups: [groups[0].id],
     },
     {
       id: Symbol('ID for Gertrude Stein'),

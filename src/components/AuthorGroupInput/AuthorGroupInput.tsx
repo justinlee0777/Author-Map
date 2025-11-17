@@ -13,10 +13,10 @@ import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 
 interface Props {
-  values: Array<AuthorGroup>;
+  values: Array<AuthorGroup['id']>;
 
   registerAuthorGroup: (group: AuthorGroup) => void | Promise<void>;
-  onChange: (groups: Array<AuthorGroup>) => void;
+  onChange: (groups: Array<AuthorGroup['id']>) => void;
 
   disabled?: boolean;
   className?: string;
@@ -71,9 +71,9 @@ export function AuthorGroupInput({
           onSelect={(group) => {
             if (
               group &&
-              values.every((addedGroup) => addedGroup.id !== group.id)
+              values.every((addedGroup) => addedGroup !== group.id)
             ) {
-              onChange(values.concat(group));
+              onChange(values.concat(group.id));
             }
           }}
         />
@@ -133,11 +133,11 @@ export function AuthorGroupInput({
         classes={{
           listItems: styles.authorGroupInputTags,
         }}
-        items={values}
+        items={values.map((id) => groups.find((group) => group.id === id)!)}
         ItemTemplate={AuthorGroupTag}
         trackItem={({ item }) => keyGenerator.getKey(item.id)}
         onRemove={({ item }) => {
-          onChange(values.filter((group) => group.id !== item.id));
+          onChange(values.filter((group) => group !== item.id));
         }}
       />
 

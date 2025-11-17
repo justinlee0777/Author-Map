@@ -180,6 +180,7 @@ export interface AuthorGroup {
   name: string;
   description: string;
   span?: TimeSpan;
+  link?: string;
 }
 
 export interface Author {
@@ -207,7 +208,7 @@ export interface Author {
   link?: string;
   portrait?: PortraitData;
 
-  groups?: Array<AuthorGroup>;
+  groups?: Array<AuthorGroup['id']>;
 }
 
 export interface StateStore {
