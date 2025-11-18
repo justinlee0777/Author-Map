@@ -113,6 +113,7 @@ export function AuthorMap({
         <AuthorListView
           statesData={statesData}
           onAuthorEdit={setEditingAuthor}
+          onAuthorGroupEdit={setEditingGroup}
         />
       );
       break;

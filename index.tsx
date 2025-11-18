@@ -197,6 +197,19 @@ const App = () => {
           }),
         )
       }
+      onGroupUpdated={(group) => {
+        setGroups((currentGroups) => {
+          const index = currentGroups.findIndex(
+            (currentGroup) => currentGroup.id === group.id,
+          );
+
+          return [
+            ...currentGroups.slice(0, index),
+            group,
+            ...currentGroups.slice(index + 1),
+          ];
+        });
+      }}
     />
   );
 };

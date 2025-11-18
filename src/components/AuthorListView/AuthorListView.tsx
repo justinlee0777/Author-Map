@@ -1,7 +1,7 @@
 import commonStyles from '../../common.module.css';
 import styles from './AuthorListView.module.css';
 
-import { Fragment, JSX, useMemo, useState } from 'react';
+import { Fragment, JSX, useContext, useEffect, useMemo, useState } from 'react';
 import {
   AuthorFilter,
   AuthorSort,
@@ -20,11 +20,13 @@ import {
 } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
+import { AuthorGroupContext } from '../../contexts';
 
 interface Props {
   statesData: AuthorStores;
 
   onAuthorEdit?: (author: Partial<Author>) => void;
+  onAuthorGroupEdit?: (authorGroup: AuthorGroup) => void;
 }
 
 enum AuthorListViewType {
@@ -62,7 +64,10 @@ function AuthorListRow({
 export function AuthorListView({
   statesData,
   onAuthorEdit,
+  onAuthorGroupEdit,
 }: Props): JSX.Element {
+  const { groups } = useContext(AuthorGroupContext);
+
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   const [viewType, setViewType] = useState<AuthorListViewType>(
@@ -80,6 +85,16 @@ export function AuthorListView({
   );
 
   const [groupsFilterId] = useMemo(() => ['groups-filter'], []);
+
+  useEffect(() => {
+    if (filteringGroup) {
+      const foundGroup = groups.find((group) => group.id === filteringGroup.id);
+
+      if (foundGroup && foundGroup !== filteringGroup) {
+        setFilteringGroup(foundGroup);
+      }
+    }
+  }, [filteringGroup, groups]);
 
   let filterElements: Array<JSX.Element>;
 
@@ -244,15 +259,28 @@ export function AuthorListView({
           <p className={styles.authorListViewGroupDescription}>
             {filteringGroup.description}
             {filteringGroup.link && (
-              <a
-                className={styles.authorListViewGroupLink}
-                href={filteringGroup.link}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                link
-              </a>
+              <span>
+                {' '}
+                <a
+                  className={styles.authorListViewGroupLink}
+                  href={filteringGroup.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  link
+                </a>
+              </span>
             )}
+
+            <button
+              className={clsx(
+                commonStyles.button,
+                styles.authorListViewEditGroup,
+              )}
+              onClick={() => onAuthorGroupEdit?.(filteringGroup)}
+            >
+              Edit
+            </button>
           </p>
         )}
       </div>

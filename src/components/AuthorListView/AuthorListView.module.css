@@ -67,5 +67,8 @@
 }
 
 .authorListViewGroupLink {
-  margin-left: 1em;
+}
+
+.authorListViewEditGroup {
+  margin-top: 1em;
 }

@@ -1,6 +1,6 @@
 import styles from './EditAuthorGroupModal.module.css';
 
-import { JSX, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
 
 import Modal from 'react-modal';
 import { AuthorGroup } from '../../models';

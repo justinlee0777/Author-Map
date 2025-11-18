@@ -72,6 +72,7 @@ export function RegisterAuthorGroup({
         name="name"
         required
         disabled={disabled}
+        value={authorGroup.name}
         onInput={(event) =>
           onChange?.({
             ...authorGroup,
@@ -101,6 +102,7 @@ export function RegisterAuthorGroup({
         id={descriptionId}
         name="description"
         required
+        value={authorGroup.description}
         disabled={disabled}
         onInput={(event) =>
           onChange?.({
@@ -178,6 +180,7 @@ export function RegisterAuthorGroup({
             link: event.currentTarget.value,
           })
         }
+        value={authorGroup.link}
       />
 
       <button
@@ -194,7 +197,7 @@ export function RegisterAuthorGroup({
         }}
         disabled={disabled || !inputsValid}
       >
-        Create
+        {authorGroup.id ? 'Update' : 'Create'}
       </button>
     </div>
   );
