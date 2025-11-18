@@ -1,7 +1,7 @@
 import commonStyles from '../../common.module.css';
 import styles from './AuthorListView.module.css';
 
-import { Fragment, JSX, useContext, useMemo, useState } from 'react';
+import { Fragment, JSX, useMemo, useState } from 'react';
 import {
   AuthorFilter,
   AuthorSort,
@@ -19,7 +19,6 @@ import {
   USState,
 } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
-import { AuthorGroupContext } from '../../contexts';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 
 interface Props {
@@ -41,13 +40,15 @@ enum SortType {
 
 function AuthorListRow({
   author,
+  eventType,
   onEdit,
 }: {
   author: Author;
+  eventType?: AuthorEventType;
   onEdit: () => void;
 }): JSX.Element {
   return (
-    <AuthorRow author={author}>
+    <AuthorRow author={author} eventType={eventType} showContext>
       <button
         className={clsx(commonStyles.button, styles.authorListViewEdit)}
         onClick={onEdit}
@@ -136,7 +137,7 @@ export function AuthorListView({
   let listElements: Array<JSX.Element>;
 
   switch (viewType) {
-    case AuthorListViewType.AUTHOR:
+    case AuthorListViewType.AUTHOR: {
       const sortArg: AuthorSort = {},
         filterArg: AuthorFilter = {};
 
@@ -171,7 +172,8 @@ export function AuthorListView({
         );
       });
       break;
-    case AuthorListViewType.STATE:
+    }
+    case AuthorListViewType.STATE: {
       listElements = Object.values(USState).map((usState) => {
         let authors = statesData.get(usState)[statesDataKey];
 
@@ -192,6 +194,7 @@ export function AuthorListView({
                   <AuthorListRow
                     key={authorKeyGenerator.getKey(author.id)}
                     author={author}
+                    eventType={authorEventType}
                     onEdit={() => onAuthorEdit?.(author)}
                   />
                 );
@@ -201,6 +204,7 @@ export function AuthorListView({
         }
       });
       break;
+    }
   }
 
   return (
@@ -235,6 +239,22 @@ export function AuthorListView({
           label="Groups"
           onSelect={setFilteringGroup}
         />
+
+        {filteringGroup && (
+          <p className={styles.authorListViewGroupDescription}>
+            {filteringGroup.description}
+            {filteringGroup.link && (
+              <a
+                className={styles.authorListViewGroupLink}
+                href={filteringGroup.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                link
+              </a>
+            )}
+          </p>
+        )}
       </div>
     </div>
   );

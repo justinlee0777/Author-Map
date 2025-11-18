@@ -60,3 +60,12 @@
 .authorListViewSettings > h2 {
   font-size: 1.25em;
 }
+
+.authorListViewGroupDescription {
+  font-size: 0.8em;
+  line-height: 1.5em;
+}
+
+.authorListViewGroupLink {
+  margin-left: 1em;
+}

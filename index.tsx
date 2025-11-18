@@ -15,6 +15,7 @@ const App = () => {
         startDate: '1830',
         endDate: '1860',
       },
+      link: 'https://en.wikipedia.org/wiki/American_Renaissance_(literature)',
     },
     {
       id: Symbol('ID for Harlem Renaissance'),

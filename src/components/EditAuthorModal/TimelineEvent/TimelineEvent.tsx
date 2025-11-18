@@ -1,6 +1,6 @@
 import styles from './TimelineEvent.module.css';
 
-import { ChangeEvent, Fragment, JSX, useMemo } from 'react';
+import { ChangeEvent, Fragment, JSX, ReactNode, useMemo } from 'react';
 
 import { BaseTimelineEvent, USState } from '../../../models';
 import { DatePicker } from '../../DatePicker/DatePicker';
@@ -16,7 +16,9 @@ interface Props {
   setFieldValue: (fieldName: string, value: string) => void;
   handleChange: (e: ChangeEvent) => void;
 
-  RemoveButton?: () => JSX.Element;
+  children?: {
+    header?: ReactNode;
+  };
   headerText?: string;
   required?: boolean;
 }
@@ -28,9 +30,9 @@ export function TimelineEvent({
   fieldName,
   setFieldValue,
   handleChange,
+  children,
   headerText = 'Event',
   required,
-  RemoveButton = () => <></>,
 }: Props): JSX.Element {
   const dateFields = dateKeys.map(({ keyName, label }) => {
     const dateFieldId = `${id}-${keyName}`;
@@ -50,15 +52,15 @@ export function TimelineEvent({
     );
   });
 
-  const [stateId, addressId] = useMemo(
-    () => [`${id}-state`, `${id}-address`],
+  const [stateId, addressId, notesId] = useMemo(
+    () => [`${id}-state`, `${id}-address`, `${id}-notes`],
     [id],
   );
 
   return (
     <div id={id} className={styles.timelineEvent}>
       <h4>
-        {headerText} <RemoveButton />
+        {headerText} {children?.header}
       </h4>
 
       <label htmlFor={stateId}>State</label>
@@ -83,7 +85,6 @@ export function TimelineEvent({
         id={addressId}
         name={`${fieldName}.location.address`}
         type="text"
-        required={required}
         value={item.location?.address}
         onChange={handleChange}
       />
@@ -93,6 +94,15 @@ export function TimelineEvent({
       </p>
 
       {dateFields}
+
+      <label htmlFor={notesId}>Notes</label>
+      <textarea
+        id={notesId}
+        name={`${fieldName}.notes`}
+        value={item.notes}
+        onChange={handleChange}
+        rows={2}
+      />
     </div>
   );
 }

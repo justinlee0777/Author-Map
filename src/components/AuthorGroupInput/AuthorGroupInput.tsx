@@ -7,7 +7,6 @@ import { RegisterAuthorGroup } from '../RegisterAuthorGroup/RegisterAuthorGroup'
 import { AuthorGroup } from '../../models';
 import { MdAdd, MdClear } from 'react-icons/md';
 import clsx from 'clsx';
-import { formatDate } from '../../utils/dates';
 import { createKeyGenerator } from '../../utils/stores';
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';

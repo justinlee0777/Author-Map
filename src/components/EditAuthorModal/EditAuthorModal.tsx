@@ -9,6 +9,7 @@ import { PulseLoader } from 'react-spinners';
 import {
   Author,
   AuthorGroup,
+  AuthorTimelineEvent,
   BaseTimelineEvent,
   MilestoneEvent,
   TimelineEvent,
@@ -29,7 +30,7 @@ interface Props {
   initialAuthor?: Partial<Author>;
 }
 
-interface TimelineEventProps extends ItemProps<Partial<TimelineEvent>> {}
+interface TimelineEventProps extends ItemProps<Partial<AuthorTimelineEvent>> {}
 
 export function EditAuthorModal({
   appElement,
@@ -70,21 +71,63 @@ export function EditAuthorModal({
   const TimelineEventField: (props: TimelineEventProps) => JSX.Element =
     useMemo(() => {
       return ({ item, index, RemoveButton }) => {
-        const { handleChange, setFieldValue } = useFormikContext<Author>();
+        const { values, handleChange, setFieldValue } =
+          useFormikContext<Author>();
 
-        const inputId = `timeline-event-${index}`;
+        const [milestone, setMilestone] = useState(
+          Boolean((item as any)['date']),
+        );
+
+        const inputId = `timeline-event-${index}`,
+          eventTypeId = `timeline-event-${index}-event-type`;
+
+        const fieldName = `timeline.${index}`;
+
+        let dateKeys: Parameters<typeof TimelineEventComponent>[0]['dateKeys'];
+
+        if (milestone) {
+          dateKeys = [
+            {
+              keyName: 'date',
+              label: 'Date',
+            },
+          ];
+        } else {
+          dateKeys = [
+            { keyName: 'startDate', label: 'Start Date' },
+            { keyName: 'endDate', label: 'End Date' },
+          ];
+        }
 
         return (
           <TimelineEventComponent
             id={inputId}
             required={true}
-            dateKeys={[
-              { keyName: 'startDate', label: 'Start Date' },
-              { keyName: 'endDate', label: 'End Date' },
-            ]}
-            RemoveButton={() => <RemoveButton item={item} index={index} />}
+            dateKeys={dateKeys}
             headerText="Event"
-            fieldName={`timeline.${index}`}
+            children={{
+              header: (
+                <>
+                  <input
+                    className={styles.editAuthorMilestoneToggle}
+                    id={eventTypeId}
+                    type="checkbox"
+                    onChange={(event) => {
+                      dateKeys.forEach(async (key) => {
+                        await setFieldValue(`${fieldName}.${key}`, undefined);
+                        delete (values.timeline[index] as any)[key.keyName];
+                      });
+
+                      setMilestone(event.currentTarget.checked);
+                    }}
+                    checked={milestone}
+                  />
+                  <label htmlFor={eventTypeId}>Milestone?</label>
+                  <RemoveButton item={item} index={index} />
+                </>
+              ),
+            }}
+            fieldName={fieldName}
             item={item as BaseTimelineEvent}
             setFieldValue={setFieldValue}
             handleChange={handleChange}
@@ -220,7 +263,7 @@ export function EditAuthorModal({
               <label htmlFor={referenceUrlId}>Reference URL</label>
               <input
                 id={referenceUrlId}
-                type="text"
+                type="url"
                 name="link"
                 value={values.link}
                 onChange={handleChange}
@@ -266,7 +309,7 @@ export function EditAuthorModal({
                 onAdd={() => {
                   setFieldValue(
                     'timeline',
-                    timeline.concat({} as TimelineEvent),
+                    timeline.concat({ location: {} } as TimelineEvent),
                   );
                 }}
                 onRemove={({ index }) => {

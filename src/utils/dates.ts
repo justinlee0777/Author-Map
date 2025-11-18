@@ -16,7 +16,7 @@ export function formatDate(
     yearAndMonthRegex = /^\d{4}-\d{2}$/;
 
   if (onlyYearRegex.test(date)) {
-    dateFormat = 'y';
+    return date;
   } else if (yearAndMonthRegex.test(date)) {
     dateFormat = 'LLLL, y';
   } else if (dateOnly) {

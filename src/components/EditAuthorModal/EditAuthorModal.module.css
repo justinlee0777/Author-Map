@@ -90,6 +90,11 @@
   padding: 1em;
 }
 
+.editAuthorMilestoneToggle {
+  margin-left: auto;
+  margin-right: 1em;
+}
+
 .editAuthorTimelineEvents > *:not(:last-of-type) {
   border-bottom: 1px solid black;
   padding-bottom: 1em;

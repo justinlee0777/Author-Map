@@ -22,15 +22,17 @@ export function RegisterAuthorGroup({
   onChange,
   onSubmit,
 }: Props): JSX.Element {
-  const [nameId, descriptionId, timespanStartId, timespanEndId] = useMemo(
-    () => [
-      `${id}-name-input`,
-      `${id}-description-input`,
-      `${id}-timespan-start`,
-      `${id}-timespan-end`,
-    ],
-    [id],
-  );
+  const [nameId, descriptionId, timespanStartId, timespanEndId, linkId] =
+    useMemo(
+      () => [
+        `${id}-name-input`,
+        `${id}-description-input`,
+        `${id}-timespan-start`,
+        `${id}-timespan-end`,
+        `${id}-link-input`,
+      ],
+      [id],
+    );
 
   const [validity, setValidity] = useState<{
     name: boolean;
@@ -162,6 +164,20 @@ export function RegisterAuthorGroup({
             } as AuthorGroup['span'],
           });
         }}
+      />
+
+      <label>Reference URL</label>
+      <input
+        id={linkId}
+        name="link"
+        type="url"
+        disabled={disabled}
+        onInput={(event) =>
+          onChange?.({
+            ...authorGroup,
+            link: event.currentTarget.value,
+          })
+        }
       />
 
       <button

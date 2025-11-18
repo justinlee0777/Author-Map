@@ -131,7 +131,7 @@ export interface AuthorLocation {
   /** If this is omitted, it is assumed the event did not take place in the States; therefore, the event is not formally recorded in the map. */
   state?: USState;
   /** Does not have to be the full address; city / town / village is fine. Called 'address' not to bias for city. */
-  address: string;
+  address?: string;
 }
 
 export enum AuthorEventType {
