@@ -1,10 +1,30 @@
 import ReactDOM from 'react-dom/client';
 
 import { AuthorMap } from './src/AuthorMap';
-import { Author, AuthorGroup, USState } from './src/models';
+import { Author, AuthorGroup, MajorEvent, USState } from './src/models';
 import { useState } from 'react';
 
 const App = () => {
+  const [majorEvents, setMajorEvents] = useState<Array<MajorEvent>>([
+    {
+      id: Symbol('ID for Declaration of Independence'),
+      date: '1776-07-04',
+      location: {
+        state: USState.PENNSYLVANIA,
+        address: 'Pennsylvania State House, Philadelphia',
+      },
+      notes: 'Ratification of the Declaration of Independence',
+    },
+    {
+      id: Symbol('ID for Emancipation Proclamation'),
+      date: '1863-01-01',
+      notes:
+        'Issuance of the Emancipation Proclamation, under emergency powers',
+      location: {},
+      referenceUrl: 'https://en.wikipedia.org/wiki/Emancipation_Proclamation',
+    },
+  ]);
+
   const [groups, setGroups] = useState<Array<AuthorGroup>>([
     {
       id: Symbol('ID for American Renaissance'),
@@ -179,6 +199,7 @@ const App = () => {
       className="authorMap"
       authors={authors}
       groups={groups}
+      majorEvents={majorEvents}
       syncAuthorUpdate={async (author) => {
         console.log('author updated', author);
 
@@ -207,6 +228,27 @@ const App = () => {
             ...currentGroups.slice(0, index),
             group,
             ...currentGroups.slice(index + 1),
+          ];
+        });
+      }}
+      onMajorEventCreated={(event) =>
+        setMajorEvents((currentEvents) =>
+          currentEvents.concat({
+            ...event,
+            id: Symbol(`Event ID for ${event.notes}`),
+          }),
+        )
+      }
+      onMajorEventUpdated={(event) => {
+        setMajorEvents((currentEvents) => {
+          const index = currentEvents.findIndex(
+            (currentEvent) => currentEvent.id === event.id,
+          );
+
+          return [
+            ...currentEvents.slice(0, index),
+            event,
+            ...currentEvents.slice(index + 1),
           ];
         });
       }}

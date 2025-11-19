@@ -4,7 +4,7 @@ import commonStyles from './common.module.css';
 import { useMemo, useRef, useState, JSX } from 'react';
 import clsx from 'clsx';
 
-import { Author, AuthorGroup } from './models';
+import { Author, AuthorGroup, MajorEvent, MilestoneEvent } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { AuthorStores } from './utils/stores';
 import { Tabs } from './components/Tabs/Tabs';
@@ -16,11 +16,15 @@ import { AddAuthor } from './components/AddAuthor/AddAuthor';
 import { AddAuthorGroup } from './components/AddAuthorGroup/AddAuthorGroup';
 import { AuthorGroupContext } from './contexts';
 import { EditAuthorGroupModal } from './components/EditAuthorGroupModal/EditAuthorGroupModal';
+import { AddMajorEvent } from './components/AddMajorEvent/AddMajorEvent';
+import { EditMajorEventModal } from './components/EditMajorEventModal/EditMajorEventModal';
 
 interface Props {
   authors: Array<Author>;
 
   groups?: Array<AuthorGroup>;
+
+  majorEvents?: Array<MilestoneEvent>;
 
   className?: string;
   /**
@@ -38,6 +42,10 @@ interface Props {
   onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
 
   onGroupUpdated?: (authorGroup: AuthorGroup) => void | Promise<void>;
+
+  onMajorEventCreated?: (event: MajorEvent) => void | Promise<void>;
+
+  onMajorEventUpdated?: (event: MajorEvent) => void | Promise<void>;
 }
 
 enum ViewType {
@@ -72,11 +80,14 @@ enum ViewType {
 export function AuthorMap({
   authors,
   groups = [],
+  majorEvents = [],
   className,
   syncAuthorAdded,
   syncAuthorUpdate,
   onGroupCreated,
   onGroupUpdated,
+  onMajorEventCreated,
+  onMajorEventUpdated,
 }: Props): JSX.Element {
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +102,9 @@ export function AuthorMap({
   const [editingGroup, setEditingGroup] = useState<Partial<AuthorGroup> | null>(
     null,
   );
+
+  const [editingMajorEvent, setEditingMajorEvent] =
+    useState<Partial<MilestoneEvent> | null>(null);
 
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => {
@@ -120,10 +134,7 @@ export function AuthorMap({
     case ViewType.TIMELINE:
     default:
       viewElement = (
-        <AuthorTimelineView
-          statesData={statesData}
-          onAuthorEdit={setEditingAuthor}
-        />
+        <AuthorTimelineView statesData={statesData} majorEvents={majorEvents} />
       );
       break;
   }
@@ -192,6 +203,17 @@ export function AuthorMap({
               });
             }}
           />
+
+          {viewType === ViewType.TIMELINE && (
+            <AddMajorEvent
+              children={{ right: 'Add major event' }}
+              onClick={() => {
+                setEditingMajorEvent({
+                  location: {},
+                });
+              }}
+            />
+          )}
         </div>
 
         {editingAuthor && (
@@ -199,6 +221,7 @@ export function AuthorMap({
             appElement={componentRef.current!}
             opened={Boolean(editingAuthor)}
             initialAuthor={editingAuthor}
+            disabled={loading}
             onClose={() => setEditingAuthor(null)}
             onGroupCreated={onGroupCreated}
             onSubmit={async (author) => {
@@ -241,6 +264,7 @@ export function AuthorMap({
             appElement={componentRef.current!}
             opened={Boolean(editingGroup)}
             initialAuthorGroup={editingGroup}
+            disabled={loading}
             onClose={() => setEditingGroup(null)}
             onSubmit={async (group) => {
               setLoading(true);
@@ -266,6 +290,45 @@ export function AuthorMap({
                 );
                 alert(
                   `Group could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+                );
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
+        )}
+
+        {editingMajorEvent && (
+          <EditMajorEventModal
+            appElement={componentRef.current!}
+            opened={Boolean(editingMajorEvent)}
+            initialEvent={editingMajorEvent}
+            disabled={loading}
+            onClose={() => setEditingMajorEvent(null)}
+            onSubmit={async (event) => {
+              setLoading(true);
+
+              const updating = Boolean(event.id);
+
+              try {
+                if (updating) {
+                  await onMajorEventUpdated?.(event);
+                } else {
+                  await onMajorEventCreated?.(event);
+
+                  if (!event.id) {
+                    event.id = Symbol(`ID for a major event: ${event.notes}`);
+                  }
+                }
+
+                setEditingMajorEvent(null);
+              } catch (error) {
+                console.error(
+                  `Major event could not be ${updating ? 'updated' : 'added'}.`,
+                  error,
+                );
+                alert(
+                  `Major event could not be ${updating ? 'updated' : 'added'}. Please try again.`,
                 );
               } finally {
                 setLoading(false);

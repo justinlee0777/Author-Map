@@ -11,7 +11,7 @@ interface Props {
     label: string;
   }>;
   id: string;
-  fieldName: string;
+  fieldName?: string;
   item: BaseTimelineEvent;
   setFieldValue: (fieldName: string, value: string) => void;
   handleChange: (e: ChangeEvent) => void;
@@ -21,6 +21,9 @@ interface Props {
   };
   headerText?: string;
   required?: boolean;
+  forceRequire?: {
+    notes?: boolean;
+  };
 }
 
 export function TimelineEvent({
@@ -33,7 +36,10 @@ export function TimelineEvent({
   children,
   headerText = 'Event',
   required,
+  forceRequire,
 }: Props): JSX.Element {
+  const keyPrefix = fieldName ? `${fieldName}.` : '';
+
   const dateFields = dateKeys.map(({ keyName, label }) => {
     const dateFieldId = `${id}-${keyName}`;
 
@@ -45,7 +51,7 @@ export function TimelineEvent({
           value={(item as any)[keyName]}
           required={required}
           onChange={(newValue) =>
-            setFieldValue(`${fieldName}.${keyName}`, newValue)
+            setFieldValue(`${keyPrefix}${keyName}`, newValue)
           }
         />
       </Fragment>
@@ -66,7 +72,7 @@ export function TimelineEvent({
       <label htmlFor={stateId}>State</label>
       <select
         id={stateId}
-        name={`${fieldName}.location.state`}
+        name={`${keyPrefix}location.state`}
         value={item.location?.state}
         onChange={handleChange}
       >
@@ -83,7 +89,7 @@ export function TimelineEvent({
       <label htmlFor={addressId}>Address</label>
       <input
         id={addressId}
-        name={`${fieldName}.location.address`}
+        name={`${keyPrefix}location.address`}
         type="text"
         value={item.location?.address}
         onChange={handleChange}
@@ -98,9 +104,10 @@ export function TimelineEvent({
       <label htmlFor={notesId}>Notes</label>
       <textarea
         id={notesId}
-        name={`${fieldName}.notes`}
+        name={`${keyPrefix}notes`}
         value={item.notes}
         onChange={handleChange}
+        required={forceRequire?.notes}
         rows={2}
       />
     </div>

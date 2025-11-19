@@ -3,16 +3,12 @@
   flex-direction: row;
   font-size: 0.8em;
   gap: 1em;
+  padding: 1em 0;
   position: relative;
 }
 
 .authorRow:not(:last-of-type) {
   border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-  padding-bottom: 1em;
-}
-
-.authorRow:not(:first-of-type) {
-  padding: 1em 0;
 }
 
 .authorRow > img {

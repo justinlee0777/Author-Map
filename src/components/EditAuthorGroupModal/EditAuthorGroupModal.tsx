@@ -13,6 +13,7 @@ interface Props {
 
   initialAuthorGroup: Partial<AuthorGroup>;
 
+  disabled?: boolean;
   onClose?: () => void;
   onSubmit?: (authorGroup: AuthorGroup) => void | Promise<void>;
 }
@@ -21,6 +22,7 @@ export function EditAuthorGroupModal({
   appElement,
   opened,
   initialAuthorGroup,
+  disabled,
   onClose,
   onSubmit,
 }: Props): JSX.Element {
@@ -42,7 +44,7 @@ export function EditAuthorGroupModal({
         <RegisterAuthorGroup
           id="create-author-group"
           value={authorGroup}
-          disabled={loading}
+          disabled={disabled || loading}
           onChange={setAuthorGroup}
           onSubmit={async (group) => {
             setLoading(true);

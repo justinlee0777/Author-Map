@@ -166,6 +166,12 @@ export interface MilestoneEvent extends BaseTimelineEvent {
 
 export type AuthorTimelineEvent = TimelineEvent | MilestoneEvent;
 
+export interface MajorEvent extends MilestoneEvent {
+  id: string | Symbol;
+
+  referenceUrl?: string;
+}
+
 /**
  * Does not refer to a group in a physical sense. "Group" is arbitrary and can refer to any possible interesting category.
  * For example, "Jewish American writers", "Belonging to the Harlem Renaissance", "pre-Republic", etc.

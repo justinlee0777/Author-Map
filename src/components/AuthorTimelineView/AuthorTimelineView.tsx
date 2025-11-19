@@ -3,19 +3,18 @@ import styles from './AuthorTimelineView.module.css';
 import { Fragment, JSX, useMemo, useState } from 'react';
 import { AuthorStores } from '../../utils/stores';
 import clsx from 'clsx';
-import { formatDate } from '../../utils/dates';
+import { controlForTimezone, formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
 import { getMilestoneEvents } from '../../utils/events';
 import { Author, AuthorGroup, MilestoneEvent } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
-import { AddAuthor } from '../AddAuthor/AddAuthor';
 
 interface Props {
   statesData: AuthorStores;
 
   groups?: Array<AuthorGroup>;
   className?: string;
-  onAuthorEdit?: (author: Partial<Author>) => void;
+  majorEvents?: Array<MilestoneEvent>;
 }
 
 interface AppearanceSettings {
@@ -25,38 +24,40 @@ interface AppearanceSettings {
 /**
  * TODO: Infinite scroll
  * TODO: Filter by months? Allow a day / month / year filter?
- * TODO: Major events? Declaration of independence? Emancipation proclamation? etc?
  */
 export function AuthorTimelineView({
   statesData,
   className,
-  onAuthorEdit,
+  majorEvents = [],
 }: Props): JSX.Element {
-  const authorEvents = statesData
-    .getAll()
-    .flatMap((author) =>
-      getMilestoneEvents(author).map((event) => ({ author, event })),
-    )
-    .sort((a, b) => {
-      return (
-        new Date(a.event.date).valueOf() - new Date(b.event.date).valueOf()
-      );
-    });
+  const authorEvents: Array<{ author?: Author; event: MilestoneEvent }> =
+    statesData
+      .getAll()
+      .flatMap(
+        (author) =>
+          getMilestoneEvents(author).map((event) => ({
+            author,
+            event,
+          })) as Array<{ author?: Author; event: MilestoneEvent }>,
+      )
+      .concat(majorEvents.map((majorEvent) => ({ event: majorEvent })))
+      .sort((a, b) => {
+        return (
+          new Date(a.event.date).valueOf() - new Date(b.event.date).valueOf()
+        );
+      });
 
   const firstDate = authorEvents.at(0)!;
 
-  const startingYear = new Date(firstDate.event.date).getFullYear(),
+  const startingYear = controlForTimezone(firstDate.event.date).getFullYear(),
     endingYear = new Date().getFullYear();
 
-  const authorEventsByYear = new Map<
-    number,
-    Array<{ author: Author; event: MilestoneEvent }>
-  >();
+  const authorEventsByYear = new Map<number, typeof authorEvents>();
 
   authorEvents.forEach((authorEvent) => {
     const { event } = authorEvent;
 
-    const year = new Date(event.date).getFullYear();
+    const year = controlForTimezone(event.date).getFullYear();
 
     if (authorEventsByYear.has(year)) {
       authorEventsByYear.get(year)!.push(authorEvent);
@@ -73,12 +74,7 @@ export function AuthorTimelineView({
   let currentEvents = eventsIterator.next();
 
   for (let year = startingYear; year <= endingYear; year++) {
-    let authorEvents:
-      | Array<{
-          author: Author;
-          event: MilestoneEvent;
-        }>
-      | undefined;
+    let authorEvents;
 
     if (currentEvents.value && currentEvents.value[0] === year) {
       [, authorEvents] = currentEvents.value;
@@ -104,16 +100,18 @@ export function AuthorTimelineView({
               <div className={styles.authorTimelineEntryBisector}></div>
 
               <div className={styles.authorTimelineViewEntryDetails}>
-                <h4 className={styles.authorTimelineViewAuthorHeader}>
-                  {getAuthorName(author)}
-                  {author.portrait?.src && (
-                    <img
-                      className={styles.authorTimelineViewPortrait}
-                      {...author.portrait}
-                      loading="lazy"
-                    />
-                  )}
-                </h4>
+                {author && (
+                  <h4 className={styles.authorTimelineViewAuthorHeader}>
+                    {getAuthorName(author)}
+                    {author.portrait?.src && (
+                      <img
+                        className={styles.authorTimelineViewPortrait}
+                        {...author.portrait}
+                        loading="lazy"
+                      />
+                    )}
+                  </h4>
+                )}
                 <p>{event.notes}</p>
               </div>
             </Fragment>

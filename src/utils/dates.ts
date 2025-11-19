@@ -1,5 +1,10 @@
 import { stateToTimezoneMap, USState } from '../models';
+import { parse } from 'date-fns';
 import { format, fromZonedTime } from 'date-fns-tz';
+
+export function controlForTimezone(date: string): Date {
+  return parse(date, 'yyyy-MM-dd', new Date());
+}
 
 interface OptionalArgs {
   dateOnly?: boolean;
@@ -34,6 +39,7 @@ export function formatDate(
       timeZone,
     });
   } else {
-    return format(date, dateFormat);
+    const parsedDate = controlForTimezone(date);
+    return format(parsedDate, dateFormat);
   }
 }
