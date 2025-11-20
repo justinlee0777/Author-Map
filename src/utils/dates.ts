@@ -2,8 +2,16 @@ import { stateToTimezoneMap, USState } from '../models';
 import { parse } from 'date-fns';
 import { format, fromZonedTime } from 'date-fns-tz';
 
+const onlyYearRegex = /^\d{4}$/,
+  yearAndMonthRegex = /^\d{4}-\d{2}$/;
 export function controlForTimezone(date: string): Date {
-  return parse(date, 'yyyy-MM-dd', new Date());
+  if (onlyYearRegex.test(date)) {
+    return parse(date, 'yyyy', new Date());
+  } else if (yearAndMonthRegex.test(date)) {
+    return parse(date, 'yyyy-MM', new Date());
+  } else {
+    return parse(date, 'yyyy-MM-dd', new Date());
+  }
 }
 
 interface OptionalArgs {
@@ -16,9 +24,6 @@ export function formatDate(
   { dateOnly }: OptionalArgs = {},
 ): string {
   let dateFormat: string;
-
-  const onlyYearRegex = /^\d{4}$/,
-    yearAndMonthRegex = /^\d{4}-\d{2}$/;
 
   if (onlyYearRegex.test(date)) {
     return date;

@@ -187,7 +187,12 @@ const App = () => {
         },
         date: '1968-12-20',
       },
-      timeline: [],
+      timeline: [
+        {
+          date: '1962',
+          notes: 'Awarded Nobel Prize in Literature',
+        },
+      ],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/John_Steinbeck_1939_%28cropped%29.jpg/500px-John_Steinbeck_1939_%28cropped%29.jpg',
       },
