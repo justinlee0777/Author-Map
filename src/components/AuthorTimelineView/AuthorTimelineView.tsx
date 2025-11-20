@@ -92,7 +92,7 @@ export function AuthorTimelineView({
           return (
             <Fragment key={i}>
               <div className={styles.authorTimelineEventDate}>
-                {formatDate(event.date, event.location.state, {
+                {formatDate(event.date, event.location?.state, {
                   dateOnly: true,
                 })}
               </div>

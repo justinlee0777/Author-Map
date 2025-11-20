@@ -44,8 +44,8 @@ export function AuthorRow({
                   {showContext && notes && <b>{notes}</b>}
                   <p>{dateContext}</p>
                   <p>
-                    {location.address}
-                    {location.state && <span>, {location.state}</span>}
+                    {location?.address}
+                    {location?.state && <span>, {location.state}</span>}
                   </p>
                 </div>
               </div>

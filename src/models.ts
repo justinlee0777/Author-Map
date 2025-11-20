@@ -152,7 +152,7 @@ export interface TimeSpan {
 }
 
 export interface BaseTimelineEvent {
-  location: AuthorLocation;
+  location?: AuthorLocation;
   /** Additional comments on the event. */
   notes?: string;
 }

@@ -93,7 +93,7 @@ export class AuthorStores {
     // Birth state
     const birthEvent = author.birthDate;
 
-    const state = birthEvent.location.state;
+    const state = birthEvent.location?.state;
 
     if (state) {
       const store = map.get(state)!;
@@ -117,7 +117,7 @@ export class AuthorStores {
     const deathEvent = author.deathDate;
 
     if (deathEvent) {
-      const state = deathEvent.location.state;
+      const state = deathEvent.location?.state;
 
       if (state) {
         const store = map.get(state)!;
@@ -140,7 +140,7 @@ export class AuthorStores {
 
     // Residing states
     fullTimeline.forEach((event) => {
-      const state = event.location.state;
+      const state = event.location?.state;
       if (state) {
         const store = map.get(state)!;
 

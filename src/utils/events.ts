@@ -28,16 +28,16 @@ export function getEvents(
       notes: 'Birth',
       dateContext: formatDate(
         author.birthDate.date,
-        author.birthDate.location.state,
+        author.birthDate.location?.state,
       ),
       eventType: AuthorEventType.BIRTHS,
     },
     ...author.timeline.map((event) => {
       let dateContext: string;
       if ('date' in event) {
-        dateContext = formatDate(event.date, event.location.state);
+        dateContext = formatDate(event.date, event.location?.state);
       } else {
-        dateContext = `${formatDate(event.startDate, event.location.state)} - ${formatDate(event.endDate, event.location.state)}`;
+        dateContext = `${formatDate(event.startDate, event.location?.state)} - ${formatDate(event.endDate, event.location?.state)}`;
       }
 
       return {
@@ -53,7 +53,7 @@ export function getEvents(
       notes: 'Death',
       dateContext: formatDate(
         author.deathDate.date,
-        author.deathDate.location.state,
+        author.deathDate.location?.state,
       ),
       eventType: AuthorEventType.DEATHS,
     });
@@ -62,7 +62,7 @@ export function getEvents(
   if (filters) {
     if (filters.usState) {
       events = events.filter(
-        (event) => event.location.state === filters.usState,
+        (event) => event.location?.state === filters.usState,
       );
     }
     if (filters.eventType) {
