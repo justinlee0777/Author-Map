@@ -1,7 +1,15 @@
 import commonStyles from '../../common.module.css';
 import styles from './AuthorListView.module.css';
 
-import { Fragment, JSX, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  Fragment,
+  JSX,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   AuthorFilter,
   AuthorSort,
@@ -21,6 +29,7 @@ import {
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 import { AuthorGroupContext } from '../../contexts';
+import { getAuthorName } from '../../utils/names';
 
 interface Props {
   statesData: AuthorStores;
@@ -71,20 +80,40 @@ export function AuthorListView({
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   const [viewType, setViewType] = useState<AuthorListViewType>(
-    AuthorListViewType.AUTHOR,
+      AuthorListViewType.AUTHOR,
+    ),
+    [authorEventType, setAuthorEventType] = useState<AuthorEventType>(
+      AuthorEventType.BIRTHS,
+    ),
+    [sortType, setSortType] = useState<SortType>(SortType.NAME),
+    [filteringGroup, setFilteringGroup] = useState<AuthorGroup | null>(null),
+    [search, setSearch] = useState<string | null>(null);
+
+  const filterAuthors: (authors: Array<Author>) => Array<Author> = useCallback(
+    (authors) => {
+      if (filteringGroup) {
+        authors = authors.filter((author) =>
+          author.groups?.includes(filteringGroup.id),
+        );
+      }
+
+      if (search) {
+        const searchRegex = new RegExp(search, 'i');
+
+        authors = authors.filter((author) => {
+          return searchRegex.test(getAuthorName(author));
+        });
+      }
+
+      return authors;
+    },
+    [filteringGroup, search],
   );
 
-  const [authorEventType, setAuthorEventType] = useState<AuthorEventType>(
-    AuthorEventType.BIRTHS,
+  const [groupsFilterId, searchId] = useMemo(
+    () => ['groups-filter', 'list-search-input'],
+    [],
   );
-
-  const [sortType, setSortType] = useState<SortType>(SortType.NAME);
-
-  const [filteringGroup, setFilteringGroup] = useState<AuthorGroup | null>(
-    null,
-  );
-
-  const [groupsFilterId] = useMemo(() => ['groups-filter'], []);
 
   useEffect(() => {
     if (filteringGroup) {
@@ -171,11 +200,7 @@ export function AuthorListView({
 
       let authors = statesData.getAll(sortArg, filterArg);
 
-      if (filteringGroup) {
-        authors = authors.filter((author) =>
-          author.groups?.includes(filteringGroup.id),
-        );
-      }
+      authors = filterAuthors(authors);
 
       listElements = authors.map((author) => {
         return (
@@ -192,11 +217,7 @@ export function AuthorListView({
       listElements = Object.values(USState).map((usState) => {
         let authors = statesData.get(usState)[statesDataKey];
 
-        if (filteringGroup) {
-          authors = authors.filter((author) =>
-            author.groups?.includes(filteringGroup.id),
-          );
-        }
+        authors = filterAuthors(authors);
 
         if (authors.length === 0) {
           return <Fragment key={usState}></Fragment>;
@@ -253,6 +274,20 @@ export function AuthorListView({
           id={groupsFilterId}
           label="Groups"
           onSelect={setFilteringGroup}
+        />
+
+        <label htmlFor={searchId}>Search</label>
+        <input
+          id={searchId}
+          value={search ?? ''}
+          type="text"
+          onChange={(event) => {
+            if (event.target.value) {
+              setSearch(event.target.value.replaceAll(/[^a-zA-Z\d\s:]/g, ''));
+            } else {
+              setSearch(null);
+            }
+          }}
         />
 
         {filteringGroup && (
