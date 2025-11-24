@@ -62,17 +62,18 @@ enum ViewType {
  * if the client prefers to update now and correct later.
  *
  *
- * TODO: Groups view? ex. Nobel Prize winners? Genre? Harlem Renaissance? Genre (class literature)? Etc?
- * TODO: Search?
+ * TODO: Really need to figure out how to distinguish authors i.e. "What are they known for - genre, masterpieces, blah"
+ * TODO: Also need a detailed page for the author _themself_. Most of that data is in editing.
+ * TODO: Validation
+ * TODO: Links to bibliography (bibliography can be part of Timeline, and a special tag can be assigned to the event for filtering)
+ *
+ * TODO: Genre (History / Philosophy / Fiction / Poetry)
  * TODO: Discussion system?
- * TODO: Full timeline
  * TODO: Show who is in a state on hover? Need to see some data early
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
  * TODO: Might want to break this up into different components.
  * TODO: Editing + export JSON
- * TODO: Overall timeline
  * TODO: Import? JSON validate?
- * TODO: Links to bibliography
  * TODO: Nicer version of timeline
  * TODO: Need to reorder timeline
  * TODO: Accept a stream?

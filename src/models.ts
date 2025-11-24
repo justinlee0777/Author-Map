@@ -151,10 +151,28 @@ export interface TimeSpan {
   endDate: string;
 }
 
+export enum AuthorAchievementType {
+  BOOK = 'Book',
+  AWARD = 'Award',
+}
+
+export interface AuthorBookAchievement {
+  bookTitle: string;
+  type: AuthorAchievementType.BOOK;
+}
+
+export interface AuthorAwardAchievement {
+  awardName: string;
+  type: AuthorAchievementType.AWARD;
+}
+
+export type AuthorAchievement = AuthorBookAchievement | AuthorAwardAchievement;
 export interface BaseTimelineEvent {
   location?: AuthorLocation;
   /** Additional comments on the event. */
   notes?: string;
+  /** Whether the event encompasses an achievement, as the publishing of a major book, or recognition of some sort. */
+  achievement?: AuthorAchievement;
 }
 
 export interface TimelineEvent extends BaseTimelineEvent, TimeSpan {}

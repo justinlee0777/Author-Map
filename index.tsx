@@ -1,7 +1,13 @@
 import ReactDOM from 'react-dom/client';
 
 import { AuthorMap } from './src/AuthorMap';
-import { Author, AuthorGroup, MajorEvent, USState } from './src/models';
+import {
+  Author,
+  AuthorAchievementType,
+  AuthorGroup,
+  MajorEvent,
+  USState,
+} from './src/models';
 import { useState } from 'react';
 
 const App = () => {
@@ -92,7 +98,16 @@ const App = () => {
         },
         date: '1892-03-26',
       },
-      timeline: [],
+      timeline: [
+        {
+          date: '1855-07-04',
+          achievement: {
+            type: AuthorAchievementType.BOOK,
+            bookTitle: 'Leaves of Grass',
+          },
+          notes: 'Self-published first edition of Leaves of Grass',
+        },
+      ],
       link: 'https://en.wikipedia.org/wiki/Walt_Whitman',
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Walt_Whitman_-_George_Collins_Cox.jpg/500px-Walt_Whitman_-_George_Collins_Cox.jpg',

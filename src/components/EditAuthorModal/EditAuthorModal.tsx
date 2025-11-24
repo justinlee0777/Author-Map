@@ -148,6 +148,9 @@ export function EditAuthorModal({
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Birth"
             fieldName="birthDate"
+            hide={{
+              achievement: true,
+            }}
             item={item as BaseTimelineEvent}
             setFieldValue={setFieldValue}
             handleChange={handleChange}
@@ -168,6 +171,9 @@ export function EditAuthorModal({
             dateKeys={[{ keyName: 'date', label: 'Date' }]}
             headerText="Death"
             fieldName="deathDate"
+            hide={{
+              achievement: true,
+            }}
             item={item as BaseTimelineEvent}
             setFieldValue={setFieldValue}
             handleChange={handleChange}

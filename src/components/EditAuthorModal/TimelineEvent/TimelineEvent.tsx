@@ -2,7 +2,11 @@ import styles from './TimelineEvent.module.css';
 
 import { ChangeEvent, Fragment, JSX, ReactNode, useMemo } from 'react';
 
-import { BaseTimelineEvent, USState } from '../../../models';
+import {
+  AuthorAchievementType,
+  BaseTimelineEvent,
+  USState,
+} from '../../../models';
 import { DatePicker } from '../../DatePicker/DatePicker';
 
 interface Props {
@@ -13,7 +17,7 @@ interface Props {
   id: string;
   fieldName?: string;
   item: BaseTimelineEvent;
-  setFieldValue: (fieldName: string, value: string) => void;
+  setFieldValue: (fieldName: string, value: any) => void;
   handleChange: (e: ChangeEvent) => void;
 
   children?: {
@@ -23,6 +27,9 @@ interface Props {
   required?: boolean;
   forceRequire?: {
     notes?: boolean;
+  };
+  hide?: {
+    achievement?: boolean;
   };
 }
 
@@ -37,6 +44,7 @@ export function TimelineEvent({
   headerText = 'Event',
   required,
   forceRequire,
+  hide,
 }: Props): JSX.Element {
   const keyPrefix = fieldName ? `${fieldName}.` : '';
 
@@ -58,10 +66,86 @@ export function TimelineEvent({
     );
   });
 
-  const [stateId, addressId, notesId] = useMemo(
-    () => [`${id}-state`, `${id}-address`, `${id}-notes`],
+  const [
+    stateId,
+    addressId,
+    notesId,
+    achievementId,
+    achievementBookId,
+    achievementAwardId,
+    achievementTypeId,
+  ] = useMemo(
+    () => [
+      `${id}-state`,
+      `${id}-address`,
+      `${id}-notes`,
+      `${id}-achievement`,
+      `${id}-achievement-book-title`,
+      `${id}-achievement-award-title`,
+      `${id}-achievement-type`,
+    ],
     [id],
   );
+
+  let achievementElements: JSX.Element | undefined;
+
+  if (item.achievement) {
+    achievementElements = (
+      <>
+        <label htmlFor={achievementTypeId}>Type of Achievement</label>
+        <select
+          id={achievementTypeId}
+          name={`${keyPrefix}achievement.type`}
+          value={item.achievement.type}
+          onChange={handleChange}
+        >
+          {Object.values(AuthorAchievementType).map((achievementType) => {
+            return (
+              <option key={achievementType} value={achievementType}>
+                {achievementType}
+              </option>
+            );
+          })}
+        </select>
+      </>
+    );
+
+    switch (item.achievement.type) {
+      case AuthorAchievementType.AWARD:
+        achievementElements = (
+          <>
+            {achievementElements}
+            <label htmlFor={achievementAwardId}>Award</label>
+            <input
+              id={achievementBookId}
+              name={`${keyPrefix}achievement.awardName`}
+              value={item.achievement.awardName}
+              onChange={handleChange}
+              type="text"
+              required
+            />
+          </>
+        );
+        break;
+      case AuthorAchievementType.BOOK:
+      default:
+        achievementElements = (
+          <>
+            {achievementElements}
+            <label htmlFor={achievementBookId}>Book title</label>
+            <input
+              id={achievementBookId}
+              name={`${keyPrefix}achievement.bookTitle`}
+              value={item.achievement.bookTitle}
+              onChange={handleChange}
+              type="text"
+              required
+            />
+          </>
+        );
+        break;
+    }
+  }
 
   return (
     <div id={id} className={styles.timelineEvent}>
@@ -100,6 +184,33 @@ export function TimelineEvent({
       </p>
 
       {dateFields}
+
+      {!hide?.achievement && (
+        <>
+          <div className={styles.timelineEventAchievement}>
+            <input
+              id={achievementId}
+              name={`${keyPrefix}achievement`}
+              checked={Boolean(item.achievement)}
+              onChange={(event) => {
+                if (event.target.checked) {
+                  setFieldValue(event.target.name, {
+                    type: AuthorAchievementType.BOOK,
+                  });
+                } else {
+                  setFieldValue(event.target.name, undefined);
+                }
+              }}
+              type="checkbox"
+            />
+            <label htmlFor={achievementId}>
+              Is this considered an achievement?
+            </label>
+          </div>
+
+          {achievementElements}
+        </>
+      )}
 
       <label htmlFor={notesId}>Notes</label>
       <textarea

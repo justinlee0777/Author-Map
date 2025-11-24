@@ -270,12 +270,6 @@ export function AuthorListView({
 
         {filterElements}
 
-        <SelectAuthorGroup
-          id={groupsFilterId}
-          label="Groups"
-          onSelect={setFilteringGroup}
-        />
-
         <label htmlFor={searchId}>Search</label>
         <input
           id={searchId}
@@ -288,6 +282,12 @@ export function AuthorListView({
               setSearch(null);
             }
           }}
+        />
+
+        <SelectAuthorGroup
+          id={groupsFilterId}
+          label="Groups"
+          onSelect={setFilteringGroup}
         />
 
         {filteringGroup && (

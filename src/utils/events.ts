@@ -73,7 +73,14 @@ export function getEvents(
   return events;
 }
 
-export function getMilestoneEvents(author: Author): Array<MilestoneEvent> {
+interface GetMilestoneEventsArgs {
+  achievementsOnly?: boolean;
+}
+
+export function getMilestoneEvents(
+  author: Author,
+  { achievementsOnly }: GetMilestoneEventsArgs = {},
+): Array<MilestoneEvent> {
   let events: Array<MilestoneEvent> = [
     { ...author.birthDate, notes: 'Birth' },
     ...author.timeline.filter((event) => 'date' in event),
@@ -81,6 +88,10 @@ export function getMilestoneEvents(author: Author): Array<MilestoneEvent> {
 
   if (author.deathDate) {
     events = events.concat({ ...author.deathDate, notes: 'Death' });
+  }
+
+  if (achievementsOnly) {
+    events = events.filter((event) => Boolean(event.achievement));
   }
 
   return events;

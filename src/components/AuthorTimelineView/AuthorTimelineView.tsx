@@ -35,10 +35,12 @@ export function AuthorTimelineView({
       .getAll()
       .flatMap(
         (author) =>
-          getMilestoneEvents(author).map((event) => ({
-            author,
-            event,
-          })) as Array<{ author?: Author; event: MilestoneEvent }>,
+          getMilestoneEvents(author, { achievementsOnly: true }).map(
+            (event) => ({
+              author,
+              event,
+            }),
+          ) as Array<{ author?: Author; event: MilestoneEvent }>,
       )
       .concat(majorEvents.map((majorEvent) => ({ event: majorEvent })))
       .sort((a, b) => {
