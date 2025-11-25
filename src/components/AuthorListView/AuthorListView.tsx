@@ -35,6 +35,7 @@ interface Props {
   statesData: AuthorStores;
 
   onAuthorEdit?: (author: Partial<Author>) => void;
+  onAuthorView?: (author: Author) => void;
   onAuthorGroupEdit?: (authorGroup: AuthorGroup) => void;
 }
 
@@ -53,13 +54,22 @@ function AuthorListRow({
   author,
   eventType,
   onEdit,
+  onView,
 }: {
   author: Author;
   eventType?: AuthorEventType;
   onEdit: () => void;
+  onView: () => void;
 }): JSX.Element {
   return (
     <AuthorRow author={author} eventType={eventType} showContext>
+      <button
+        className={clsx(commonStyles.button, styles.authorListViewEdit)}
+        onClick={onView}
+      >
+        View
+      </button>
+
       <button
         className={clsx(commonStyles.button, styles.authorListViewEdit)}
         onClick={onEdit}
@@ -74,6 +84,7 @@ export function AuthorListView({
   statesData,
   onAuthorEdit,
   onAuthorGroupEdit,
+  onAuthorView,
 }: Props): JSX.Element {
   const { groups } = useContext(AuthorGroupContext);
 
@@ -207,6 +218,7 @@ export function AuthorListView({
           <AuthorListRow
             key={authorKeyGenerator.getKey(author.id)}
             author={author}
+            onView={() => onAuthorView?.(author)}
             onEdit={() => onAuthorEdit?.(author)}
           />
         );
@@ -231,6 +243,7 @@ export function AuthorListView({
                     key={authorKeyGenerator.getKey(author.id)}
                     author={author}
                     eventType={authorEventType}
+                    onView={() => onAuthorView?.(author)}
                     onEdit={() => onAuthorEdit?.(author)}
                   />
                 );

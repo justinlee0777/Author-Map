@@ -152,13 +152,14 @@ export interface TimeSpan {
 }
 
 export enum AuthorAchievementType {
-  BOOK = 'Book',
+  RENOWNED_WORK = 'Renowned work',
   AWARD = 'Award',
 }
 
-export interface AuthorBookAchievement {
-  bookTitle: string;
-  type: AuthorAchievementType.BOOK;
+export interface AuthorWorkAchievement {
+  workTitle: string;
+  type: AuthorAchievementType.RENOWNED_WORK;
+  referenceUrl?: string;
 }
 
 export interface AuthorAwardAchievement {
@@ -166,7 +167,7 @@ export interface AuthorAwardAchievement {
   type: AuthorAchievementType.AWARD;
 }
 
-export type AuthorAchievement = AuthorBookAchievement | AuthorAwardAchievement;
+export type AuthorAchievement = AuthorWorkAchievement | AuthorAwardAchievement;
 export interface BaseTimelineEvent {
   location?: AuthorLocation;
   /** Additional comments on the event. */
@@ -223,9 +224,9 @@ export interface Author {
   authorDisplayName?: string;
 
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
-  birthDate: MilestoneEvent;
+  birthDate: Omit<MilestoneEvent, 'achievement'>;
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
-  deathDate?: MilestoneEvent;
+  deathDate?: Omit<MilestoneEvent, 'achievement'>;
   /** Assume the timeline is ordered. Birth and death dates are redundant. */
   timeline: Array<TimelineEvent | MilestoneEvent>;
 

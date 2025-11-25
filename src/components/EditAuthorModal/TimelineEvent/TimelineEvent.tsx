@@ -33,6 +33,9 @@ interface Props {
   };
 }
 
+/**
+ * TODO: wise to break this down into smaller components ex achievement stuff
+ */
 export function TimelineEvent({
   id,
   item,
@@ -74,6 +77,7 @@ export function TimelineEvent({
     achievementBookId,
     achievementAwardId,
     achievementTypeId,
+    achievementBookReferenceUrl,
   ] = useMemo(
     () => [
       `${id}-state`,
@@ -83,6 +87,7 @@ export function TimelineEvent({
       `${id}-achievement-book-title`,
       `${id}-achievement-award-title`,
       `${id}-achievement-type`,
+      `${id}-achievement-book-reference`,
     ],
     [id],
   );
@@ -127,16 +132,26 @@ export function TimelineEvent({
           </>
         );
         break;
-      case AuthorAchievementType.BOOK:
+      case AuthorAchievementType.RENOWNED_WORK:
       default:
         achievementElements = (
           <>
             {achievementElements}
-            <label htmlFor={achievementBookId}>Book title</label>
+            <label htmlFor={achievementBookId}>Work title</label>
             <input
               id={achievementBookId}
-              name={`${keyPrefix}achievement.bookTitle`}
-              value={item.achievement.bookTitle}
+              name={`${keyPrefix}achievement.workTitle`}
+              value={item.achievement.workTitle}
+              onChange={handleChange}
+              type="text"
+              required
+            />
+
+            <label htmlFor={achievementBookReferenceUrl}>Reference URL</label>
+            <input
+              id={achievementBookReferenceUrl}
+              name={`${keyPrefix}achievement.referenceUrl`}
+              value={item.achievement.referenceUrl}
               onChange={handleChange}
               type="text"
               required
@@ -195,7 +210,7 @@ export function TimelineEvent({
               onChange={(event) => {
                 if (event.target.checked) {
                   setFieldValue(event.target.name, {
-                    type: AuthorAchievementType.BOOK,
+                    type: AuthorAchievementType.RENOWNED_WORK,
                   });
                 } else {
                   setFieldValue(event.target.name, undefined);

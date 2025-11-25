@@ -102,10 +102,11 @@ const App = () => {
         {
           date: '1855-07-04',
           achievement: {
-            type: AuthorAchievementType.BOOK,
-            bookTitle: 'Leaves of Grass',
+            type: AuthorAchievementType.RENOWNED_WORK,
+            workTitle: 'Leaves of Grass',
+            referenceUrl: 'https://en.wikipedia.org/wiki/Leaves_of_Grass',
           },
-          notes: 'Self-published first edition of Leaves of Grass',
+          notes: 'Self-published',
         },
       ],
       link: 'https://en.wikipedia.org/wiki/Walt_Whitman',
@@ -205,7 +206,10 @@ const App = () => {
       timeline: [
         {
           date: '1962',
-          notes: 'Awarded Nobel Prize in Literature',
+          achievement: {
+            awardName: 'Nobel Prize in Literature',
+            type: AuthorAchievementType.AWARD,
+          },
         },
       ],
       portrait: {

@@ -6,7 +6,12 @@ import clsx from 'clsx';
 import { controlForTimezone, formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
 import { getMilestoneEvents } from '../../utils/events';
-import { Author, AuthorGroup, MilestoneEvent } from '../../models';
+import {
+  Author,
+  AuthorAchievementType,
+  AuthorGroup,
+  MilestoneEvent,
+} from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 
 interface Props {
@@ -91,6 +96,38 @@ export function AuthorTimelineView({
         <h4 className={styles.authorTimelineViewYear}>{year}</h4>
         <div className={styles.authorTimelineViewEntryBullet}></div>
         {authorEvents?.map(({ author, event }, i) => {
+          let achievementElement: JSX.Element | undefined;
+
+          if (event.achievement) {
+            switch (event.achievement.type) {
+              case AuthorAchievementType.AWARD:
+                achievementElement = (
+                  <p>Awarded {event.achievement.awardName}</p>
+                );
+                break;
+              case AuthorAchievementType.RENOWNED_WORK:
+              default:
+                let workTitleElement = (
+                  <span>{event.achievement.workTitle}</span>
+                );
+
+                if (event.achievement.referenceUrl) {
+                  workTitleElement = (
+                    <a
+                      href={event.achievement.referenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {workTitleElement}
+                    </a>
+                  );
+                }
+
+                achievementElement = <p>Known work: {workTitleElement} </p>;
+                break;
+            }
+          }
+
           return (
             <Fragment key={i}>
               <div className={styles.authorTimelineEventDate}>
@@ -114,6 +151,9 @@ export function AuthorTimelineView({
                     )}
                   </h4>
                 )}
+
+                {achievementElement}
+
                 <p>{event.notes}</p>
               </div>
             </Fragment>

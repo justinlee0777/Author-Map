@@ -18,6 +18,7 @@ import { AuthorGroupContext } from './contexts';
 import { EditAuthorGroupModal } from './components/EditAuthorGroupModal/EditAuthorGroupModal';
 import { AddMajorEvent } from './components/AddMajorEvent/AddMajorEvent';
 import { EditMajorEventModal } from './components/EditMajorEventModal/EditMajorEventModal';
+import { ViewAuthorModal } from './components/ViewAuthorModal/ViewAuthorModal';
 
 interface Props {
   authors: Array<Author>;
@@ -71,11 +72,6 @@ enum ViewType {
  * TODO: Discussion system?
  * TODO: Show who is in a state on hover? Need to see some data early
  * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
- * TODO: Might want to break this up into different components.
- * TODO: Editing + export JSON
- * TODO: Import? JSON validate?
- * TODO: Nicer version of timeline
- * TODO: Need to reorder timeline
  * TODO: Accept a stream?
  */
 export function AuthorMap({
@@ -104,6 +100,8 @@ export function AuthorMap({
     null,
   );
 
+  const [viewingAuthor, setViewingAuthor] = useState<Author | null>(null);
+
   const [editingMajorEvent, setEditingMajorEvent] =
     useState<Partial<MilestoneEvent> | null>(null);
 
@@ -128,6 +126,7 @@ export function AuthorMap({
         <AuthorListView
           statesData={statesData}
           onAuthorEdit={setEditingAuthor}
+          onAuthorView={setViewingAuthor}
           onAuthorGroupEdit={setEditingGroup}
         />
       );
@@ -335,6 +334,15 @@ export function AuthorMap({
                 setLoading(false);
               }
             }}
+          />
+        )}
+
+        {viewingAuthor && (
+          <ViewAuthorModal
+            appElement={componentRef.current!}
+            opened={Boolean(viewingAuthor)}
+            author={viewingAuthor}
+            onClose={() => setViewingAuthor(null)}
           />
         )}
       </div>
