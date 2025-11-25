@@ -64,7 +64,6 @@ enum ViewType {
  *
  *
  * TODO: Really need to figure out how to distinguish authors i.e. "What are they known for - genre, masterpieces, blah"
- * TODO: Also need a detailed page for the author _themself_. Most of that data is in editing.
  * TODO: Validation
  * TODO: Links to bibliography (bibliography can be part of Timeline, and a special tag can be assigned to the event for filtering)
  *
