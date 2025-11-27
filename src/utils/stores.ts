@@ -46,7 +46,7 @@ export class AuthorStores {
     let authors = Array.from(this.internalRegistry.values());
 
     if (deceasedOnly) {
-      authors = authors.filter((author) => !author.deathDate);
+      authors = authors.filter((author) => Boolean(author.deathDate));
     }
 
     if (sort.name) {
