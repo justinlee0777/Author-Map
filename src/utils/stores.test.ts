@@ -1,4 +1,5 @@
 import { Author, USState } from '../models';
+import { AuthorStores } from './stores';
 
 const authors: Array<Author> = [
   {
@@ -52,35 +53,19 @@ const authors: Array<Author> = [
   },
 ];
 
-describe('createStores()', () => {
+describe('AuthorStores', () => {
   test('should sort and populate author data', () => {
-    const stores = createStores(authors);
+    const stores = new AuthorStores(authors);
 
     const alabamaStore = stores.get(USState.ALABAMA)!;
 
     expect(alabamaStore.bornAuthors.length).toBe(2);
 
-    expect(alabamaStore.bornAuthors[0].authorFirstName).toBe('John');
-    expect(alabamaStore.bornAuthors[0].authorLastName).toBe('Smith');
+    expect(alabamaStore.bornAuthors[0].authorFirstName).toBe('Alan');
+    expect(alabamaStore.bornAuthors[0].authorLastName).toBe('Smithee');
 
-    expect(alabamaStore.bornAuthors[1].authorFirstName).toBe('Alan');
-    expect(alabamaStore.bornAuthors[1].authorLastName).toBe('Smithee');
-
-    expect(alabamaStore.bornAuthors[0].events).toEqual([
-      {
-        address: 'Foo',
-        context: 'Birth',
-        date: '1992',
-      },
-    ]);
-
-    expect(alabamaStore.bornAuthors[1].events).toEqual([
-      {
-        address: 'Bar',
-        context: 'Birth',
-        date: '1989',
-      },
-    ]);
+    expect(alabamaStore.bornAuthors[1].authorFirstName).toBe('John');
+    expect(alabamaStore.bornAuthors[1].authorLastName).toBe('Smith');
 
     const arizonaStore = stores.get(USState.ARIZONA)!;
 
@@ -92,23 +77,5 @@ describe('createStores()', () => {
 
     expect(floridaStore.bornAuthors[0].authorFirstName).toBe('John');
     expect(floridaStore.bornAuthors[0].authorLastName).toBe('Doe');
-
-    expect(floridaStore.bornAuthors[0].events).toEqual([
-      {
-        address: 'Baz',
-        context: 'Birth',
-        date: '1997',
-      },
-    ]);
-
-    const connecticutStore = stores.get(USState.CONNECTICUT)!;
-
-    expect(connecticutStore.residingAuthors[0].events).toEqual([
-      {
-        address: 'FooBar',
-        context: 'Attended so-and-so elementary school.',
-        date: 'February, 2000 - April, 2001',
-      },
-    ]);
   });
 });

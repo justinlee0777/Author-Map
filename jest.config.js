@@ -1,7 +1,7 @@
-const { defaults } = require('jest-config');
+import { defaults } from 'jest-config';
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
+export default {
   preset: 'ts-jest',
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {

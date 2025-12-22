@@ -14,6 +14,7 @@ describe('<DynamicList/>', () => {
             </p>
           );
         }}
+        onAdd={() => {}}
         trackItem={({ index }) => index.toString()}
       />,
     );
@@ -67,10 +68,10 @@ describe('<DynamicList/>', () => {
 
   test('should remove items', async () => {
     const onRemove = jest.fn();
-
+    const items = ['foo', 'bar', 'baz'];
     render(
       <DynamicList<string>
-        items={['foo', 'bar', 'baz']}
+        items={items}
         addText="Add"
         ItemTemplate={({ item, index, RemoveButton }) => {
           return (
@@ -92,7 +93,7 @@ describe('<DynamicList/>', () => {
       fireEvent.click(item.querySelector('button')!);
 
       expect(onRemove).toHaveBeenCalledTimes(index + 1);
-      expect(onRemove).toHaveBeenCalledWith(index);
+      expect(onRemove).toHaveBeenCalledWith({ index, item: items[index] });
     });
   });
 });

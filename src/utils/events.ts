@@ -6,7 +6,6 @@ import {
   USState,
 } from '../models';
 import { formatDate } from './dates';
-import { getAuthorName } from './names';
 
 interface EventFilters {
   usState?: USState;
