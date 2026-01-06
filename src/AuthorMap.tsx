@@ -23,6 +23,12 @@ import { ViewAuthorModal } from './components/ViewAuthorModal/ViewAuthorModal';
 interface Props {
   authors: Array<Author>;
 
+  /**
+   * Whether the client should be disabled from adding and editing authors / groups etc.
+   * If a string is provided, this is the error message shown to user explaining why they cannot take any actions.
+   */
+  disabled?: boolean | string;
+
   groups?: Array<AuthorGroup>;
 
   majorEvents?: Array<MilestoneEvent>;
@@ -78,6 +84,7 @@ export function AuthorMap({
   groups = [],
   majorEvents = [],
   className,
+  disabled,
   syncAuthorAdded,
   syncAuthorUpdate,
   onGroupCreated,
@@ -220,10 +227,14 @@ export function AuthorMap({
             appElement={componentRef.current!}
             opened={Boolean(editingAuthor)}
             initialAuthor={editingAuthor}
-            disabled={loading}
+            disabled={loading || disabled}
             onClose={() => setEditingAuthor(null)}
             onGroupCreated={onGroupCreated}
             onSubmit={async (author) => {
+              if (disabled) {
+                return;
+              }
+
               setLoading(true);
 
               const updating = Boolean(author.id);
@@ -263,9 +274,13 @@ export function AuthorMap({
             appElement={componentRef.current!}
             opened={Boolean(editingGroup)}
             initialAuthorGroup={editingGroup}
-            disabled={loading}
+            disabled={loading || disabled}
             onClose={() => setEditingGroup(null)}
             onSubmit={async (group) => {
+              if (disabled) {
+                return;
+              }
+
               setLoading(true);
 
               const updating = Boolean(group.id);
@@ -302,9 +317,13 @@ export function AuthorMap({
             appElement={componentRef.current!}
             opened={Boolean(editingMajorEvent)}
             initialEvent={editingMajorEvent}
-            disabled={loading}
+            disabled={loading || disabled}
             onClose={() => setEditingMajorEvent(null)}
             onSubmit={async (event) => {
+              if (disabled) {
+                return;
+              }
+
               setLoading(true);
 
               const updating = Boolean(event.id);

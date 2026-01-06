@@ -18,12 +18,13 @@ import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
 import { MdClear } from 'react-icons/md';
 import { TimelineEvent as TimelineEventComponent } from './TimelineEvent/TimelineEvent';
 import { AuthorGroupInput } from '../AuthorGroupInput/AuthorGroupInput';
+import { Tooltip } from 'react-tooltip';
 
 interface Props {
   appElement: HTMLElement;
   opened: boolean;
 
-  disabled?: boolean;
+  disabled?: boolean | string;
   onSubmit?: (author: Author) => void | Promise<void>;
   onClose?: () => void;
   onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
@@ -53,6 +54,7 @@ export function EditAuthorModal({
     deathDateId,
     referenceUrlId,
     deceasedId,
+    tooltipId,
   ] = useMemo(
     () => [
       'portraitInput',
@@ -64,6 +66,7 @@ export function EditAuthorModal({
       'deathDateInput',
       'referenceUrlInput',
       'deceasedInput',
+      'editAuthorModalTooltip',
     ],
     [],
   );
@@ -345,9 +348,17 @@ export function EditAuthorModal({
                 }}
               />
 
-              <button type="submit" disabled={!isValid || disabled || loading}>
+              <button
+                type="submit"
+                disabled={!isValid || Boolean(disabled) || loading}
+                data-tooltip-id={tooltipId}
+                data-tooltip-content={String(disabled)}
+                data-tooltip-hidden={typeof disabled !== 'string'}
+              >
                 {loading ? <PulseLoader size="1em" /> : 'Submit'}
               </button>
+
+              <Tooltip id={tooltipId} place="top" />
             </form>
           );
         }}

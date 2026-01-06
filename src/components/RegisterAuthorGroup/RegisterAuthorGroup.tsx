@@ -5,12 +5,13 @@ import { JSX, useMemo, useState } from 'react';
 import { AuthorGroup } from '../../models';
 import { DatePicker } from '../DatePicker/DatePicker';
 import clsx from 'clsx';
+import { Tooltip } from 'react-tooltip';
 
 interface Props {
   id: string;
   value: Partial<AuthorGroup>;
 
-  disabled?: boolean;
+  disabled?: boolean | string;
   onChange?: (value: Partial<AuthorGroup>) => void;
   onSubmit?: (value: AuthorGroup) => void;
 }
@@ -22,17 +23,24 @@ export function RegisterAuthorGroup({
   onChange,
   onSubmit,
 }: Props): JSX.Element {
-  const [nameId, descriptionId, timespanStartId, timespanEndId, linkId] =
-    useMemo(
-      () => [
-        `${id}-name-input`,
-        `${id}-description-input`,
-        `${id}-timespan-start`,
-        `${id}-timespan-end`,
-        `${id}-link-input`,
-      ],
-      [id],
-    );
+  const [
+    nameId,
+    descriptionId,
+    timespanStartId,
+    timespanEndId,
+    linkId,
+    tooltipId,
+  ] = useMemo(
+    () => [
+      `${id}-name-input`,
+      `${id}-description-input`,
+      `${id}-timespan-start`,
+      `${id}-timespan-end`,
+      `${id}-link-input`,
+      `${id}-tooltip`,
+    ],
+    [id],
+  );
 
   const [validity, setValidity] = useState<{
     name: boolean;
@@ -71,7 +79,7 @@ export function RegisterAuthorGroup({
         id={nameId}
         name="name"
         required
-        disabled={disabled}
+        disabled={Boolean(disabled)}
         value={authorGroup.name}
         onInput={(event) =>
           onChange?.({
@@ -103,7 +111,7 @@ export function RegisterAuthorGroup({
         name="description"
         required
         value={authorGroup.description}
-        disabled={disabled}
+        disabled={Boolean(disabled)}
         onInput={(event) =>
           onChange?.({
             ...authorGroup,
@@ -127,7 +135,7 @@ export function RegisterAuthorGroup({
           });
         }}
         id={timespanStartId}
-        disabled={disabled}
+        disabled={Boolean(disabled)}
         value={authorGroup.span?.startDate}
         onChange={(value) => {
           onChange?.({
@@ -155,7 +163,7 @@ export function RegisterAuthorGroup({
           });
         }}
         id={timespanEndId}
-        disabled={disabled}
+        disabled={Boolean(disabled)}
         value={authorGroup.span?.endDate}
         onChange={(value) => {
           onChange?.({
@@ -173,7 +181,7 @@ export function RegisterAuthorGroup({
         id={linkId}
         name="link"
         type="url"
-        disabled={disabled}
+        disabled={Boolean(disabled)}
         onInput={(event) =>
           onChange?.({
             ...authorGroup,
@@ -195,10 +203,15 @@ export function RegisterAuthorGroup({
             onSubmit?.({ ...authorGroupAttributes } as AuthorGroup);
           }
         }}
-        disabled={disabled || !inputsValid}
+        disabled={Boolean(disabled) || !inputsValid}
+        data-tooltip-id={tooltipId}
+        data-tooltip-content={String(disabled)}
+        data-tooltip-hidden={typeof disabled !== 'string'}
       >
         {authorGroup.id ? 'Update' : 'Create'}
       </button>
+
+      <Tooltip id={tooltipId} place="top" />
     </div>
   );
 }

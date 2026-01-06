@@ -9,12 +9,13 @@ import { MdClear } from 'react-icons/md';
 
 import { BaseTimelineEvent, MajorEvent } from '../../models';
 import { TimelineEvent } from '../EditAuthorModal/TimelineEvent/TimelineEvent';
+import { Tooltip } from 'react-tooltip';
 
 interface Props {
   appElement: HTMLElement;
   opened: boolean;
 
-  disabled?: boolean;
+  disabled?: boolean | string;
   onSubmit?: (event: MajorEvent) => void | Promise<void>;
   onClose?: () => void;
   initialEvent?: Partial<MajorEvent>;
@@ -30,7 +31,10 @@ export function EditMajorEventModal({
 }: Props): JSX.Element {
   const [loading, setLoading] = useState(false);
 
-  const [referenceUrlId] = useMemo(() => ['major-event-reference-url'], []);
+  const [referenceUrlId, tooltipId] = useMemo(
+    () => ['major-event-reference-url', 'edit-major-event-modal-tooltip'],
+    [],
+  );
 
   return (
     <Modal isOpen={opened} appElement={appElement}>
@@ -83,9 +87,17 @@ export function EditMajorEventModal({
                 type="url"
               />
 
-              <button type="submit" disabled={!isValid || disabled || loading}>
+              <button
+                type="submit"
+                disabled={!isValid || Boolean(disabled) || loading}
+                data-tooltip-id={tooltipId}
+                data-tooltip-content={String(disabled)}
+                data-tooltip-hidden={typeof disabled !== 'string'}
+              >
                 {loading ? <PulseLoader size="1em" /> : 'Submit'}
               </button>
+
+              <Tooltip id={tooltipId} place="top" />
             </form>
           );
         }}

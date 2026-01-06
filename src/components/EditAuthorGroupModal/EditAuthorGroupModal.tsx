@@ -13,7 +13,7 @@ interface Props {
 
   initialAuthorGroup: Partial<AuthorGroup>;
 
-  disabled?: boolean;
+  disabled?: boolean | string;
   onClose?: () => void;
   onSubmit?: (authorGroup: AuthorGroup) => void | Promise<void>;
 }

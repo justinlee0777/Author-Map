@@ -220,6 +220,7 @@ const App = () => {
 
   return (
     <AuthorMap
+      disabled="Need to be authenticated to add/edit authors."
       className="authorMap"
       authors={authors}
       groups={groups}
