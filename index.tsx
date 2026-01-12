@@ -8,7 +8,7 @@ import {
   MajorEvent,
   USState,
 } from './src/models';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const App = () => {
   const [majorEvents, setMajorEvents] = useState<Array<MajorEvent>>([
@@ -218,66 +218,96 @@ const App = () => {
     },
   ]);
 
+  // Set to 'false' on initial if you want to work with more controlled data during development.
+  const [needsLoading, setNeedsLoading] = useState(false);
+
+  useEffect(() => {
+    if (needsLoading) {
+      (async () => {
+        const baseUrl = `http://localhost:8080`;
+
+        const [authors, authorGroups, majorEvents] = await Promise.all([
+          fetch(`${baseUrl}/api/authors/`).then((response) => response.json()),
+          fetch(`${baseUrl}/api/author-groups/`).then((response) =>
+            response.json(),
+          ),
+          fetch(`${baseUrl}/api/author-major-events/`).then((response) =>
+            response.json(),
+          ),
+        ]);
+
+        setAuthors(authors);
+        setGroups(authorGroups);
+        setMajorEvents(majorEvents);
+
+        setNeedsLoading(false);
+      })();
+    }
+  }, [needsLoading]);
+
   return (
-    <AuthorMap
-      disabled="Need to be authenticated to add/edit authors."
-      className="authorMap"
-      authors={authors}
-      groups={groups}
-      majorEvents={majorEvents}
-      syncAuthorUpdate={async (author) => {
-        console.log('author updated', author);
+    <>
+      {needsLoading && <p>Loading...</p>}
+      <AuthorMap
+        disabled="Need to be authenticated to add/edit authors."
+        className="authorMap"
+        authors={authors}
+        groups={groups}
+        majorEvents={majorEvents}
+        syncAuthorUpdate={async (author) => {
+          console.log('author updated', author);
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }}
-      syncAuthorAdded={(author) => {
-        console.log('author added', author);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }}
+        syncAuthorAdded={(author) => {
+          console.log('author added', author);
 
-        author.id = Symbol();
-      }}
-      onGroupCreated={(group) =>
-        setGroups((currentGroups) =>
-          currentGroups.concat({
-            ...group,
-            id: Symbol(`Group ID for ${group.name}`),
-          }),
-        )
-      }
-      onGroupUpdated={(group) => {
-        setGroups((currentGroups) => {
-          const index = currentGroups.findIndex(
-            (currentGroup) => currentGroup.id === group.id,
-          );
+          author.id = Symbol();
+        }}
+        onGroupCreated={(group) =>
+          setGroups((currentGroups) =>
+            currentGroups.concat({
+              ...group,
+              id: Symbol(`Group ID for ${group.name}`),
+            }),
+          )
+        }
+        onGroupUpdated={(group) => {
+          setGroups((currentGroups) => {
+            const index = currentGroups.findIndex(
+              (currentGroup) => currentGroup.id === group.id,
+            );
 
-          return [
-            ...currentGroups.slice(0, index),
-            group,
-            ...currentGroups.slice(index + 1),
-          ];
-        });
-      }}
-      onMajorEventCreated={(event) =>
-        setMajorEvents((currentEvents) =>
-          currentEvents.concat({
-            ...event,
-            id: Symbol(`Event ID for ${event.notes}`),
-          }),
-        )
-      }
-      onMajorEventUpdated={(event) => {
-        setMajorEvents((currentEvents) => {
-          const index = currentEvents.findIndex(
-            (currentEvent) => currentEvent.id === event.id,
-          );
+            return [
+              ...currentGroups.slice(0, index),
+              group,
+              ...currentGroups.slice(index + 1),
+            ];
+          });
+        }}
+        onMajorEventCreated={(event) =>
+          setMajorEvents((currentEvents) =>
+            currentEvents.concat({
+              ...event,
+              id: Symbol(`Event ID for ${event.notes}`),
+            }),
+          )
+        }
+        onMajorEventUpdated={(event) => {
+          setMajorEvents((currentEvents) => {
+            const index = currentEvents.findIndex(
+              (currentEvent) => currentEvent.id === event.id,
+            );
 
-          return [
-            ...currentEvents.slice(0, index),
-            event,
-            ...currentEvents.slice(index + 1),
-          ];
-        });
-      }}
-    />
+            return [
+              ...currentEvents.slice(0, index),
+              event,
+              ...currentEvents.slice(index + 1),
+            ];
+          });
+        }}
+      />
+    </>
   );
 };
 

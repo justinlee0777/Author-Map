@@ -54,7 +54,9 @@
   flex: 1;
   flex-direction: column;
   gap: 1em;
+  height: 100%;
   min-width: 0;
+  overflow-y: auto;
 }
 
 .authorListViewSettings > h2 {

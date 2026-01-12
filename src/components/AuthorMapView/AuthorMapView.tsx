@@ -116,13 +116,13 @@ export function AuthorMapView({
                   validAreas.has(geography.properties.name as USState),
                 )
                 .map((geography) => {
-                  const stateName = geography.properties.name;
+                  const stateName = geography.properties.name as USState;
 
                   return (
                     <Fragment key={geography.rsmKey}>
                       <Geography
                         data-tooltip-id={tooltipId}
-                        data-tooltip-content={stateName}
+                        data-tooltip-content={`${stateName} (${statesData.get(stateName)[statesDataKey].length})`}
                         geography={geography}
                         style={{
                           default: {

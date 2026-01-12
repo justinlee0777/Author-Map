@@ -21,6 +21,10 @@ export class AuthorStores {
   private map: Map<USState, StateStore>;
   private internalRegistry: Map<Author['id'], Author>;
 
+  get numAuthors(): number {
+    return this.map.size;
+  }
+
   constructor(authors: Array<Author>) {
     this.map = new Map<USState, StateStore>([
       ...Object.values(USState).map(

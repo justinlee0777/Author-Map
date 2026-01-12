@@ -1,6 +1,6 @@
 import styles from './AuthorTimelineView.module.css';
 
-import { Fragment, JSX, useMemo, useState } from 'react';
+import { Fragment, JSX, useEffect, useMemo, useRef, useState } from 'react';
 import { AuthorStores } from '../../utils/stores';
 import clsx from 'clsx';
 import { controlForTimezone, formatDate } from '../../utils/dates';
@@ -13,6 +13,7 @@ import {
   MilestoneEvent,
 } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
+import infiniteScroll from '../../utils/infinite-scroll';
 
 interface Props {
   statesData: AuthorStores;
@@ -27,7 +28,6 @@ interface AppearanceSettings {
 }
 
 /**
- * TODO: Infinite scroll
  * TODO: Filter by months? Allow a day / month / year filter?
  */
 export function AuthorTimelineView({
@@ -35,6 +35,8 @@ export function AuthorTimelineView({
   className,
   majorEvents = [],
 }: Props): JSX.Element {
+  const entriesRef = useRef<HTMLUListElement>(null);
+
   const authorEvents: Array<{ author?: Author; event: MilestoneEvent }> =
     statesData
       .getAll()
@@ -75,97 +77,122 @@ export function AuthorTimelineView({
 
   const [settings, setSettings] = useState<AppearanceSettings>({});
 
-  const eventElements: Array<JSX.Element> = [],
-    eventsIterator = authorEventsByYear.entries();
+  const eventElements: Array<JSX.Element> = useMemo(() => {
+    const temp: Array<JSX.Element> = [];
 
-  let currentEvents = eventsIterator.next();
+    const eventsIterator = authorEventsByYear.entries();
 
-  for (let year = startingYear; year <= endingYear; year++) {
-    let authorEvents;
+    let currentEvents = eventsIterator.next();
 
-    if (currentEvents.value && currentEvents.value[0] === year) {
-      [, authorEvents] = currentEvents.value;
+    for (let year = startingYear; year <= endingYear; year++) {
+      let authorEvents;
 
-      currentEvents = eventsIterator.next();
-    } else if (settings.removeEmptyYears) {
-      continue;
+      if (currentEvents.value && currentEvents.value[0] === year) {
+        [, authorEvents] = currentEvents.value;
+
+        currentEvents = eventsIterator.next();
+      } else if (settings.removeEmptyYears) {
+        continue;
+      }
+
+      temp.push(
+        <li className={styles.authorTimelineViewEntry} key={year}>
+          <h4 className={styles.authorTimelineViewYear}>{year}</h4>
+          <div className={styles.authorTimelineViewEntryBullet}></div>
+          {authorEvents?.map(({ author, event }, i) => {
+            let achievementElement: JSX.Element | undefined;
+
+            if (event.achievement) {
+              switch (event.achievement.type) {
+                case AuthorAchievementType.AWARD:
+                  achievementElement = (
+                    <p>Awarded {event.achievement.awardName}</p>
+                  );
+                  break;
+                case AuthorAchievementType.RENOWNED_WORK:
+                default:
+                  let workTitleElement = (
+                    <span>{event.achievement.workTitle}</span>
+                  );
+
+                  if (event.achievement.referenceUrl) {
+                    workTitleElement = (
+                      <a
+                        href={event.achievement.referenceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {workTitleElement}
+                      </a>
+                    );
+                  }
+
+                  achievementElement = <p>Known work: {workTitleElement} </p>;
+                  break;
+              }
+            }
+
+            return (
+              <Fragment key={i}>
+                <div className={styles.authorTimelineEventDate}>
+                  {formatDate(event.date, event.location?.state, {
+                    dateOnly: true,
+                  })}
+                </div>
+
+                <div className={styles.authorTimelineEntryBisector}></div>
+
+                <div className={styles.authorTimelineViewEntryDetails}>
+                  {author && (
+                    <h4 className={styles.authorTimelineViewAuthorHeader}>
+                      {getAuthorName(author)}
+                      {author.portrait?.src && (
+                        <img
+                          className={styles.authorTimelineViewPortrait}
+                          {...author.portrait}
+                          loading="lazy"
+                        />
+                      )}
+                    </h4>
+                  )}
+
+                  {achievementElement}
+
+                  <p>{event.notes}</p>
+                </div>
+              </Fragment>
+            );
+          })}
+        </li>,
+      );
     }
 
-    eventElements.push(
-      <li className={styles.authorTimelineViewEntry} key={year}>
-        <h4 className={styles.authorTimelineViewYear}>{year}</h4>
-        <div className={styles.authorTimelineViewEntryBullet}></div>
-        {authorEvents?.map(({ author, event }, i) => {
-          let achievementElement: JSX.Element | undefined;
+    return temp;
+  }, [settings]);
 
-          if (event.achievement) {
-            switch (event.achievement.type) {
-              case AuthorAchievementType.AWARD:
-                achievementElement = (
-                  <p>Awarded {event.achievement.awardName}</p>
-                );
-                break;
-              case AuthorAchievementType.RENOWNED_WORK:
-              default:
-                let workTitleElement = (
-                  <span>{event.achievement.workTitle}</span>
-                );
+  const initialEntriesShown = 20;
 
-                if (event.achievement.referenceUrl) {
-                  workTitleElement = (
-                    <a
-                      href={event.achievement.referenceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {workTitleElement}
-                    </a>
-                  );
-                }
+  const [entriesShown, setEntriesShown] = useState(initialEntriesShown);
 
-                achievementElement = <p>Known work: {workTitleElement} </p>;
-                break;
-            }
-          }
+  useEffect(() => {
+    if (entriesRef.current) {
+      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () =>
+        setEntriesShown(
+          Math.min(entriesShown + initialEntriesShown, eventElements.length),
+        ),
+      );
 
-          return (
-            <Fragment key={i}>
-              <div className={styles.authorTimelineEventDate}>
-                {formatDate(event.date, event.location?.state, {
-                  dateOnly: true,
-                })}
-              </div>
-
-              <div className={styles.authorTimelineEntryBisector}></div>
-
-              <div className={styles.authorTimelineViewEntryDetails}>
-                {author && (
-                  <h4 className={styles.authorTimelineViewAuthorHeader}>
-                    {getAuthorName(author)}
-                    {author.portrait?.src && (
-                      <img
-                        className={styles.authorTimelineViewPortrait}
-                        {...author.portrait}
-                        loading="lazy"
-                      />
-                    )}
-                  </h4>
-                )}
-
-                {achievementElement}
-
-                <p>{event.notes}</p>
-              </div>
-            </Fragment>
-          );
-        })}
-      </li>,
-    );
-  }
+      return () => {
+        destroyInfiniteScroll();
+      };
+    }
+  }, [entriesRef.current, entriesShown]);
 
   return (
     <div className={clsx(styles.authorTimelineView, className)}>
-      <ul className={styles.authorTimelineViewEntries}>{eventElements}</ul>
+      <ul className={styles.authorTimelineViewEntries} ref={entriesRef}>
+        {eventElements.slice(0, entriesShown)}
+      </ul>
       <div className={styles.authorTimelineViewSettings}>
         <Radiogroup<keyof AppearanceSettings>
           className={styles.authorTimelineViewAppearance}

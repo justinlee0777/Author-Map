@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -30,6 +31,7 @@ import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 import { AuthorGroupContext } from '../../contexts';
 import { getAuthorName } from '../../utils/names';
+import infiniteScroll from '../../utils/infinite-scroll';
 
 interface Props {
   statesData: AuthorStores;
@@ -88,6 +90,8 @@ export function AuthorListView({
 }: Props): JSX.Element {
   const { groups } = useContext(AuthorGroupContext);
 
+  const entriesRef = useRef<HTMLDivElement>(null);
+
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   const [viewType, setViewType] = useState<AuthorListViewType>(
@@ -136,6 +140,24 @@ export function AuthorListView({
     }
   }, [filteringGroup, groups]);
 
+  const initialEntriesShown = 5;
+
+  const [entriesShown, setEntriesShown] = useState(initialEntriesShown);
+
+  useEffect(() => {
+    if (entriesRef.current) {
+      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () =>
+        setEntriesShown(
+          Math.min(entriesShown + initialEntriesShown, statesData.numAuthors),
+        ),
+      );
+
+      return () => {
+        destroyInfiniteScroll();
+      };
+    }
+  }, [entriesRef.current, entriesShown]);
+
   let filterElements: Array<JSX.Element>;
 
   switch (viewType) {
@@ -151,7 +173,10 @@ export function AuthorListView({
             label: value,
           }))}
           selected={sortType}
-          onChange={setSortType}
+          onChange={(value) => {
+            setEntriesShown(initialEntriesShown);
+            setSortType(value);
+          }}
         />,
       ];
       break;
@@ -258,7 +283,9 @@ export function AuthorListView({
 
   return (
     <div className={styles.authorListView}>
-      <div className={styles.authorListViewEntries}>{listElements}</div>
+      <div className={styles.authorListViewEntries} ref={entriesRef}>
+        {listElements.slice(0, entriesShown)}
+      </div>
       <div className={styles.authorListViewSettings}>
         <h2>Appearance</h2>
         <Tabs<AuthorListViewType>
