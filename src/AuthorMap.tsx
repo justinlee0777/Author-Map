@@ -68,9 +68,9 @@ enum ViewType {
  * TODO: There is a strategy to block data change if the external datastore fails, but there also needs to be a fallback strategy
  * if the client prefers to update now and correct later.
  *
+ * TODO: If author residence dates are recorded, then we can do month / year filters of "who was in this state at so and so time"
  *
  * TODO: Really need to figure out how to distinguish authors i.e. "What are they known for - genre, masterpieces, blah"
- * TODO: Validation
  * TODO: Links to bibliography (bibliography can be part of Timeline, and a special tag can be assigned to the event for filtering)
  *
  * TODO: Genre (History / Philosophy / Fiction / Poetry)
