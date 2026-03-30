@@ -51,6 +51,7 @@
 
 .authorTimelineEventDate {
   grid-column: 1;
+  padding-top: 1em;
 }
 
 .authorTimelineEntryBisector {
@@ -72,7 +73,7 @@
   align-self: flex-start;
   justify-self: start;
   gap: 1em;
-  padding-bottom: 1em;
+  padding-top: 1em;
 }
 
 .authorTimelineViewEntryDetails > p {
