@@ -127,7 +127,7 @@ export function AuthorMapView({
         marker,
       };
     });
-  }, [cityCoordinates, tooltipId, toCityID, setHighlightedCity]);
+  }, [filters, cityCoordinates, tooltipId, toCityID, setHighlightedCity]);
 
   const stateDrawerElement = useMemo(() => {
     let title: string | undefined,
