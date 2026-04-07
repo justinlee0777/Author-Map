@@ -20,13 +20,7 @@ import {
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
-import {
-  Author,
-  AuthorEventType,
-  AuthorGroup,
-  StateStore,
-  USState,
-} from '../../models';
+import { Author, AuthorEventType, AuthorGroup, USState } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 import { AuthorGroupContext } from '../../contexts';
@@ -200,20 +194,6 @@ export function AuthorListView({
       break;
   }
 
-  let statesDataKey: keyof StateStore;
-
-  switch (authorEventType) {
-    case AuthorEventType.BIRTHS:
-      statesDataKey = 'bornAuthors';
-      break;
-    case AuthorEventType.DEATHS:
-      statesDataKey = 'deceasedAuthors';
-      break;
-    default:
-      statesDataKey = 'residingAuthors';
-      break;
-  }
-
   let listElements: Array<JSX.Element>;
 
   switch (viewType) {
@@ -252,7 +232,7 @@ export function AuthorListView({
     }
     case AuthorListViewType.STATE: {
       listElements = Object.values(USState).map((usState) => {
-        let authors = statesData.get(usState)[statesDataKey];
+        let authors = statesData.getAuthors(usState, authorEventType);
 
         authors = filterAuthors(authors);
 

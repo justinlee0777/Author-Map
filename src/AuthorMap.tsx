@@ -4,7 +4,13 @@ import commonStyles from './common.module.css';
 import { useMemo, useRef, useState, JSX } from 'react';
 import clsx from 'clsx';
 
-import { Author, AuthorGroup, MajorEvent, MilestoneEvent } from './models';
+import {
+  Author,
+  AuthorGroup,
+  CityCoordinates,
+  MajorEvent,
+  MilestoneEvent,
+} from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { AuthorStores } from './utils/stores';
 import { Tabs } from './components/Tabs/Tabs';
@@ -32,6 +38,8 @@ interface Props {
   groups?: Array<AuthorGroup>;
 
   majorEvents?: Array<MilestoneEvent>;
+
+  cityCoordinates?: Array<CityCoordinates>;
 
   className?: string;
   /**
@@ -70,6 +78,9 @@ enum ViewType {
  *
  * TODO: If author residence dates are recorded, then we can do month / year filters of "who was in this state at so and so time"
  *
+ * TODO: Need a flag to distinguish which author milestones should be shown on the timeline
+ * Filter timeline by births / deaths / milestones
+ * TODO: Books and Timeline Events model
  * TODO: Really need to figure out how to distinguish authors i.e. "What are they known for - genre, masterpieces, blah"
  * TODO: Links to bibliography (bibliography can be part of Timeline, and a special tag can be assigned to the event for filtering)
  *
@@ -83,6 +94,7 @@ export function AuthorMap({
   authors,
   groups = [],
   majorEvents = [],
+  cityCoordinates = [],
   className,
   disabled,
   syncAuthorAdded,
@@ -123,6 +135,7 @@ export function AuthorMap({
       viewElement = (
         <AuthorMapView
           statesData={statesData}
+          cityCoordinates={cityCoordinates}
           onAuthorEdit={setEditingAuthor}
         />
       );

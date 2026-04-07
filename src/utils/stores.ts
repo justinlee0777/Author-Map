@@ -1,5 +1,6 @@
 import {
   Author,
+  AuthorEventType,
   MilestoneEvent,
   StateStore,
   TimelineEvent,
@@ -85,6 +86,29 @@ export class AuthorStores {
 
   get(state: USState): StateStore {
     return this.map.get(state)!;
+  }
+
+  getAuthors(
+    state: USState,
+    eventType?: AuthorEventType,
+    address?: string,
+  ): Array<Author> {
+    const stateData = this.get(state);
+
+    switch (eventType) {
+      case AuthorEventType.BIRTHS:
+        return stateData.bornAuthors.filter(
+          (author) => author.birthDate.location?.address === address,
+        );
+      case AuthorEventType.DEATHS:
+        return stateData.deceasedAuthors.filter(
+          (author) => author.deathDate?.location?.address === address,
+        );
+      default:
+        return stateData.residingAuthors.filter((author) =>
+          this.hasAuthorResided(author, state, address),
+        );
+    }
   }
 
   add(author: Author): void {
@@ -187,6 +211,38 @@ export class AuthorStores {
 
       this.internalRegistry.delete(authorId);
     }
+  }
+
+  private hasAuthorResided(
+    author: Author,
+    usState: USState,
+    address?: string,
+  ): boolean {
+    let fullTimeline = [author.birthDate, ...author.timeline];
+
+    if (author.deathDate) {
+      fullTimeline = fullTimeline.concat(author.deathDate);
+    }
+
+    return fullTimeline.some((event) => {
+      const { location } = event;
+
+      if (location) {
+        if (location.state) {
+          const value = location.state === usState;
+
+          if (address) {
+            return value && location.address === address;
+          } else {
+            return value;
+          }
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    });
   }
 }
 

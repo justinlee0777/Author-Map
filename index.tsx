@@ -254,6 +254,15 @@ const App = () => {
         authors={authors}
         groups={groups}
         majorEvents={majorEvents}
+        cityCoordinates={[
+          {
+            location: {
+              state: USState.NEW_YORK,
+              address: 'New York City',
+            },
+            coordinates: [-74.006, 40.7128],
+          },
+        ]}
         syncAuthorUpdate={async (author) => {
           console.log('author updated', author);
 

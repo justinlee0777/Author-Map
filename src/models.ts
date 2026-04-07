@@ -169,6 +169,7 @@ export interface AuthorAwardAchievement {
 
 export type AuthorAchievement = AuthorWorkAchievement | AuthorAwardAchievement;
 export interface BaseTimelineEvent {
+  authorId?: Author['id'];
   location?: AuthorLocation;
   /** Additional comments on the event. */
   notes?: string;
@@ -240,4 +241,9 @@ export interface StateStore {
   bornAuthors: Array<Author>;
   deceasedAuthors: Array<Author>;
   residingAuthors: Array<Author>;
+}
+
+export interface CityCoordinates {
+  coordinates: [number, number];
+  location: Required<AuthorLocation>;
 }

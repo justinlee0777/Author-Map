@@ -3,17 +3,16 @@ import commonStyles from '../../common.module.css';
 
 import clsx from 'clsx';
 import { JSX, ReactNode, useMemo } from 'react';
-import { Author, AuthorEventType, StateStore, USState } from '../../models';
-import { AuthorStores, createKeyGenerator } from '../../utils/stores';
-import { MdAdd, MdClose } from 'react-icons/md';
+import { Author, AuthorEventType } from '../../models';
+import { createKeyGenerator } from '../../utils/stores';
+import { MdClose } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { AddAuthor } from '../AddAuthor/AddAuthor';
 
 interface Props {
-  usState: USState;
-  statesData: AuthorStores;
-  statesDataKey: keyof StateStore;
+  title: string;
+  authors: Array<Author>;
 
   eventType?: AuthorEventType;
   showContext?: boolean;
@@ -23,9 +22,8 @@ interface Props {
 }
 
 export function StateDrawer({
-  usState,
-  statesData,
-  statesDataKey,
+  title,
+  authors,
   eventType,
   showContext,
   onClose,
@@ -38,7 +36,7 @@ export function StateDrawer({
     <div className={clsx(styles.stateDrawerUSState, commonStyles.sideDrawer)}>
       <AddAuthor className={styles.stateDrawerAdd} onClick={onAddAuthor} />
       <h3>
-        {usState}
+        {title}
 
         <button
           className={clsx(commonStyles.button, styles.stateDrawerClose)}
@@ -48,7 +46,7 @@ export function StateDrawer({
         </button>
       </h3>
       <div className={styles.stateDrawerList}>
-        {statesData.get(usState)![statesDataKey].map((author, i) => {
+        {authors.map((author) => {
           let authorName: ReactNode = getAuthorName(author);
 
           if (author.link) {

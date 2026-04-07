@@ -6,12 +6,20 @@ import {
   ComposableMap,
   Geographies,
   Geography,
+  Marker,
   ZoomableGroup,
 } from 'react-simple-maps';
+import { Tooltip } from 'react-tooltip';
 
 import { geography } from '../../consts/states.const';
-import { Author, AuthorEventType, StateStore, USState } from '../../models';
-import { Tooltip } from 'react-tooltip';
+import {
+  Author,
+  AuthorEventType,
+  AuthorLocation,
+  CityCoordinates,
+  StateStore,
+  USState,
+} from '../../models';
 import { StateDrawer } from '../StateDrawer/StateDrawer';
 import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
@@ -35,12 +43,14 @@ interface Filters {
 
 interface Props {
   statesData: AuthorStores;
+  cityCoordinates: Array<CityCoordinates>;
 
   onAuthorEdit?: (author: Partial<Author>) => void;
 }
 
 export function AuthorMapView({
   statesData,
+  cityCoordinates,
   onAuthorEdit,
 }: Props): JSX.Element {
   const tooltipId = useMemo(() => 'state-labels-tooltip', []);
@@ -70,6 +80,14 @@ export function AuthorMapView({
     [STATE_COLORS],
   );
 
+  const toCityID = useCallback(({ address, state }: AuthorLocation) => {
+    if (address) {
+      return `${state}-${address}`.replaceAll(/ /g, '-');
+    } else {
+      return null;
+    }
+  }, []);
+
   const [position, setPosition] = useState<MapPosition>({
     coordinates: [-97, 38],
     zoom: 1,
@@ -79,21 +97,101 @@ export function AuthorMapView({
     null,
   );
 
-  const [filters, setFilters] = useState<Filters>({});
+  const [highlightedCity, setHighlightedCity] =
+    useState<Required<AuthorLocation> | null>(null);
 
-  let statesDataKey: keyof StateStore;
+  const [filters, setFilters] = useState<Filters>({
+    eventType: AuthorEventType.BIRTHS,
+  });
 
-  switch (filters.eventType) {
-    case AuthorEventType.BIRTHS:
-      statesDataKey = 'bornAuthors';
-      break;
-    case AuthorEventType.DEATHS:
-      statesDataKey = 'deceasedAuthors';
-      break;
-    default:
-      statesDataKey = 'residingAuthors';
-      break;
-  }
+  const renderedCityCoordinates: Array<
+    CityCoordinates & { marker: JSX.Element }
+  > = useMemo(() => {
+    return cityCoordinates.map((cityCoordinate) => {
+      const { location, coordinates } = cityCoordinate;
+
+      const marker = (
+        <Marker
+          key={toCityID(location)}
+          coordinates={coordinates}
+          data-tooltip-id={tooltipId}
+          data-tooltip-content={`${location.address}, ${location.state} (${statesData.getAuthors(location.state, filters.eventType, location.address).length})`}
+          onClick={() => setHighlightedCity(location)}
+        >
+          <circle r={5} fill="#000" />
+        </Marker>
+      );
+
+      return {
+        ...cityCoordinate,
+        marker,
+      };
+    });
+  }, [cityCoordinates, tooltipId, toCityID, setHighlightedCity]);
+
+  const stateDrawerElement = useMemo(() => {
+    let title: string | undefined,
+      authors: Array<Author> | undefined,
+      state: USState | undefined;
+
+    if (highlightedState) {
+      title = highlightedState;
+      authors = statesData.getAuthors(highlightedState);
+      state = highlightedState;
+    } else if (highlightedCity) {
+      title = `${highlightedCity.address}, ${highlightedCity.state}`;
+      authors = statesData.getAuthors(
+        highlightedCity.state,
+        filters.eventType,
+        highlightedCity.address,
+      );
+      state = highlightedCity.state;
+    }
+
+    if (title && authors) {
+      return (
+        <StateDrawer
+          title={title}
+          authors={authors}
+          eventType={filters.eventType}
+          showContext={!filters.eventType}
+          onClose={() => {
+            setHighlightedState(null);
+            setHighlightedCity(null);
+          }}
+          onEdit={onAuthorEdit}
+          onAddAuthor={() => {
+            onAuthorEdit?.({
+              authorFirstName: '',
+              authorLastName: '',
+              authorFullName: '',
+              timeline: [],
+              portrait: {
+                src: '',
+              },
+              birthDate: {
+                date: '',
+                location: {
+                  address: '',
+                  state,
+                },
+              },
+            });
+          }}
+        />
+      );
+    } else {
+      return <></>;
+    }
+  }, [
+    statesData,
+    highlightedState,
+    highlightedCity,
+    filters,
+    setHighlightedState,
+    setHighlightedCity,
+    onAuthorEdit,
+  ]);
 
   return (
     <>
@@ -122,7 +220,7 @@ export function AuthorMapView({
                     <Fragment key={geography.rsmKey}>
                       <Geography
                         data-tooltip-id={tooltipId}
-                        data-tooltip-content={`${stateName} (${statesData.get(stateName)[statesDataKey].length})`}
+                        data-tooltip-content={`${stateName} (${statesData.getAuthors(stateName, filters.eventType).length})`}
                         geography={geography}
                         style={{
                           default: {
@@ -153,6 +251,7 @@ export function AuthorMapView({
                 });
             }}
           </Geographies>
+          {renderedCityCoordinates.map(({ marker }) => marker)}
         </ZoomableGroup>
       </ComposableMap>
       <Tooltip
@@ -161,35 +260,7 @@ export function AuthorMapView({
         place="right"
         noArrow
       />
-      {highlightedState && (
-        <StateDrawer
-          usState={highlightedState}
-          statesData={statesData}
-          statesDataKey={statesDataKey}
-          eventType={filters.eventType}
-          showContext={!filters.eventType}
-          onClose={() => setHighlightedState(null)}
-          onEdit={onAuthorEdit}
-          onAddAuthor={() => {
-            onAuthorEdit?.({
-              authorFirstName: '',
-              authorLastName: '',
-              authorFullName: '',
-              timeline: [],
-              portrait: {
-                src: '',
-              },
-              birthDate: {
-                date: '',
-                location: {
-                  address: '',
-                  state: highlightedState,
-                },
-              },
-            });
-          }}
-        />
-      )}
+      {stateDrawerElement}
       <Tabs<AuthorEventType>
         className={clsx(
           commonStyles.floatingAction,
