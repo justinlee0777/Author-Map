@@ -71,6 +71,20 @@ export function AuthorMapView({
     [],
   );
 
+  const MARKER_COLORS = useMemo(
+    () => [
+      '#1E90FF',
+      '#FF7A18',
+      '#E6007A',
+      '#A3FF12',
+      '#00E5FF',
+      '#FF2D2D',
+      '#7C4DFF',
+      '#FFD400',
+    ],
+    [],
+  );
+
   const getColor = useCallback(
     (stateName: string) => {
       return STATE_COLORS[
@@ -107,27 +121,51 @@ export function AuthorMapView({
   const renderedCityCoordinates: Array<
     CityCoordinates & { marker: JSX.Element }
   > = useMemo(() => {
-    return cityCoordinates.map((cityCoordinate) => {
-      const { location, coordinates } = cityCoordinate;
+    return cityCoordinates.reduce(
+      (acc, cityCoordinate, i) => {
+        const { location, coordinates } = cityCoordinate;
+        const numAuthors = statesData.getAuthors(
+          location.state,
+          filters.eventType,
+          location.address,
+        ).length;
 
-      const marker = (
-        <Marker
-          key={toCityID(location)}
-          coordinates={coordinates}
-          data-tooltip-id={tooltipId}
-          data-tooltip-content={`${location.address}, ${location.state} (${statesData.getAuthors(location.state, filters.eventType, location.address).length})`}
-          onClick={() => setHighlightedCity(location)}
-        >
-          <circle r={5} fill="#000" />
-        </Marker>
-      );
+        if (numAuthors > 0) {
+          const marker = (
+            <Marker
+              key={toCityID(location)}
+              coordinates={coordinates}
+              data-tooltip-id={tooltipId}
+              data-tooltip-content={`${location.address}, ${location.state} (${numAuthors})`}
+              onClick={() => setHighlightedCity(location)}
+            >
+              <circle
+                r={1.5}
+                fill={MARKER_COLORS[i % MARKER_COLORS.length]}
+                stroke="black"
+                strokeWidth={0.5}
+              />
+            </Marker>
+          );
 
-      return {
-        ...cityCoordinate,
-        marker,
-      };
-    });
-  }, [filters, cityCoordinates, tooltipId, toCityID, setHighlightedCity]);
+          return acc.concat({
+            ...cityCoordinate,
+            marker,
+          });
+        } else {
+          return acc;
+        }
+      },
+      [] as Array<CityCoordinates & { marker: JSX.Element }>,
+    );
+  }, [
+    MARKER_COLORS,
+    filters,
+    cityCoordinates,
+    tooltipId,
+    toCityID,
+    setHighlightedCity,
+  ]);
 
   const stateDrawerElement = useMemo(() => {
     let title: string | undefined,
