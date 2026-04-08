@@ -98,15 +98,19 @@ export class AuthorStores {
     switch (eventType) {
       case AuthorEventType.BIRTHS:
         return stateData.bornAuthors.filter(
-          (author) => author.birthDate.location?.address === address,
+          (author) =>
+            !Boolean(address) || author.birthDate.location?.address === address,
         );
       case AuthorEventType.DEATHS:
         return stateData.deceasedAuthors.filter(
-          (author) => author.deathDate?.location?.address === address,
+          (author) =>
+            !Boolean(address) ||
+            author.deathDate?.location?.address === address,
         );
       default:
-        return stateData.residingAuthors.filter((author) =>
-          this.hasAuthorResided(author, state, address),
+        return stateData.residingAuthors.filter(
+          (author) =>
+            !Boolean(address) || this.hasAuthorResided(author, state, address),
         );
     }
   }

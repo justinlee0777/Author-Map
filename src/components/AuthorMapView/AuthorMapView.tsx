@@ -137,7 +137,10 @@ export function AuthorMapView({
               coordinates={coordinates}
               data-tooltip-id={tooltipId}
               data-tooltip-content={`${location.address}, ${location.state} (${numAuthors})`}
-              onClick={() => setHighlightedCity(location)}
+              onClick={() => {
+                setHighlightedCity(location);
+                setHighlightedState(null);
+              }}
             >
               <circle
                 r={1.5}
@@ -165,6 +168,7 @@ export function AuthorMapView({
     tooltipId,
     toCityID,
     setHighlightedCity,
+    setHighlightedState,
   ]);
 
   const stateDrawerElement = useMemo(() => {
@@ -174,7 +178,7 @@ export function AuthorMapView({
 
     if (highlightedState) {
       title = highlightedState;
-      authors = statesData.getAuthors(highlightedState);
+      authors = statesData.getAuthors(highlightedState, filters.eventType);
       state = highlightedState;
     } else if (highlightedCity) {
       title = `${highlightedCity.address}, ${highlightedCity.state}`;
@@ -282,6 +286,7 @@ export function AuthorMapView({
                         }}
                         onClick={() => {
                           setHighlightedState(stateName as USState);
+                          setHighlightedCity(null);
                         }}
                       />
                     </Fragment>
