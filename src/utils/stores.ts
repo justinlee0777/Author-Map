@@ -177,11 +177,11 @@ export class AuthorMapStores {
     }
   }
 
-  getBirthDate(authorId: Author['id']): AuthorTimelineEvent | undefined {
+  getBirthDate(authorId: Author['id']): BirthEvent | undefined {
     return this.birthEventsByAuthor.get(authorId);
   }
 
-  getDeathDate(authorId: Author['id']): AuthorTimelineEvent | undefined {
+  getDeathDate(authorId: Author['id']): DeathEvent | undefined {
     return this.deathEventsByAuthor.get(authorId);
   }
 
@@ -214,16 +214,7 @@ export class AuthorMapStores {
         }
       }
 
-      this.addTimelineEvent({
-        ...birthEvent,
-        type: 'Milestone',
-        id: Symbol(`Birth of ${getAuthorName(author)}`),
-      });
-
-      fullTimeline = [
-        { ...birthEvent, notes: 'Birth', type: 'Milestone' },
-        ...fullTimeline,
-      ];
+      fullTimeline = [birthEvent, ...fullTimeline];
     }
 
     // Death state
@@ -249,16 +240,7 @@ export class AuthorMapStores {
         }
       }
 
-      this.addTimelineEvent({
-        ...deathEvent,
-        type: 'Milestone',
-        id: Symbol(`Death of ${getAuthorName(author)}`),
-      });
-
-      fullTimeline = [
-        ...fullTimeline,
-        { ...deathEvent, notes: 'Death', type: 'Milestone' },
-      ];
+      fullTimeline = [...fullTimeline, deathEvent];
     }
 
     // Residing states
@@ -321,6 +303,12 @@ export class AuthorMapStores {
       }
 
       authorTimeline.set(event.id, event);
+
+      if (event.type === 'Birth') {
+        this.birthEventsByAuthor.set(event.authorId, event);
+      } else if (event.type === 'Death') {
+        this.deathEventsByAuthor.set(event.authorId, event);
+      }
     } else {
       this.majorEvents.set(event.id, event);
     }
@@ -365,7 +353,10 @@ export class AuthorMapStores {
 
     this.majorEvents = new Map(sortedMajorEvents);
 
-    sortedBy(this.allEvents, this.getTimelineEventSortingAttribute);
+    this.allEvents = sortedBy(
+      this.allEvents,
+      this.getTimelineEventSortingAttribute,
+    );
   }
 
   private getTimelineEventSortingAttribute = (
@@ -373,6 +364,8 @@ export class AuthorMapStores {
   ): Date => {
     switch (event.type) {
       case 'Milestone':
+      case 'Birth':
+      case 'Death':
         return new Date(event.date);
       case 'Timeline':
         return new Date(event.startDate);

@@ -70,7 +70,7 @@ export function EditAuthorModal({
     ],
     [],
   );
-
+  /*
   const TimelineEventField: (props: TimelineEventProps) => JSX.Element =
     useMemo(() => {
       return ({ item, index, RemoveButton }) => {
@@ -138,6 +138,7 @@ export function EditAuthorModal({
         );
       };
     }, []);
+  */
 
   const BirthField: ({ item }: { item: MilestoneEvent }) => JSX.Element =
     useMemo(() => {
@@ -200,7 +201,7 @@ export function EditAuthorModal({
         }}
       >
         {({ handleSubmit, values, handleChange, setFieldValue, isValid }) => {
-          const timeline = values.timeline ?? [];
+          // const timeline = values.timeline ?? [];
 
           return (
             <form className={styles.editAuthorForm} onSubmit={handleSubmit}>
@@ -277,7 +278,7 @@ export function EditAuthorModal({
                 value={values.link}
                 onChange={handleChange}
               />
-
+              {/*
               <BirthField item={values.birthDate!} />
 
               <div className={styles.editAuthorDeceasedRow}>
@@ -328,6 +329,7 @@ export function EditAuthorModal({
                   ]);
                 }}
               />
+              */}
 
               <h4>Groups</h4>
 

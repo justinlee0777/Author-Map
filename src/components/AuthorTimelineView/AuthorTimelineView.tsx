@@ -14,11 +14,10 @@ import clsx from 'clsx';
 import { controlForTimezone, formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
 import {
-  Author,
   AuthorAchievementType,
   AuthorGroup,
   AuthorTimelineEvent,
-  MilestoneEvent,
+  TimelineEvent,
 } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import infiniteScroll from '../../utils/infinite-scroll';
@@ -41,9 +40,16 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
 
   const entriesRef = useRef<HTMLUListElement>(null);
 
-  const timelineEvents = statesData.timelineEvents.filter(
-    (event) => event.type === 'Milestone',
-  ) as Array<MilestoneEvent>;
+  const timelineEvents = statesData.timelineEvents.filter((event) => {
+    switch (event.type) {
+      case 'Birth':
+      case 'Death':
+      case 'Milestone':
+        return true;
+      default:
+        return false;
+    }
+  }) as Array<Exclude<AuthorTimelineEvent, TimelineEvent>>;
 
   const firstDate = timelineEvents.at(0)!;
 
@@ -123,6 +129,20 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
               }
             }
 
+            let note: string;
+
+            switch (event.type) {
+              case 'Birth':
+                note = 'Birth';
+                break;
+              case 'Death':
+                note = 'Death';
+                break;
+              default:
+                note = event.notes ?? '';
+                break;
+            }
+
             return (
               <Fragment key={i}>
                 <div className={styles.authorTimelineEventDate}>
@@ -149,7 +169,7 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
 
                   {achievementElement}
 
-                  <p>{event.notes}</p>
+                  <p>{note}</p>
                 </div>
               </Fragment>
             );

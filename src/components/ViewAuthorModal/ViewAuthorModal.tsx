@@ -41,6 +41,9 @@ export function ViewAuthorModal({
     .getAuthorTimeline(author)
     .filter((event) => Boolean(event.achievement)) as Array<MilestoneEvent>;
 
+  const birthDate = data.getBirthDate(author.id),
+    deathDate = data.getDeathDate(author.id);
+
   return (
     <Modal isOpen={opened} appElement={appElement}>
       <div className={styles.viewAuthorModal}>
@@ -60,21 +63,21 @@ export function ViewAuthorModal({
         <h4>Name</h4>
         <p>{authorNameElement}</p>
 
-        <h4>Birth</h4>
-        <p>{formatDate(author.birthDate.date)}</p>
-        {author.birthDate.location && (
-          <p>{getAddress(author.birthDate.location)}</p>
+        {birthDate && (
+          <>
+            <h4>Birth</h4>
+            <p>{formatDate(birthDate.date)}</p>
+            {birthDate.location && <p>{getAddress(birthDate.location)}</p>}
+            {birthDate.notes && <p>{birthDate.notes}</p>}
+          </>
         )}
-        {author.birthDate.notes && <p>{author.birthDate.notes}</p>}
 
-        {author.deathDate && (
+        {deathDate && (
           <>
             <h4>Death</h4>
-            <p>{formatDate(author.deathDate.date)}</p>
-            {author.deathDate.location && (
-              <p>{getAddress(author.deathDate.location)}</p>
-            )}
-            {author.deathDate.notes && <p>{author.deathDate.notes}</p>}
+            <p>{formatDate(deathDate.date)}</p>
+            {deathDate.location && <p>{getAddress(deathDate.location)}</p>}
+            {deathDate.notes && <p>{deathDate.notes}</p>}
           </>
         )}
 

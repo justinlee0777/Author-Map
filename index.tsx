@@ -241,16 +241,15 @@ const App = () => {
       (async () => {
         const baseUrl = `http://localhost:8080`;
 
-        const [{ authors, groups, majorEvents, coordinates }] =
-          await Promise.all([
-            fetch(`${baseUrl}/api/author-map/`).then((response) =>
-              response.json(),
-            ),
-          ]);
+        const [{ authors, groups, timeline, coordinates }] = await Promise.all([
+          fetch(`${baseUrl}/api/author-map/`).then((response) =>
+            response.json(),
+          ),
+        ]);
 
         setAuthors(authors);
         setGroups(groups);
-        setTimeline(majorEvents);
+        setTimeline(timeline);
         setCityCoordinates(coordinates);
 
         setNeedsLoading(false);

@@ -7,7 +7,7 @@ import Modal from 'react-modal';
 import { PulseLoader } from 'react-spinners';
 import { MdClear } from 'react-icons/md';
 
-import { BaseTimelineEvent, MajorEvent } from '../../models';
+import { BaseTimelineEvent, MilestoneEvent } from '../../models';
 import { TimelineEvent } from '../EditAuthorModal/TimelineEvent/TimelineEvent';
 import { Tooltip } from 'react-tooltip';
 
@@ -16,9 +16,9 @@ interface Props {
   opened: boolean;
 
   disabled?: boolean | string;
-  onSubmit?: (event: MajorEvent) => void | Promise<void>;
+  onSubmit?: (event: MilestoneEvent) => void | Promise<void>;
   onClose?: () => void;
-  initialEvent?: Partial<MajorEvent>;
+  initialEvent?: Partial<MilestoneEvent>;
 }
 
 export function EditMajorEventModal({
@@ -38,13 +38,13 @@ export function EditMajorEventModal({
 
   return (
     <Modal isOpen={opened} appElement={appElement}>
-      <Formik<Partial<MajorEvent>>
+      <Formik<Partial<MilestoneEvent>>
         initialValues={initialEvent}
         onSubmit={async (finalEvent) => {
           setLoading(true);
 
           try {
-            await onSubmit?.(finalEvent as MajorEvent);
+            await onSubmit?.(finalEvent as MilestoneEvent);
           } finally {
             setLoading(false);
           }

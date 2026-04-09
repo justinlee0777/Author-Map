@@ -2,13 +2,14 @@ import styles from './StateDrawer.module.css';
 import commonStyles from '../../common.module.css';
 
 import clsx from 'clsx';
-import { JSX, ReactNode, useMemo } from 'react';
-import { Author, AuthorEventType, MilestoneEvent } from '../../models';
+import { JSX, ReactNode, useContext, useMemo } from 'react';
+import { Author, AuthorEventType, AuthorTimelineEvent } from '../../models';
 import { createKeyGenerator } from '../../utils/stores';
 import { MdClose } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { AddAuthor } from '../AddAuthor/AddAuthor';
+import { AuthorMapDataContext } from '../../contexts';
 
 interface Props {
   title: string;
@@ -30,6 +31,8 @@ export function StateDrawer({
   onEdit,
   onAddAuthor,
 }: Props): JSX.Element {
+  const { data } = useContext(AuthorMapDataContext);
+
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   return (
@@ -57,15 +60,20 @@ export function StateDrawer({
             );
           }
 
-          let events: Array<Omit<MilestoneEvent, 'id' | 'type'>> = [];
+          const birthDate = data.getBirthDate(author.id),
+            deathDate = data.getDeathDate(author.id);
+
+          let events: Array<AuthorTimelineEvent> = [];
 
           switch (eventType) {
             case AuthorEventType.BIRTHS:
-              events = [author.birthDate];
+              if (birthDate) {
+                events = [birthDate];
+              }
               break;
             case AuthorEventType.DEATHS:
-              if (author.deathDate) {
-                events = [author.deathDate];
+              if (deathDate) {
+                events = [deathDate];
               }
               break;
           }
