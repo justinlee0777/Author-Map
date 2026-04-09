@@ -4,15 +4,15 @@ import commonStyles from './common.module.css';
 import { useMemo, useRef, useState, JSX } from 'react';
 import clsx from 'clsx';
 
-import {
+import type {
   Author,
   AuthorGroup,
+  AuthorTimelineEvent,
   CityCoordinates,
-  MajorEvent,
   MilestoneEvent,
 } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
-import { AuthorStores } from './utils/stores';
+import { AuthorMapStores } from './utils/stores';
 import { Tabs } from './components/Tabs/Tabs';
 import { AuthorMapView } from './components/AuthorMapView/AuthorMapView';
 import { AuthorListView } from './components/AuthorListView/AuthorListView';
@@ -20,7 +20,7 @@ import { getAuthorName } from './utils/names';
 import { AuthorTimelineView } from './components/AuthorTimelineView/AuthorTimelineView';
 import { AddAuthor } from './components/AddAuthor/AddAuthor';
 import { AddAuthorGroup } from './components/AddAuthorGroup/AddAuthorGroup';
-import { AuthorGroupContext } from './contexts';
+import { AuthorGroupContext, AuthorMapDataContext } from './contexts';
 import { EditAuthorGroupModal } from './components/EditAuthorGroupModal/EditAuthorGroupModal';
 import { AddMajorEvent } from './components/AddMajorEvent/AddMajorEvent';
 import { EditMajorEventModal } from './components/EditMajorEventModal/EditMajorEventModal';
@@ -37,7 +37,7 @@ interface Props {
 
   groups?: Array<AuthorGroup>;
 
-  majorEvents?: Array<MilestoneEvent>;
+  timeline?: Array<AuthorTimelineEvent>;
 
   cityCoordinates?: Array<CityCoordinates>;
 
@@ -58,9 +58,9 @@ interface Props {
 
   onGroupUpdated?: (authorGroup: AuthorGroup) => void | Promise<void>;
 
-  onMajorEventCreated?: (event: MajorEvent) => void | Promise<void>;
+  onTimelineEventCreated?: (event: AuthorTimelineEvent) => void | Promise<void>;
 
-  onMajorEventUpdated?: (event: MajorEvent) => void | Promise<void>;
+  onTimelineEventUpdated?: (event: AuthorTimelineEvent) => void | Promise<void>;
 }
 
 enum ViewType {
@@ -93,7 +93,7 @@ enum ViewType {
 export function AuthorMap({
   authors,
   groups = [],
-  majorEvents = [],
+  timeline = [],
   cityCoordinates = [],
   className,
   disabled,
@@ -101,8 +101,8 @@ export function AuthorMap({
   syncAuthorUpdate,
   onGroupCreated,
   onGroupUpdated,
-  onMajorEventCreated,
-  onMajorEventUpdated,
+  onTimelineEventCreated,
+  onTimelineEventUpdated,
 }: Props): JSX.Element {
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -125,7 +125,7 @@ export function AuthorMap({
 
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => {
-    return new AuthorStores(authors);
+    return new AuthorMapStores(authors, timeline);
   }, [authors]);
 
   let viewElement: JSX.Element;
@@ -134,7 +134,6 @@ export function AuthorMap({
     case ViewType.MAP:
       viewElement = (
         <AuthorMapView
-          statesData={statesData}
           cityCoordinates={cityCoordinates}
           onAuthorEdit={setEditingAuthor}
         />
@@ -143,7 +142,6 @@ export function AuthorMap({
     case ViewType.LIST:
       viewElement = (
         <AuthorListView
-          statesData={statesData}
           onAuthorEdit={setEditingAuthor}
           onAuthorView={setViewingAuthor}
           onAuthorGroupEdit={setEditingGroup}
@@ -152,231 +150,224 @@ export function AuthorMap({
       break;
     case ViewType.TIMELINE:
     default:
-      viewElement = (
-        <AuthorTimelineView statesData={statesData} majorEvents={majorEvents} />
-      );
+      viewElement = <AuthorTimelineView />;
       break;
   }
 
   return (
-    <AuthorGroupContext.Provider value={{ groups }}>
-      <div
-        className={clsx(styles.authorMapComponentContainer, className)}
-        ref={componentRef}
-      >
-        <div className={styles.authorMapContainer}>{viewElement}</div>
-        <Tabs<ViewType>
-          className={clsx(
-            commonStyles.floatingAction,
-            styles.authorMapViewSwitch,
-          )}
-          highlightedValue={viewType}
-          values={Object.values(ViewType).map((value) => ({
-            value,
-            label: value,
-          }))}
-          onChange={(value) => {
-            if (value) {
-              setViewType(value);
-            }
-          }}
-        />
-
+    <AuthorMapDataContext.Provider value={{ data: statesData }}>
+      <AuthorGroupContext.Provider value={{ groups }}>
         <div
-          className={clsx(
-            commonStyles.floatingAction,
-            styles.authorMapAddButtons,
-          )}
+          className={clsx(styles.authorMapComponentContainer, className)}
+          ref={componentRef}
         >
-          <AddAuthor
-            children={{ right: 'Add author' }}
-            onClick={() => {
-              setEditingAuthor({
-                authorFirstName: '',
-                authorLastName: '',
-                authorFullName: '',
-                timeline: [],
-                portrait: {
-                  src: '',
-                },
-                birthDate: {
-                  date: '',
-                  location: {
-                    address: '',
-                  },
-                },
-              });
+          <div className={styles.authorMapContainer}>{viewElement}</div>
+          <Tabs<ViewType>
+            className={clsx(
+              commonStyles.floatingAction,
+              styles.authorMapViewSwitch,
+            )}
+            highlightedValue={viewType}
+            values={Object.values(ViewType).map((value) => ({
+              value,
+              label: value,
+            }))}
+            onChange={(value) => {
+              if (value) {
+                setViewType(value);
+              }
             }}
           />
 
-          <AddAuthorGroup
-            children={{ right: 'Add group' }}
-            onClick={() => {
-              setEditingGroup({
-                name: '',
-                description: '',
-                span: {
-                  startDate: '',
-                  endDate: '',
-                },
-              });
-            }}
-          />
-
-          {viewType === ViewType.TIMELINE && (
-            <AddMajorEvent
-              children={{ right: 'Add major event' }}
+          <div
+            className={clsx(
+              commonStyles.floatingAction,
+              styles.authorMapAddButtons,
+            )}
+          >
+            <AddAuthor
+              children={{ right: 'Add author' }}
               onClick={() => {
-                setEditingMajorEvent({
-                  location: {},
+                setEditingAuthor({
+                  authorFirstName: '',
+                  authorLastName: '',
+                  authorFullName: '',
+                  portrait: {
+                    src: '',
+                  },
                 });
               }}
             />
+
+            <AddAuthorGroup
+              children={{ right: 'Add group' }}
+              onClick={() => {
+                setEditingGroup({
+                  name: '',
+                  description: '',
+                  span: {
+                    startDate: '',
+                    endDate: '',
+                  },
+                });
+              }}
+            />
+
+            {viewType === ViewType.TIMELINE && (
+              <AddMajorEvent
+                children={{ right: 'Add major event' }}
+                onClick={() => {
+                  setEditingMajorEvent({
+                    location: {},
+                  });
+                }}
+              />
+            )}
+          </div>
+
+          {editingAuthor && (
+            <EditAuthorModal
+              appElement={componentRef.current!}
+              opened={Boolean(editingAuthor)}
+              initialAuthor={editingAuthor}
+              disabled={loading || disabled}
+              onClose={() => setEditingAuthor(null)}
+              onGroupCreated={onGroupCreated}
+              onSubmit={async (author) => {
+                if (disabled) {
+                  return;
+                }
+
+                setLoading(true);
+
+                const updating = Boolean(author.id);
+
+                try {
+                  if (updating) {
+                    await syncAuthorUpdate?.(author);
+                    statesData.update(author);
+                  } else {
+                    await syncAuthorAdded?.(author);
+
+                    if (!author.id) {
+                      author.id = Symbol(`ID for ${getAuthorName(author)}`);
+                    }
+
+                    statesData.add(author);
+                  }
+
+                  setEditingAuthor(null);
+                } catch (error) {
+                  console.error(
+                    `Author could not be ${updating ? 'updated' : 'added'}.`,
+                    error,
+                  );
+                  alert(
+                    `Author could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            />
+          )}
+
+          {editingGroup && (
+            <EditAuthorGroupModal
+              appElement={componentRef.current!}
+              opened={Boolean(editingGroup)}
+              initialAuthorGroup={editingGroup}
+              disabled={loading || disabled}
+              onClose={() => setEditingGroup(null)}
+              onSubmit={async (group) => {
+                if (disabled) {
+                  return;
+                }
+
+                setLoading(true);
+
+                const updating = Boolean(group.id);
+
+                try {
+                  if (updating) {
+                    await onGroupUpdated?.(group);
+                  } else {
+                    await onGroupCreated?.(group);
+
+                    if (!group.id) {
+                      group.id = Symbol(`ID for ${group.name}`);
+                    }
+                  }
+
+                  setEditingGroup(null);
+                } catch (error) {
+                  console.error(
+                    `Group could not be ${updating ? 'updated' : 'added'}.`,
+                    error,
+                  );
+                  alert(
+                    `Group could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            />
+          )}
+
+          {editingMajorEvent && (
+            <EditMajorEventModal
+              appElement={componentRef.current!}
+              opened={Boolean(editingMajorEvent)}
+              initialEvent={editingMajorEvent}
+              disabled={loading || disabled}
+              onClose={() => setEditingMajorEvent(null)}
+              onSubmit={async (event) => {
+                if (disabled) {
+                  return;
+                }
+
+                setLoading(true);
+
+                const updating = Boolean(event.id);
+
+                try {
+                  if (updating) {
+                    await onTimelineEventUpdated?.(event);
+                  } else {
+                    await onTimelineEventCreated?.(event);
+
+                    if (!event.id) {
+                      event.id = Symbol(`ID for a major event: ${event.notes}`);
+                    }
+                  }
+
+                  setEditingMajorEvent(null);
+                } catch (error) {
+                  console.error(
+                    `Major event could not be ${updating ? 'updated' : 'added'}.`,
+                    error,
+                  );
+                  alert(
+                    `Major event could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            />
+          )}
+
+          {viewingAuthor && (
+            <ViewAuthorModal
+              appElement={componentRef.current!}
+              opened={Boolean(viewingAuthor)}
+              author={viewingAuthor}
+              onClose={() => setViewingAuthor(null)}
+            />
           )}
         </div>
-
-        {editingAuthor && (
-          <EditAuthorModal
-            appElement={componentRef.current!}
-            opened={Boolean(editingAuthor)}
-            initialAuthor={editingAuthor}
-            disabled={loading || disabled}
-            onClose={() => setEditingAuthor(null)}
-            onGroupCreated={onGroupCreated}
-            onSubmit={async (author) => {
-              if (disabled) {
-                return;
-              }
-
-              setLoading(true);
-
-              const updating = Boolean(author.id);
-
-              try {
-                if (updating) {
-                  await syncAuthorUpdate?.(author);
-                  statesData.update(author);
-                } else {
-                  await syncAuthorAdded?.(author);
-
-                  if (!author.id) {
-                    author.id = Symbol(`ID for ${getAuthorName(author)}`);
-                  }
-
-                  statesData.add(author);
-                }
-
-                setEditingAuthor(null);
-              } catch (error) {
-                console.error(
-                  `Author could not be ${updating ? 'updated' : 'added'}.`,
-                  error,
-                );
-                alert(
-                  `Author could not be ${updating ? 'updated' : 'added'}. Please try again.`,
-                );
-              } finally {
-                setLoading(false);
-              }
-            }}
-          />
-        )}
-
-        {editingGroup && (
-          <EditAuthorGroupModal
-            appElement={componentRef.current!}
-            opened={Boolean(editingGroup)}
-            initialAuthorGroup={editingGroup}
-            disabled={loading || disabled}
-            onClose={() => setEditingGroup(null)}
-            onSubmit={async (group) => {
-              if (disabled) {
-                return;
-              }
-
-              setLoading(true);
-
-              const updating = Boolean(group.id);
-
-              try {
-                if (updating) {
-                  await onGroupUpdated?.(group);
-                } else {
-                  await onGroupCreated?.(group);
-
-                  if (!group.id) {
-                    group.id = Symbol(`ID for ${group.name}`);
-                  }
-                }
-
-                setEditingGroup(null);
-              } catch (error) {
-                console.error(
-                  `Group could not be ${updating ? 'updated' : 'added'}.`,
-                  error,
-                );
-                alert(
-                  `Group could not be ${updating ? 'updated' : 'added'}. Please try again.`,
-                );
-              } finally {
-                setLoading(false);
-              }
-            }}
-          />
-        )}
-
-        {editingMajorEvent && (
-          <EditMajorEventModal
-            appElement={componentRef.current!}
-            opened={Boolean(editingMajorEvent)}
-            initialEvent={editingMajorEvent}
-            disabled={loading || disabled}
-            onClose={() => setEditingMajorEvent(null)}
-            onSubmit={async (event) => {
-              if (disabled) {
-                return;
-              }
-
-              setLoading(true);
-
-              const updating = Boolean(event.id);
-
-              try {
-                if (updating) {
-                  await onMajorEventUpdated?.(event);
-                } else {
-                  await onMajorEventCreated?.(event);
-
-                  if (!event.id) {
-                    event.id = Symbol(`ID for a major event: ${event.notes}`);
-                  }
-                }
-
-                setEditingMajorEvent(null);
-              } catch (error) {
-                console.error(
-                  `Major event could not be ${updating ? 'updated' : 'added'}.`,
-                  error,
-                );
-                alert(
-                  `Major event could not be ${updating ? 'updated' : 'added'}. Please try again.`,
-                );
-              } finally {
-                setLoading(false);
-              }
-            }}
-          />
-        )}
-
-        {viewingAuthor && (
-          <ViewAuthorModal
-            appElement={componentRef.current!}
-            opened={Boolean(viewingAuthor)}
-            author={viewingAuthor}
-            onClose={() => setViewingAuthor(null)}
-          />
-        )}
-      </div>
-    </AuthorGroupContext.Provider>
+      </AuthorGroupContext.Provider>
+    </AuthorMapDataContext.Provider>
   );
 }

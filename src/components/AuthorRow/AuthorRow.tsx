@@ -1,13 +1,21 @@
 import styles from './AuthorRow.module.css';
 
 import { Fragment, JSX, ReactNode, useMemo } from 'react';
-import { Author, AuthorAchievementType, AuthorEventType } from '../../models';
-import { getAuthorName } from '../../utils/names';
-import { getEvents } from '../../utils/events';
 import clsx from 'clsx';
+
+import {
+  Author,
+  AuthorAchievementType,
+  AuthorEventType,
+  AuthorTimelineEvent,
+  MilestoneEvent,
+} from '../../models';
+import { getAuthorName } from '../../utils/names';
+import { formatDate } from '../../utils/dates';
 
 interface Props {
   author: Author;
+  events: Array<AuthorTimelineEvent>;
 
   className?: string;
   showContext?: boolean;
@@ -17,17 +25,17 @@ interface Props {
 
 export function AuthorRow({
   author,
+  events,
   className,
   showContext,
   children,
-  eventType,
 }: Props): JSX.Element {
   const authorName = useMemo(() => getAuthorName(author), [author]);
 
-  const events = useMemo(
-    () => getEvents(author, { eventType }),
-    [author, eventType],
-  );
+  // Do not show timespan for now.
+  const finalEvents = events.filter(
+    (event) => 'date' in event,
+  ) as Array<MilestoneEvent>;
 
   return (
     <div className={clsx(styles.authorRow, className)}>
@@ -36,7 +44,7 @@ export function AuthorRow({
       )}
       <div className={styles.authorRowDetails}>
         <h4>{authorName}</h4>
-        {events.map(({ notes, dateContext, location, achievement }, index) => {
+        {finalEvents.map(({ notes, date, location, achievement }, index) => {
           let contextElement: JSX.Element | undefined;
 
           if (showContext) {
@@ -83,7 +91,7 @@ export function AuthorRow({
               <div className={styles.authorRowRelevantEvent}>
                 <div className={styles.authorRowRelevantEventContext}>
                   {contextElement}
-                  <p>{dateContext}</p>
+                  <p>{formatDate(date)}</p>
                   <p>
                     {location?.address}
                     {location?.state && <span>, {location.state}</span>}

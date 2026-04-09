@@ -169,28 +169,44 @@ export interface AuthorAwardAchievement {
 
 export type AuthorAchievement = AuthorWorkAchievement | AuthorAwardAchievement;
 export interface BaseTimelineEvent {
+  id: string | Symbol;
+
   authorId?: Author['id'];
   location?: AuthorLocation;
   /** Additional comments on the event. */
   notes?: string;
   /** Whether the event encompasses an achievement, as the publishing of a major book, or recognition of some sort. */
   achievement?: AuthorAchievement;
+  referenceUrl?: string;
 }
 
-export interface TimelineEvent extends BaseTimelineEvent, TimeSpan {}
+export interface BirthEvent extends BaseTimelineEvent {
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
+  date: string;
+  type: 'Birth';
+}
+
+export interface DeathEvent extends BaseTimelineEvent {
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
+  date: string;
+  type: 'Death';
+}
+
+export interface TimelineEvent extends BaseTimelineEvent, TimeSpan {
+  type: 'Timeline';
+}
 
 export interface MilestoneEvent extends BaseTimelineEvent {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   date: string;
+  type: 'Milestone';
 }
 
-export type AuthorTimelineEvent = TimelineEvent | MilestoneEvent;
-
-export interface MajorEvent extends MilestoneEvent {
-  id: string | Symbol;
-
-  referenceUrl?: string;
-}
+export type AuthorTimelineEvent =
+  | BirthEvent
+  | DeathEvent
+  | TimelineEvent
+  | MilestoneEvent;
 
 /**
  * Does not refer to a group in a physical sense. "Group" is arbitrary and can refer to any possible interesting category.
@@ -224,13 +240,6 @@ export interface Author {
   /** Preferred over all names. */
   authorDisplayName?: string;
 
-  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
-  birthDate: Omit<MilestoneEvent, 'achievement'>;
-  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
-  deathDate?: Omit<MilestoneEvent, 'achievement'>;
-  /** Assume the timeline is ordered. Birth and death dates are redundant. */
-  timeline: Array<TimelineEvent | MilestoneEvent>;
-
   link?: string;
   portrait?: PortraitData;
 
@@ -246,4 +255,11 @@ export interface StateStore {
 export interface CityCoordinates {
   coordinates: [number, number];
   location: Required<AuthorLocation>;
+}
+
+export interface AuthorBook {
+  authorId: Author['id'];
+  title: string;
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
+  publicationDate: string;
 }

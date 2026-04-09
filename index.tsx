@@ -5,32 +5,13 @@ import {
   Author,
   AuthorAchievementType,
   AuthorGroup,
-  MajorEvent,
+  CityCoordinates,
+  AuthorTimelineEvent,
   USState,
 } from './src/models';
 import { useEffect, useState } from 'react';
 
 const App = () => {
-  const [majorEvents, setMajorEvents] = useState<Array<MajorEvent>>([
-    {
-      id: Symbol('ID for Declaration of Independence'),
-      date: '1776-07-04',
-      location: {
-        state: USState.PENNSYLVANIA,
-        address: 'Pennsylvania State House, Philadelphia',
-      },
-      notes: 'Ratification of the Declaration of Independence',
-    },
-    {
-      id: Symbol('ID for Emancipation Proclamation'),
-      date: '1863-01-01',
-      notes:
-        'Issuance of the Emancipation Proclamation, under emergency powers',
-      location: {},
-      referenceUrl: 'https://en.wikipedia.org/wiki/Emancipation_Proclamation',
-    },
-  ]);
-
   const [groups, setGroups] = useState<Array<AuthorGroup>>([
     {
       id: Symbol('ID for American Renaissance'),
@@ -74,7 +55,6 @@ const App = () => {
         },
         date: '1891-09-28',
       },
-      timeline: [],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Herman_Melville_by_Joseph_O_Eaton.jpg/500px-Herman_Melville_by_Joseph_O_Eaton.jpg',
       },
@@ -98,17 +78,6 @@ const App = () => {
         },
         date: '1892-03-26',
       },
-      timeline: [
-        {
-          date: '1855-07-04',
-          achievement: {
-            type: AuthorAchievementType.RENOWNED_WORK,
-            workTitle: 'Leaves of Grass',
-            referenceUrl: 'https://en.wikipedia.org/wiki/Leaves_of_Grass',
-          },
-          notes: 'Self-published',
-        },
-      ],
       link: 'https://en.wikipedia.org/wiki/Walt_Whitman',
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Walt_Whitman_-_George_Collins_Cox.jpg/500px-Walt_Whitman_-_George_Collins_Cox.jpg',
@@ -132,7 +101,6 @@ const App = () => {
         },
         date: '1946-07-27',
       },
-      timeline: [],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Gertrude_Stein_1935-01-04.jpg/500px-Gertrude_Stein_1935-01-04.jpg',
       },
@@ -155,7 +123,6 @@ const App = () => {
           address: 'London, England',
         },
       },
-      timeline: [],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Thomas_Stearns_Eliot_by_Lady_Ottoline_Morrell_%281934%29.jpg',
       },
@@ -179,7 +146,6 @@ const App = () => {
         },
         date: '2007-04-11',
       },
-      timeline: [],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg/330px-Kurt_Vonnegut_by_Bernard_Gotfryd_%281965%29.jpg',
       },
@@ -203,42 +169,89 @@ const App = () => {
         },
         date: '1968-12-20',
       },
-      timeline: [
-        {
-          date: '1962',
-          achievement: {
-            awardName: 'Nobel Prize in Literature',
-            type: AuthorAchievementType.AWARD,
-          },
-        },
-      ],
       portrait: {
         src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/John_Steinbeck_1939_%28cropped%29.jpg/500px-John_Steinbeck_1939_%28cropped%29.jpg',
       },
     },
   ]);
 
+  const [timeline, setTimeline] = useState<Array<AuthorTimelineEvent>>([
+    {
+      id: Symbol('ID for Declaration of Independence'),
+      date: '1776-07-04',
+      location: {
+        state: USState.PENNSYLVANIA,
+        address: 'Pennsylvania State House, Philadelphia',
+      },
+      notes: 'Ratification of the Declaration of Independence',
+      type: 'Milestone',
+    },
+    {
+      id: Symbol('ID for Emancipation Proclamation'),
+      date: '1863-01-01',
+      notes:
+        'Issuance of the Emancipation Proclamation, under emergency powers',
+      location: {},
+      referenceUrl: 'https://en.wikipedia.org/wiki/Emancipation_Proclamation',
+      type: 'Milestone',
+    },
+    {
+      id: Symbol('ID for Leaves of Grass'),
+      authorId: authors.find((author) => author.authorLastName === 'Whitman')!
+        .id,
+      date: '1855-07-04',
+      achievement: {
+        type: AuthorAchievementType.RENOWNED_WORK,
+        workTitle: 'Leaves of Grass',
+        referenceUrl: 'https://en.wikipedia.org/wiki/Leaves_of_Grass',
+      },
+      notes: 'Self-published',
+      type: 'Milestone',
+    },
+    {
+      id: Symbol('ID for Steinbeck Nobel Prize'),
+      authorId: authors.find((author) => author.authorLastName === 'Steinbeck')!
+        .id,
+      date: '1962',
+      achievement: {
+        awardName: 'Nobel Prize in Literature',
+        type: AuthorAchievementType.AWARD,
+      },
+      type: 'Milestone',
+    },
+  ]);
+
+  const [cityCoordinates, setCityCoordinates] = useState<
+    Array<CityCoordinates>
+  >([
+    {
+      location: {
+        state: USState.NEW_YORK,
+        address: 'New York City',
+      },
+      coordinates: [-74.006, 40.7128],
+    },
+  ]);
+
   // Set to 'false' on initial if you want to work with more controlled data during development.
-  const [needsLoading, setNeedsLoading] = useState(false);
+  const [needsLoading, setNeedsLoading] = useState(true);
 
   useEffect(() => {
     if (needsLoading) {
       (async () => {
         const baseUrl = `http://localhost:8080`;
 
-        const [authors, authorGroups, majorEvents] = await Promise.all([
-          fetch(`${baseUrl}/api/authors/`).then((response) => response.json()),
-          fetch(`${baseUrl}/api/author-groups/`).then((response) =>
-            response.json(),
-          ),
-          fetch(`${baseUrl}/api/author-major-events/`).then((response) =>
-            response.json(),
-          ),
-        ]);
+        const [{ authors, groups, majorEvents, coordinates }] =
+          await Promise.all([
+            fetch(`${baseUrl}/api/author-map/`).then((response) =>
+              response.json(),
+            ),
+          ]);
 
         setAuthors(authors);
-        setGroups(authorGroups);
-        setMajorEvents(majorEvents);
+        setGroups(groups);
+        setTimeline(majorEvents);
+        setCityCoordinates(coordinates);
 
         setNeedsLoading(false);
       })();
@@ -253,16 +266,8 @@ const App = () => {
         className="authorMap"
         authors={authors}
         groups={groups}
-        majorEvents={majorEvents}
-        cityCoordinates={[
-          {
-            location: {
-              state: USState.NEW_YORK,
-              address: 'New York City',
-            },
-            coordinates: [-74.006, 40.7128],
-          },
-        ]}
+        timeline={timeline}
+        cityCoordinates={cityCoordinates}
         syncAuthorUpdate={async (author) => {
           console.log('author updated', author);
 
@@ -294,16 +299,16 @@ const App = () => {
             ];
           });
         }}
-        onMajorEventCreated={(event) =>
-          setMajorEvents((currentEvents) =>
+        onTimelineEventCreated={(event) =>
+          setTimeline((currentEvents) =>
             currentEvents.concat({
               ...event,
               id: Symbol(`Event ID for ${event.notes}`),
             }),
           )
         }
-        onMajorEventUpdated={(event) => {
-          setMajorEvents((currentEvents) => {
+        onTimelineEventUpdated={(event) => {
+          setTimeline((currentEvents) => {
             const index = currentEvents.findIndex(
               (currentEvent) => currentEvent.id === event.id,
             );

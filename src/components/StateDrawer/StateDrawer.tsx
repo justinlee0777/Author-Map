@@ -3,7 +3,7 @@ import commonStyles from '../../common.module.css';
 
 import clsx from 'clsx';
 import { JSX, ReactNode, useMemo } from 'react';
-import { Author, AuthorEventType } from '../../models';
+import { Author, AuthorEventType, MilestoneEvent } from '../../models';
 import { createKeyGenerator } from '../../utils/stores';
 import { MdClose } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
@@ -57,12 +57,25 @@ export function StateDrawer({
             );
           }
 
+          let events: Array<Omit<MilestoneEvent, 'id' | 'type'>> = [];
+
+          switch (eventType) {
+            case AuthorEventType.BIRTHS:
+              events = [author.birthDate];
+              break;
+            case AuthorEventType.DEATHS:
+              if (author.deathDate) {
+                events = [author.deathDate];
+              }
+              break;
+          }
+
           return (
             <AuthorRow
               key={authorKeyGenerator.getKey(author.id)}
               className={styles.stateDrawerAuthorRow}
               author={author}
-              eventType={eventType}
+              events={events}
               showContext={showContext}
             >
               <button

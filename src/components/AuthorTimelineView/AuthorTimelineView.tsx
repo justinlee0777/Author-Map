@@ -1,26 +1,32 @@
 import styles from './AuthorTimelineView.module.css';
 
-import { Fragment, JSX, useEffect, useMemo, useRef, useState } from 'react';
-import { AuthorStores } from '../../utils/stores';
+import {
+  Fragment,
+  JSX,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import clsx from 'clsx';
+
 import { controlForTimezone, formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
-import { getMilestoneEvents } from '../../utils/events';
 import {
   Author,
   AuthorAchievementType,
   AuthorGroup,
+  AuthorTimelineEvent,
   MilestoneEvent,
 } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import infiniteScroll from '../../utils/infinite-scroll';
+import { AuthorMapDataContext } from '../../contexts';
 
 interface Props {
-  statesData: AuthorStores;
-
   groups?: Array<AuthorGroup>;
   className?: string;
-  majorEvents?: Array<MilestoneEvent>;
 }
 
 interface AppearanceSettings {
@@ -30,65 +36,46 @@ interface AppearanceSettings {
 /**
  * TODO: Filter by months? Allow a day / month / year filter?
  */
-export function AuthorTimelineView({
-  statesData,
-  className,
-  majorEvents = [],
-}: Props): JSX.Element {
+export function AuthorTimelineView({ className }: Props): JSX.Element {
+  const { data: statesData } = useContext(AuthorMapDataContext);
+
   const entriesRef = useRef<HTMLUListElement>(null);
 
-  const authorEvents: Array<{ author?: Author; event: MilestoneEvent }> =
-    statesData
-      .getAll()
-      .flatMap(
-        (author) =>
-          getMilestoneEvents(author, { achievementsOnly: true }).map(
-            (event) => ({
-              author,
-              event,
-            }),
-          ) as Array<{ author?: Author; event: MilestoneEvent }>,
-      )
-      .concat(majorEvents.map((majorEvent) => ({ event: majorEvent })))
-      .sort((a, b) => {
-        return (
-          new Date(a.event.date).valueOf() - new Date(b.event.date).valueOf()
-        );
-      });
+  const timelineEvents = statesData.timelineEvents.filter(
+    (event) => event.type === 'Milestone',
+  ) as Array<MilestoneEvent>;
 
-  const firstDate = authorEvents.at(0)!;
+  const firstDate = timelineEvents.at(0)!;
 
-  const startingYear = controlForTimezone(firstDate.event.date).getFullYear(),
+  const startingYear = controlForTimezone(firstDate.date).getFullYear(),
     endingYear = new Date().getFullYear();
 
-  const authorEventsByYear = new Map<number, typeof authorEvents>();
+  const [settings, setSettings] = useState<AppearanceSettings>({});
 
-  authorEvents.forEach((authorEvent) => {
-    const { event } = authorEvent;
+  const timelineEventsByYear = new Map<number, typeof timelineEvents>();
 
-    const year = controlForTimezone(event.date).getFullYear();
+  timelineEvents.forEach((timelineEvent) => {
+    const year = controlForTimezone(timelineEvent.date).getFullYear();
 
-    if (authorEventsByYear.has(year)) {
-      authorEventsByYear.get(year)!.push(authorEvent);
+    if (timelineEventsByYear.has(year)) {
+      timelineEventsByYear.get(year)!.push(timelineEvent);
     } else {
-      authorEventsByYear.set(year, [authorEvent]);
+      timelineEventsByYear.set(year, [timelineEvent]);
     }
   });
-
-  const [settings, setSettings] = useState<AppearanceSettings>({});
 
   const eventElements: Array<JSX.Element> = useMemo(() => {
     const temp: Array<JSX.Element> = [];
 
-    const eventsIterator = authorEventsByYear.entries();
+    const eventsIterator = timelineEventsByYear.entries();
 
     let currentEvents = eventsIterator.next();
 
     for (let year = startingYear; year <= endingYear; year++) {
-      let authorEvents;
+      let events;
 
       if (currentEvents.value && currentEvents.value[0] === year) {
-        [, authorEvents] = currentEvents.value;
+        [, events] = currentEvents.value;
 
         currentEvents = eventsIterator.next();
       } else if (settings.removeEmptyYears) {
@@ -99,8 +86,12 @@ export function AuthorTimelineView({
         <li className={styles.authorTimelineViewEntry} key={year}>
           <h4 className={styles.authorTimelineViewYear}>{year}</h4>
           <div className={styles.authorTimelineViewEntryBullet}></div>
-          {authorEvents?.map(({ author, event }, i) => {
+          {events?.map((event, i) => {
             let achievementElement: JSX.Element | undefined;
+
+            const author = event.authorId
+              ? statesData.getAuthor(event.authorId)
+              : undefined;
 
             if (event.achievement) {
               switch (event.achievement.type) {
@@ -168,7 +159,7 @@ export function AuthorTimelineView({
     }
 
     return temp;
-  }, [settings]);
+  }, [settings, statesData]);
 
   const initialEntriesShown = 20;
 

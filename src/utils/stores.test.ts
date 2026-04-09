@@ -1,5 +1,5 @@
 import { Author, USState } from '../models';
-import { AuthorStores } from './stores';
+import { AuthorMapStores } from './stores';
 
 const authors: Array<Author> = [
   {
@@ -55,7 +55,7 @@ const authors: Array<Author> = [
 
 describe('AuthorStores', () => {
   test('should sort and populate author data', () => {
-    const stores = new AuthorStores(authors);
+    const stores = new AuthorMapStores(authors);
 
     const alabamaStore = stores.get(USState.ALABAMA)!;
 

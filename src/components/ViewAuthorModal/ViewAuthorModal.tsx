@@ -1,14 +1,13 @@
 import styles from './ViewAuthorModal.module.css';
 
 import { Fragment, JSX, ReactNode, useContext } from 'react';
-import { Author, AuthorAchievementType } from '../../models';
+import { Author, AuthorAchievementType, MilestoneEvent } from '../../models';
 import Modal from 'react-modal';
 import { MdClear } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { formatDate } from '../../utils/dates';
 import { getAddress } from '../../utils/address';
-import { AuthorGroupContext } from '../../contexts';
-import { getMilestoneEvents } from '../../utils/events';
+import { AuthorGroupContext, AuthorMapDataContext } from '../../contexts';
 
 interface Props {
   appElement: HTMLElement;
@@ -24,6 +23,8 @@ export function ViewAuthorModal({
   onClose,
   author,
 }: Props): JSX.Element {
+  const { data } = useContext(AuthorMapDataContext);
+
   const { groups } = useContext(AuthorGroupContext);
 
   let authorNameElement: ReactNode = getAuthorName(author);
@@ -36,10 +37,9 @@ export function ViewAuthorModal({
     );
   }
 
-  const achievements = getMilestoneEvents(author, {
-    achievementsOnly: true,
-    excludeBirthAndDeath: true,
-  });
+  const achievements = data
+    .getAuthorTimeline(author)
+    .filter((event) => Boolean(event.achievement)) as Array<MilestoneEvent>;
 
   return (
     <Modal isOpen={opened} appElement={appElement}>
