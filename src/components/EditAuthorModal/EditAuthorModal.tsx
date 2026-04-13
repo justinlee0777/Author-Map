@@ -8,11 +8,12 @@ import { PulseLoader } from 'react-spinners';
 
 import {
   Author,
+  AuthorData,
   AuthorGroup,
   AuthorTimelineEvent,
   BaseTimelineEvent,
-  MilestoneEvent,
-  TimelineEvent,
+  BirthEvent,
+  DeathEvent,
 } from '../../models';
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
 import { MdClear } from 'react-icons/md';
@@ -23,15 +24,16 @@ import { Tooltip } from 'react-tooltip';
 interface Props {
   appElement: HTMLElement;
   opened: boolean;
+  initialData: RecursivePartial<AuthorData>;
 
   disabled?: boolean | string;
-  onSubmit?: (author: Author) => void | Promise<void>;
+  onSubmit?: (data: AuthorData) => void | Promise<void>;
   onClose?: () => void;
   onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
-  initialAuthor?: Partial<Author>;
 }
 
-interface TimelineEventProps extends ItemProps<Partial<AuthorTimelineEvent>> {}
+interface TimelineEventProps
+  extends ItemProps<RecursivePartial<AuthorTimelineEvent>> {}
 
 export function EditAuthorModal({
   appElement,
@@ -40,7 +42,7 @@ export function EditAuthorModal({
   onSubmit,
   onClose,
   onGroupCreated,
-  initialAuthor = {},
+  initialData,
 }: Props): JSX.Element {
   const [loading, setLoading] = useState(false);
 
@@ -70,16 +72,14 @@ export function EditAuthorModal({
     ],
     [],
   );
-  /*
+
   const TimelineEventField: (props: TimelineEventProps) => JSX.Element =
     useMemo(() => {
       return ({ item, index, RemoveButton }) => {
         const { values, handleChange, setFieldValue } =
-          useFormikContext<Author>();
+          useFormikContext<RecursivePartial<AuthorData>>();
 
-        const [milestone, setMilestone] = useState(
-          Boolean((item as any)['date']),
-        );
+        const [milestone, setMilestone] = useState(item.type === 'Milestone');
 
         const inputId = `timeline-event-${index}`,
           eventTypeId = `timeline-event-${index}-event-type`;
@@ -115,13 +115,19 @@ export function EditAuthorModal({
                     className={styles.editAuthorMilestoneToggle}
                     id={eventTypeId}
                     type="checkbox"
-                    onChange={(event) => {
+                    onChange={async (event) => {
                       dateKeys.forEach(async (key) => {
                         await setFieldValue(`${fieldName}.${key}`, undefined);
-                        delete (values.timeline[index] as any)[key.keyName];
+                        delete (values.timeline![index] as any)[key.keyName];
                       });
 
-                      setMilestone(event.currentTarget.checked);
+                      const isMilestone = event.currentTarget.checked;
+
+                      setMilestone(isMilestone);
+                      setFieldValue(
+                        `${fieldName}.type`,
+                        isMilestone ? 'Milestone' : 'Timeline',
+                      );
                     }}
                     checked={milestone}
                   />
@@ -138,70 +144,92 @@ export function EditAuthorModal({
         );
       };
     }, []);
-  */
 
-  const BirthField: ({ item }: { item: MilestoneEvent }) => JSX.Element =
-    useMemo(() => {
-      return ({ item }) => {
-        const { handleChange, setFieldValue } = useFormikContext<Author>();
+  const BirthField: ({
+    item,
+  }: {
+    item: RecursivePartial<BirthEvent>;
+  }) => JSX.Element = useMemo(() => {
+    return ({ item }) => {
+      const { handleChange, setFieldValue } = useFormikContext<Author>();
 
-        return (
-          <TimelineEventComponent
-            id={birthDateId}
-            required={true}
-            dateKeys={[{ keyName: 'date', label: 'Date' }]}
-            headerText="Birth"
-            fieldName="birthDate"
-            hide={{
-              achievement: true,
-            }}
-            item={item as BaseTimelineEvent}
-            setFieldValue={setFieldValue}
-            handleChange={handleChange}
-          />
-        );
-      };
-    }, []);
+      return (
+        <TimelineEventComponent
+          id={birthDateId}
+          required={true}
+          dateKeys={[{ keyName: 'date', label: 'Date' }]}
+          headerText="Birth"
+          fieldName="birthDate"
+          hide={{
+            achievement: true,
+          }}
+          item={item as BaseTimelineEvent}
+          setFieldValue={setFieldValue}
+          handleChange={handleChange}
+        />
+      );
+    };
+  }, []);
 
-  const DeathField: ({ item }: { item: MilestoneEvent }) => JSX.Element =
-    useMemo(() => {
-      return ({ item }) => {
-        const { handleChange, setFieldValue } = useFormikContext<Author>();
+  const DeathField: ({
+    item,
+  }: {
+    item: RecursivePartial<DeathEvent>;
+  }) => JSX.Element = useMemo(() => {
+    return ({ item }) => {
+      const { handleChange, setFieldValue } = useFormikContext<Author>();
 
-        return (
-          <TimelineEventComponent
-            id={deathDateId}
-            required={true}
-            dateKeys={[{ keyName: 'date', label: 'Date' }]}
-            headerText="Death"
-            fieldName="deathDate"
-            hide={{
-              achievement: true,
-            }}
-            item={item as BaseTimelineEvent}
-            setFieldValue={setFieldValue}
-            handleChange={handleChange}
-          />
-        );
-      };
-    }, []);
+      return (
+        <TimelineEventComponent
+          id={deathDateId}
+          required={true}
+          dateKeys={[{ keyName: 'date', label: 'Date' }]}
+          headerText="Death"
+          fieldName="deathDate"
+          hide={{
+            achievement: true,
+          }}
+          item={item as BaseTimelineEvent}
+          setFieldValue={setFieldValue}
+          handleChange={handleChange}
+        />
+      );
+    };
+  }, []);
 
   return (
     <Modal isOpen={opened} appElement={appElement}>
-      <Formik<Partial<Author>>
-        initialValues={initialAuthor}
-        onSubmit={async (finalAuthor) => {
+      <Formik<RecursivePartial<AuthorData>>
+        initialValues={initialData}
+        onSubmit={async (finalData) => {
           setLoading(true);
 
+          let deathDate: DeathEvent | undefined;
+
+          if (finalData.deathDate) {
+            deathDate = {
+              ...(finalData.deathDate as DeathEvent),
+              type: 'Death',
+            };
+          }
+
           try {
-            await onSubmit?.(finalAuthor as Author);
+            await onSubmit?.({
+              ...finalData,
+              author: finalData.author,
+              birthDate: {
+                ...finalData.birthDate,
+                type: 'Birth',
+              },
+              deathDate,
+            } as AuthorData);
           } finally {
             setLoading(false);
           }
         }}
       >
         {({ handleSubmit, values, handleChange, setFieldValue, isValid }) => {
-          // const timeline = values.timeline ?? [];
+          const timeline = values.timeline ?? [];
 
           return (
             <form className={styles.editAuthorForm} onSubmit={handleSubmit}>
@@ -214,8 +242,8 @@ export function EditAuthorModal({
               </button>
               <div className={styles.editAuthorPortraitRow}>
                 <div className={styles.editAuthorPortraitContainer}>
-                  {values.portrait?.src && (
-                    <img src={values.portrait?.src} loading="lazy" />
+                  {values.author?.portrait?.src && (
+                    <img src={values.author?.portrait?.src} loading="lazy" />
                   )}
                 </div>
                 <div className={styles.editAuthorPortraitDetails}>
@@ -224,7 +252,7 @@ export function EditAuthorModal({
                     id={portraitId}
                     type="text"
                     name="portrait.src"
-                    value={values.portrait?.src}
+                    value={values.author?.portrait?.src}
                     onChange={handleChange}
                   />
                 </div>
@@ -234,8 +262,8 @@ export function EditAuthorModal({
               <input
                 id={authorFirstNameId}
                 type="text"
-                name="authorFirstName"
-                value={values.authorFirstName}
+                name="author.authorFirstName"
+                value={values.author?.authorFirstName}
                 required
                 onChange={handleChange}
               />
@@ -244,8 +272,8 @@ export function EditAuthorModal({
               <input
                 id={authorLastNameId}
                 type="text"
-                name="authorLastName"
-                value={values.authorLastName}
+                name="author.authorLastName"
+                value={values.author?.authorLastName}
                 required
                 onChange={handleChange}
               />
@@ -254,8 +282,8 @@ export function EditAuthorModal({
               <input
                 id={authorFullNameId}
                 type="text"
-                name="authorFullName"
-                value={values.authorFullName}
+                name="author.authorFullName"
+                value={values.author?.authorFullName}
                 onChange={handleChange}
               />
 
@@ -265,8 +293,8 @@ export function EditAuthorModal({
               <input
                 id={authorDisplayedNameId}
                 type="text"
-                name="authorDisplayName"
-                value={values.authorDisplayName}
+                name="author.authorDisplayName"
+                value={values.author?.authorDisplayName}
                 onChange={handleChange}
               />
 
@@ -274,11 +302,11 @@ export function EditAuthorModal({
               <input
                 id={referenceUrlId}
                 type="url"
-                name="link"
-                value={values.link}
+                name="author.link"
+                value={values.author?.link}
                 onChange={handleChange}
               />
-              {/*
+
               <BirthField item={values.birthDate!} />
 
               <div className={styles.editAuthorDeceasedRow}>
@@ -305,12 +333,16 @@ export function EditAuthorModal({
               {values.deathDate && <DeathField item={values.deathDate!} />}
 
               <label className={styles.editAuthorTimelineLabel}>Timeline</label>
-              <DynamicList<Partial<TimelineEvent>>
+              <DynamicList<RecursivePartial<AuthorTimelineEvent>>
                 classes={{
                   component: styles.editAuthorTimelineEventsContainer,
                   listItems: styles.editAuthorTimelineEvents,
                 }}
-                items={values.timeline ?? []}
+                items={
+                  (values.timeline as Array<
+                    RecursivePartial<AuthorTimelineEvent>
+                  >) ?? []
+                }
                 ItemTemplate={TimelineEventField}
                 trackItem={({ index }) => {
                   return index.toString();
@@ -319,7 +351,7 @@ export function EditAuthorModal({
                 onAdd={() => {
                   setFieldValue(
                     'timeline',
-                    timeline.concat({ location: {} } as TimelineEvent),
+                    timeline.concat({ location: {} } as AuthorTimelineEvent),
                   );
                 }}
                 onRemove={({ index }) => {
@@ -329,13 +361,14 @@ export function EditAuthorModal({
                   ]);
                 }}
               />
-              */}
 
               <h4>Groups</h4>
 
               <AuthorGroupInput
                 className={styles.editAuthorGroupsContainer}
-                values={values.groups ?? []}
+                values={
+                  (values.author?.groups as Array<AuthorGroup['id']>) ?? []
+                }
                 registerAuthorGroup={async (group) => {
                   setLoading(true);
 
@@ -346,7 +379,7 @@ export function EditAuthorModal({
                   }
                 }}
                 onChange={(groups) => {
-                  setFieldValue('groups', groups);
+                  setFieldValue('author.groups', groups);
                 }}
               />
 

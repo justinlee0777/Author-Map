@@ -6,7 +6,6 @@ import {
   AuthorTimelineEvent,
   BirthEvent,
   DeathEvent,
-  StateStore,
   USState,
 } from '../models';
 import { getAuthorName } from './names';
@@ -22,7 +21,6 @@ export interface AuthorFilter {
 }
 
 export class AuthorMapStores {
-  private map: Map<USState, StateStore>;
   private internalRegistry: Map<Author['id'], Author>;
   private authorTimelines: Map<
     Author['id'],
@@ -34,7 +32,7 @@ export class AuthorMapStores {
   private deathEventsByAuthor: Map<Author['id'], DeathEvent>;
 
   get numAuthors(): number {
-    return this.map.size;
+    return this.internalRegistry.size;
   }
 
   get timelineEvents(): Array<AuthorTimelineEvent> {
@@ -42,16 +40,6 @@ export class AuthorMapStores {
   }
 
   constructor(authors: Array<Author>, timeline: Array<AuthorTimelineEvent>) {
-    this.map = new Map<USState, StateStore>([
-      ...Object.values(USState).map(
-        (stateName) =>
-          [
-            stateName,
-            { bornAuthors: [], deceasedAuthors: [], residingAuthors: [] },
-          ] as [USState, StateStore],
-      ),
-    ]);
-
     this.internalRegistry = new Map();
 
     this.authorTimelines = new Map();
@@ -133,10 +121,6 @@ export class AuthorMapStores {
     }
   }
 
-  get(state: USState): StateStore {
-    return this.map.get(state)!;
-  }
-
   getAuthor(id: Author['id']): Author {
     return this.internalRegistry.get(id)!;
   }
@@ -146,119 +130,96 @@ export class AuthorMapStores {
     eventType?: AuthorEventType,
     address?: string,
   ): Array<Author> {
-    const stateData = this.get(state);
-
     switch (eventType) {
       case AuthorEventType.BIRTHS:
-        return stateData.bornAuthors.filter((author) => {
-          const birthDate = this.birthEventsByAuthor.get(author.id);
-          return !Boolean(address) || birthDate?.location?.address === address;
-        });
+        return [...this.birthEventsByAuthor.entries()]
+          .filter(
+            ([, birthEvent]) =>
+              birthEvent.location?.state === state &&
+              birthEvent?.location?.address === address,
+          )
+          .map(([authorId]) => this.internalRegistry.get(authorId)!);
       case AuthorEventType.DEATHS:
-        return stateData.deceasedAuthors.filter((author) => {
-          const deathDate = this.deathEventsByAuthor.get(author.id);
-          return !Boolean(address) || deathDate?.location?.address === address;
-        });
+        return [...this.deathEventsByAuthor.entries()]
+          .filter(
+            ([, deathEvent]) =>
+              deathEvent.location?.state === state &&
+              deathEvent?.location?.address === address,
+          )
+          .map(([authorId]) => this.internalRegistry.get(authorId)!);
       default:
-        return stateData.residingAuthors.filter(
-          (author) =>
-            !Boolean(address) || this.hasAuthorResided(author, state, address),
-        );
+        return [];
     }
   }
 
-  getAuthorTimeline(author: Author): Array<AuthorTimelineEvent> {
-    if (this.authorTimelines.has(author.id)) {
-      const timelineMap = this.authorTimelines.get(author.id)!;
+  getAuthorTimeline(
+    authorId: Author['id'],
+    noBirthAndDeath = false,
+  ): Array<AuthorTimelineEvent> {
+    if (this.authorTimelines.has(authorId)) {
+      const timelineMap = this.authorTimelines.get(authorId)!;
 
-      return [...timelineMap.values()];
+      let events = [...timelineMap.values()];
+
+      if (noBirthAndDeath) {
+        events = events.filter((event) => {
+          switch (event.type) {
+            case 'Birth':
+            case 'Death':
+              return false;
+            default:
+              return true;
+          }
+        });
+      }
+
+      return events;
     } else {
       return [];
     }
+  }
+
+  setAuthorTimeline(
+    authorId: Author['id'],
+    timeline: Array<AuthorTimelineEvent>,
+  ): void {
+    const preexistingEventKeys = new Set(
+      this.authorTimelines.get(authorId)?.keys(),
+    );
+
+    this.authorTimelines.set(
+      authorId,
+      new Map(timeline.map((event) => [event.id, event] as const)),
+    );
+
+    this.allEvents = this.allEvents
+      .filter((event) => !preexistingEventKeys.has(event.id))
+      .concat(timeline);
+
+    this.sortTimelineEvents();
   }
 
   getBirthDate(authorId: Author['id']): BirthEvent | undefined {
     return this.birthEventsByAuthor.get(authorId);
   }
 
+  setBirthDate(authorId: Author['id'], birthEvent: BirthEvent): void {
+    this.birthEventsByAuthor.set(authorId, birthEvent);
+  }
+
   getDeathDate(authorId: Author['id']): DeathEvent | undefined {
     return this.deathEventsByAuthor.get(authorId);
   }
 
+  setDeathDate(authorId: Author['id'], deathEvent: DeathEvent): void {
+    this.deathEventsByAuthor.set(authorId, deathEvent);
+  }
+
+  removeDeathDate(authorId: Author['id']): void {
+    this.deathEventsByAuthor.delete(authorId);
+  }
+
   add(author: Author): void {
-    const { map } = this;
-
-    let fullTimeline: Array<Omit<AuthorTimelineEvent, 'id'>> = [
-      ...this.getAuthorTimeline(author),
-    ];
-
-    // Birth state
-    const birthEvent = this.birthEventsByAuthor.get(author.id);
-
-    if (birthEvent) {
-      const state = birthEvent.location?.state;
-
-      if (state) {
-        const store = map.get(state)!;
-
-        const birthEventDate = new Date(birthEvent.date);
-
-        const succeedingIndex = store.bornAuthors.findIndex((author) => {
-          return birthEventDate < new Date(birthEvent.date);
-        });
-
-        if (succeedingIndex === -1) {
-          store.bornAuthors.push(author);
-        } else {
-          store.bornAuthors.splice(succeedingIndex, 0, author);
-        }
-      }
-
-      fullTimeline = [birthEvent, ...fullTimeline];
-    }
-
-    // Death state
-    const deathEvent = this.deathEventsByAuthor.get(author.id);
-
-    if (deathEvent) {
-      const state = deathEvent.location?.state;
-
-      if (state) {
-        const store = map.get(state)!;
-
-        const deathEventDate = new Date(deathEvent.date);
-
-        const succeedingIndex = store.deceasedAuthors.findIndex((author) => {
-          const authorDeathEvent = this.deathEventsByAuthor.get(author.id);
-          return deathEventDate < new Date(authorDeathEvent!.date);
-        });
-
-        if (succeedingIndex === -1) {
-          store.deceasedAuthors.push(author);
-        } else {
-          store.deceasedAuthors.splice(succeedingIndex, 0, author);
-        }
-      }
-
-      fullTimeline = [...fullTimeline, deathEvent];
-    }
-
-    // Residing states
-    fullTimeline.forEach((event) => {
-      const state = event.location?.state;
-      if (state) {
-        const store = map.get(state)!;
-
-        if (
-          !store.residingAuthors.find(
-            (residingAuthor) => residingAuthor.id === author.id,
-          )
-        ) {
-          store.residingAuthors.push(author);
-        }
-      }
-    });
-
     this.internalRegistry.set(author.id, author);
   }
 
@@ -269,23 +230,7 @@ export class AuthorMapStores {
   }
 
   remove(authorId: Author['id']) {
-    const { map } = this;
-
     if (this.internalRegistry.has(authorId)) {
-      const keys: Array<keyof StateStore> = [
-        'bornAuthors',
-        'deceasedAuthors',
-        'residingAuthors',
-      ];
-
-      for (const stateStore of map.values()) {
-        keys.forEach((key) => {
-          stateStore[key] = stateStore[key].filter(
-            (existingAuthor) => existingAuthor.id !== authorId,
-          );
-        });
-      }
-
       this.internalRegistry.delete(authorId);
 
       this.authorTimelines.delete(authorId);
@@ -334,8 +279,10 @@ export class AuthorMapStores {
     this.addTimelineEvent(event);
   }
 
-  sortTimelineEvents(): void {
-    for (const [authorId, authorTimeline] of this.authorTimelines.entries()) {
+  private sortAuthorTimelineEvents(authorId: Author['id']): void {
+    if (this.authorTimelines.has(authorId)) {
+      const authorTimeline = this.authorTimelines.get(authorId)!;
+
       const sortedAuthorTimeline = sortedBy(
         [...authorTimeline.entries()],
         ([, value]) =>
@@ -343,6 +290,12 @@ export class AuthorMapStores {
       );
 
       this.authorTimelines.set(authorId, new Map(sortedAuthorTimeline));
+    }
+  }
+
+  private sortTimelineEvents(): void {
+    for (const authorId of this.authorTimelines.keys()) {
+      this.sortAuthorTimelineEvents(authorId);
     }
 
     const sortedMajorEvents = sortedBy(
@@ -389,7 +342,7 @@ export class AuthorMapStores {
       fullTimeline = [birthEvent];
     }
 
-    fullTimeline = fullTimeline.concat(this.getAuthorTimeline(author));
+    fullTimeline = fullTimeline.concat(this.getAuthorTimeline(author.id));
 
     const deathEvent = this.deathEventsByAuthor.get(author.id);
 

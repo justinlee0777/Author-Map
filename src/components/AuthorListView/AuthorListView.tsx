@@ -14,7 +14,6 @@ import {
 import {
   AuthorFilter,
   AuthorSort,
-  AuthorMapStores,
   createKeyGenerator,
 } from '../../utils/stores';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
@@ -25,7 +24,6 @@ import {
   AuthorEventType,
   AuthorGroup,
   AuthorTimelineEvent,
-  MilestoneEvent,
   USState,
 } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';

@@ -213,9 +213,6 @@ export type AuthorTimelineEvent =
  * For example, "Jewish American writers", "Belonging to the Harlem Renaissance", "pre-Republic", etc.
  */
 export interface AuthorGroup {
-  /**
-   * Highly recommended for update operations, in case authors have name collision. Also highly recommended for performance.
-   */
   id: string | Symbol;
 
   /** Assumed to be unique. */
@@ -226,9 +223,6 @@ export interface AuthorGroup {
 }
 
 export interface Author {
-  /**
-   * Highly recommended for update operations, in case authors have name collision. Also highly recommended for performance.
-   */
   id: string | Symbol;
 
   authorFirstName: string;
@@ -246,12 +240,6 @@ export interface Author {
   groups?: Array<AuthorGroup['id']>;
 }
 
-export interface StateStore {
-  bornAuthors: Array<Author>;
-  deceasedAuthors: Array<Author>;
-  residingAuthors: Array<Author>;
-}
-
 export interface CityCoordinates {
   coordinates: [number, number];
   location: Required<AuthorLocation>;
@@ -262,4 +250,12 @@ export interface AuthorBook {
   title: string;
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   publicationDate: string;
+}
+
+export interface AuthorData {
+  author: Author;
+  birthDate: BirthEvent;
+
+  deathDate?: DeathEvent;
+  timeline?: Array<AuthorTimelineEvent>;
 }

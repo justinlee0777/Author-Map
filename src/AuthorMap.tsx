@@ -1,14 +1,17 @@
 import styles from './AuthorMap.module.css';
 import commonStyles from './common.module.css';
 
-import { useMemo, useRef, useState, JSX } from 'react';
+import { useMemo, useRef, useState, JSX, useCallback } from 'react';
 import clsx from 'clsx';
 
 import type {
   Author,
+  AuthorData,
   AuthorGroup,
   AuthorTimelineEvent,
+  BirthEvent,
   CityCoordinates,
+  DeathEvent,
   MilestoneEvent,
 } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
@@ -16,7 +19,6 @@ import { AuthorMapStores } from './utils/stores';
 import { Tabs } from './components/Tabs/Tabs';
 import { AuthorMapView } from './components/AuthorMapView/AuthorMapView';
 import { AuthorListView } from './components/AuthorListView/AuthorListView';
-import { getAuthorName } from './utils/names';
 import { AuthorTimelineView } from './components/AuthorTimelineView/AuthorTimelineView';
 import { AddAuthor } from './components/AddAuthor/AddAuthor';
 import { AddAuthorGroup } from './components/AddAuthorGroup/AddAuthorGroup';
@@ -47,12 +49,12 @@ interface Props {
    * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
    * TODO: How should IDs be handled?
    */
-  syncAuthorAdded?: (author: Author) => void | Promise<void>;
+  syncAuthorAdded?: (author: AuthorData) => void | Promise<void>;
   /**
    * Used to update an external dataset.
    * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
    */
-  syncAuthorUpdate?: (changedAuthor: Author) => void | Promise<void>;
+  syncAuthorUpdate?: (changedAuthor: AuthorData) => void | Promise<void>;
 
   onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
 
@@ -110,9 +112,8 @@ export function AuthorMap({
 
   const [viewType, setViewType] = useState<ViewType>(ViewType.MAP);
 
-  const [editingAuthor, setEditingAuthor] = useState<Partial<Author> | null>(
-    null,
-  );
+  const [editingAuthor, setEditingAuthor] =
+    useState<RecursivePartial<AuthorData> | null>(null);
 
   const [editingGroup, setEditingGroup] = useState<Partial<AuthorGroup> | null>(
     null,
@@ -128,6 +129,28 @@ export function AuthorMap({
     return new AuthorMapStores(authors, timeline);
   }, [authors]);
 
+  const onAuthorEdit = useCallback(
+    (author: Partial<Author>) => {
+      let birthDate: BirthEvent | undefined,
+        deathDate: DeathEvent | undefined,
+        timeline: Array<AuthorTimelineEvent> = [];
+
+      if (author.id) {
+        ((birthDate = statesData.getBirthDate(author.id)),
+          (deathDate = statesData.getDeathDate(author.id)));
+        timeline = statesData.getAuthorTimeline(author.id, true);
+      }
+
+      setEditingAuthor({
+        author,
+        birthDate,
+        deathDate,
+        timeline,
+      });
+    },
+    [statesData, setEditingAuthor],
+  );
+
   let viewElement: JSX.Element;
 
   switch (viewType) {
@@ -135,14 +158,14 @@ export function AuthorMap({
       viewElement = (
         <AuthorMapView
           cityCoordinates={cityCoordinates}
-          onAuthorEdit={setEditingAuthor}
+          onAuthorEdit={onAuthorEdit}
         />
       );
       break;
     case ViewType.LIST:
       viewElement = (
         <AuthorListView
-          onAuthorEdit={setEditingAuthor}
+          onAuthorEdit={onAuthorEdit}
           onAuthorView={setViewingAuthor}
           onAuthorGroupEdit={setEditingGroup}
         />
@@ -189,12 +212,19 @@ export function AuthorMap({
               children={{ right: 'Add author' }}
               onClick={() => {
                 setEditingAuthor({
-                  authorFirstName: '',
-                  authorLastName: '',
-                  authorFullName: '',
-                  portrait: {
-                    src: '',
+                  author: {
+                    authorFirstName: '',
+                    authorLastName: '',
+                    authorFullName: '',
+                    portrait: {
+                      src: '',
+                    },
                   },
+                  birthDate: {
+                    date: '',
+                    type: 'Birth',
+                  },
+                  timeline: [],
                 });
               }}
             />
@@ -229,31 +259,46 @@ export function AuthorMap({
             <EditAuthorModal
               appElement={componentRef.current!}
               opened={Boolean(editingAuthor)}
-              initialAuthor={editingAuthor}
+              initialData={editingAuthor}
               disabled={loading || disabled}
               onClose={() => setEditingAuthor(null)}
               onGroupCreated={onGroupCreated}
-              onSubmit={async (author) => {
+              onSubmit={async (data) => {
                 if (disabled) {
                   return;
                 }
 
                 setLoading(true);
 
-                const updating = Boolean(author.id);
+                const updating = Boolean(data.author.id);
 
                 try {
+                  const fullTimeline: Array<AuthorTimelineEvent> = [
+                    data.birthDate,
+                    ...(data.timeline ?? []),
+                  ];
+
+                  if (data.deathDate) {
+                    fullTimeline.push(data.deathDate);
+                  }
+
                   if (updating) {
-                    await syncAuthorUpdate?.(author);
-                    statesData.update(author);
+                    await syncAuthorUpdate?.(data);
+
+                    statesData.update(data.author);
                   } else {
-                    await syncAuthorAdded?.(author);
+                    await syncAuthorAdded?.(data);
 
-                    if (!author.id) {
-                      author.id = Symbol(`ID for ${getAuthorName(author)}`);
-                    }
+                    statesData.add(data.author);
+                  }
 
-                    statesData.add(author);
+                  statesData.setAuthorTimeline(data.author.id, fullTimeline);
+                  statesData.setBirthDate(data.author.id, data.birthDate);
+
+                  if (data.deathDate) {
+                    statesData.setDeathDate(data.author.id, data.deathDate);
+                  } else {
+                    statesData.removeDeathDate(data.author.id);
                   }
 
                   setEditingAuthor(null);

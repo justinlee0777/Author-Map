@@ -25,12 +25,10 @@ import {
   AuthorEventType,
   AuthorLocation,
   CityCoordinates,
-  StateStore,
   USState,
 } from '../../models';
 import { StateDrawer } from '../StateDrawer/StateDrawer';
 import { Tabs } from '../Tabs/Tabs';
-import { AuthorMapStores } from '../../utils/stores';
 import { AuthorMapDataContext } from '../../contexts';
 
 interface Geography {

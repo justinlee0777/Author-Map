@@ -38,7 +38,7 @@ export function ViewAuthorModal({
   }
 
   const achievements = data
-    .getAuthorTimeline(author)
+    .getAuthorTimeline(author.id, true)
     .filter((event) => Boolean(event.achievement)) as Array<MilestoneEvent>;
 
   const birthDate = data.getBirthDate(author.id),

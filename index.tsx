@@ -261,7 +261,6 @@ const App = () => {
     <>
       {needsLoading && <p>Loading...</p>}
       <AuthorMap
-        disabled="Need to be authenticated to add/edit authors."
         className="authorMap"
         authors={authors}
         groups={groups}
@@ -275,7 +274,7 @@ const App = () => {
         syncAuthorAdded={(author) => {
           console.log('author added', author);
 
-          author.id = Symbol();
+          author.author.id = Symbol();
         }}
         onGroupCreated={(group) =>
           setGroups((currentGroups) =>
