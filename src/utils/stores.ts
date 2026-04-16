@@ -52,15 +52,15 @@ export class AuthorMapStores {
 
     this.deathEventsByAuthor = new Map();
 
+    for (const author of authors) {
+      this.add(author);
+    }
+
     for (const event of timeline) {
       this.addTimelineEvent(event);
     }
 
     this.sortTimelineEvents();
-
-    for (const author of authors) {
-      this.add(author);
-    }
   }
 
   getAll(
@@ -136,7 +136,7 @@ export class AuthorMapStores {
           .filter(
             ([, birthEvent]) =>
               birthEvent.location?.state === state &&
-              birthEvent?.location?.address === address,
+              (address ? birthEvent?.location?.address === address : true),
           )
           .map(([authorId]) => this.internalRegistry.get(authorId)!);
       case AuthorEventType.DEATHS:
@@ -144,7 +144,7 @@ export class AuthorMapStores {
           .filter(
             ([, deathEvent]) =>
               deathEvent.location?.state === state &&
-              deathEvent?.location?.address === address,
+              (address ? deathEvent?.location?.address === address : true),
           )
           .map(([authorId]) => this.internalRegistry.get(authorId)!);
       default:
@@ -152,10 +152,12 @@ export class AuthorMapStores {
     }
   }
 
+  getAuthorTimeline(authorId: Author['id']): Array<AuthorTimelineEvent>;
   getAuthorTimeline(
     authorId: Author['id'],
-    noBirthAndDeath = false,
-  ): Array<AuthorTimelineEvent> {
+    noBirthAndDeath: true,
+  ): Array<Exclude<AuthorTimelineEvent, BirthEvent | DeathEvent>>;
+  getAuthorTimeline(authorId: Author['id'], noBirthAndDeath = false) {
     if (this.authorTimelines.has(authorId)) {
       const timelineMap = this.authorTimelines.get(authorId)!;
 
@@ -249,6 +251,8 @@ export class AuthorMapStores {
 
       authorTimeline.set(event.id, event);
 
+      this.authorTimelines.set(event.authorId, authorTimeline);
+
       if (event.type === 'Birth') {
         this.birthEventsByAuthor.set(event.authorId, event);
       } else if (event.type === 'Death') {
@@ -329,6 +333,7 @@ export class AuthorMapStores {
     }
   };
 
+  /* TODO: Fix. Should accept a date / time range
   private hasAuthorResided(
     author: Author,
     usState: USState,
@@ -370,6 +375,7 @@ export class AuthorMapStores {
       }
     });
   }
+    */
 }
 
 interface KeyGenerator {

@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { AuthorMap } from './src/AuthorMap';
 import {
   Author,
-  AuthorAchievementType,
   AuthorGroup,
   CityCoordinates,
   AuthorTimelineEvent,
@@ -200,11 +199,13 @@ const App = () => {
       authorId: authors.find((author) => author.authorLastName === 'Whitman')!
         .id,
       date: '1855-07-04',
+      /*
       achievement: {
         type: AuthorAchievementType.RENOWNED_WORK,
         workTitle: 'Leaves of Grass',
         referenceUrl: 'https://en.wikipedia.org/wiki/Leaves_of_Grass',
       },
+      */
       notes: 'Self-published',
       type: 'Milestone',
     },
@@ -213,10 +214,12 @@ const App = () => {
       authorId: authors.find((author) => author.authorLastName === 'Steinbeck')!
         .id,
       date: '1962',
+      /*
       achievement: {
         awardName: 'Nobel Prize in Literature',
         type: AuthorAchievementType.AWARD,
       },
+      */
       type: 'Milestone',
     },
   ]);

@@ -1,7 +1,7 @@
 import styles from './ViewAuthorModal.module.css';
 
 import { Fragment, JSX, ReactNode, useContext } from 'react';
-import { Author, AuthorAchievementType, MilestoneEvent } from '../../models';
+import { Author } from '../../models';
 import Modal from 'react-modal';
 import { MdClear } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
@@ -37,9 +37,7 @@ export function ViewAuthorModal({
     );
   }
 
-  const achievements = data
-    .getAuthorTimeline(author.id, true)
-    .filter((event) => Boolean(event.achievement)) as Array<MilestoneEvent>;
+  const events = data.getAuthorTimeline(author.id, true);
 
   const birthDate = data.getBirthDate(author.id),
     deathDate = data.getDeathDate(author.id);
@@ -81,39 +79,34 @@ export function ViewAuthorModal({
           </>
         )}
 
-        {achievements.length > 0 && (
+        {events.length > 0 && (
           <>
-            <h4>Known for</h4>
-            {achievements.map(({ date, achievement }, i) => {
-              let titleElement: ReactNode;
+            <h4>Timeline</h4>
+            {/* TODO: This should be like a miniature Timeline component. */}
+            {events.map((event, i) => {
+              let eventElement: ReactNode;
 
-              switch (achievement!.type) {
-                case AuthorAchievementType.AWARD:
-                  titleElement = achievement!.awardName;
+              switch (event.type) {
+                case 'Timeline':
+                  eventElement = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
                   break;
-                case AuthorAchievementType.RENOWNED_WORK:
+                case 'Milestone':
                 default:
-                  titleElement = achievement!.workTitle;
-
-                  if (achievement!.referenceUrl) {
-                    titleElement = (
-                      <a
-                        href={achievement!.referenceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {titleElement}
-                      </a>
-                    );
-                  }
+                  eventElement = formatDate(event.date);
                   break;
+              }
+
+              if (event.notes) {
+                eventElement = (
+                  <>
+                    {eventElement} - {event.notes}
+                  </>
+                );
               }
 
               return (
                 <Fragment key={i}>
-                  <p>
-                    {formatDate(date)} - {titleElement}
-                  </p>
+                  <p>{eventElement}</p>
                 </Fragment>
               );
             })}

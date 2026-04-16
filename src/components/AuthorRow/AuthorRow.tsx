@@ -5,7 +5,6 @@ import clsx from 'clsx';
 
 import {
   Author,
-  AuthorAchievementType,
   AuthorEventType,
   AuthorTimelineEvent,
   MilestoneEvent,
@@ -44,9 +43,9 @@ export function AuthorRow({
       )}
       <div className={styles.authorRowDetails}>
         <h4>{authorName}</h4>
-        {finalEvents.map(({ notes, date, location, achievement }, index) => {
+        {finalEvents.map(({ notes, date, location }, index) => {
           let contextElement: JSX.Element | undefined;
-
+          /*
           if (showContext) {
             let achievementElement: JSX.Element | undefined;
 
@@ -85,6 +84,7 @@ export function AuthorRow({
               </>
             );
           }
+            */
 
           return (
             <Fragment key={index}>

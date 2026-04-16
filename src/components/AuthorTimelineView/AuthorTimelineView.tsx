@@ -13,12 +13,7 @@ import clsx from 'clsx';
 
 import { controlForTimezone, formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
-import {
-  AuthorAchievementType,
-  AuthorGroup,
-  AuthorTimelineEvent,
-  TimelineEvent,
-} from '../../models';
+import { AuthorGroup, AuthorTimelineEvent, TimelineEvent } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import infiniteScroll from '../../utils/infinite-scroll';
 import { AuthorMapDataContext } from '../../contexts';
@@ -44,7 +39,6 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
     switch (event.type) {
       case 'Birth':
       case 'Death':
-      case 'Milestone':
         return true;
       default:
         return false;
@@ -93,41 +87,9 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
           <h4 className={styles.authorTimelineViewYear}>{year}</h4>
           <div className={styles.authorTimelineViewEntryBullet}></div>
           {events?.map((event, i) => {
-            let achievementElement: JSX.Element | undefined;
-
             const author = event.authorId
               ? statesData.getAuthor(event.authorId)
               : undefined;
-
-            if (event.achievement) {
-              switch (event.achievement.type) {
-                case AuthorAchievementType.AWARD:
-                  achievementElement = (
-                    <p>Awarded {event.achievement.awardName}</p>
-                  );
-                  break;
-                case AuthorAchievementType.RENOWNED_WORK:
-                default:
-                  let workTitleElement = (
-                    <span>{event.achievement.workTitle}</span>
-                  );
-
-                  if (event.achievement.referenceUrl) {
-                    workTitleElement = (
-                      <a
-                        href={event.achievement.referenceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {workTitleElement}
-                      </a>
-                    );
-                  }
-
-                  achievementElement = <p>Known work: {workTitleElement} </p>;
-                  break;
-              }
-            }
 
             let note: string;
 
@@ -166,8 +128,6 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
                       )}
                     </h4>
                   )}
-
-                  {achievementElement}
 
                   <p>{note}</p>
                 </div>

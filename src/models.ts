@@ -151,6 +151,8 @@ export interface TimeSpan {
   endDate: string;
 }
 
+/* TODO: Not sure what to do with this or how to do it organically.
+Seems to me that this should be flattened and its own model, mostly because "achievement" is a separate concept from what the author has actually done.
 export enum AuthorAchievementType {
   RENOWNED_WORK = 'Renowned work',
   AWARD = 'Award',
@@ -168,6 +170,8 @@ export interface AuthorAwardAchievement {
 }
 
 export type AuthorAchievement = AuthorWorkAchievement | AuthorAwardAchievement;
+*/
+
 export interface BaseTimelineEvent {
   id: string | Symbol;
 
@@ -175,8 +179,6 @@ export interface BaseTimelineEvent {
   location?: AuthorLocation;
   /** Additional comments on the event. */
   notes?: string;
-  /** Whether the event encompasses an achievement, as the publishing of a major book, or recognition of some sort. */
-  achievement?: AuthorAchievement;
   referenceUrl?: string;
 }
 
