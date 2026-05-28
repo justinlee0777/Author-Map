@@ -1,14 +1,13 @@
 import styles from './ViewAuthorModal.module.css';
 
 import { Fragment, JSX, ReactNode, useContext } from 'react';
-import { Author, AuthorAchievementType } from '../../models';
+import { Author } from '../../models';
 import Modal from 'react-modal';
 import { MdClear } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { formatDate } from '../../utils/dates';
 import { getAddress } from '../../utils/address';
-import { AuthorGroupContext } from '../../contexts';
-import { getMilestoneEvents } from '../../utils/events';
+import { AuthorGroupContext, AuthorMapDataContext } from '../../contexts';
 
 interface Props {
   appElement: HTMLElement;
@@ -24,6 +23,8 @@ export function ViewAuthorModal({
   onClose,
   author,
 }: Props): JSX.Element {
+  const { data } = useContext(AuthorMapDataContext);
+
   const { groups } = useContext(AuthorGroupContext);
 
   let authorNameElement: ReactNode = getAuthorName(author);
@@ -36,10 +37,10 @@ export function ViewAuthorModal({
     );
   }
 
-  const achievements = getMilestoneEvents(author, {
-    achievementsOnly: true,
-    excludeBirthAndDeath: true,
-  });
+  const events = data.getAuthorTimeline(author.id, true);
+
+  const birthDate = data.getBirthDate(author.id),
+    deathDate = data.getDeathDate(author.id);
 
   return (
     <Modal isOpen={opened} appElement={appElement}>
@@ -60,57 +61,52 @@ export function ViewAuthorModal({
         <h4>Name</h4>
         <p>{authorNameElement}</p>
 
-        <h4>Birth</h4>
-        <p>{formatDate(author.birthDate.date)}</p>
-        {author.birthDate.location && (
-          <p>{getAddress(author.birthDate.location)}</p>
-        )}
-        {author.birthDate.notes && <p>{author.birthDate.notes}</p>}
-
-        {author.deathDate && (
+        {birthDate && (
           <>
-            <h4>Death</h4>
-            <p>{formatDate(author.deathDate.date)}</p>
-            {author.deathDate.location && (
-              <p>{getAddress(author.deathDate.location)}</p>
-            )}
-            {author.deathDate.notes && <p>{author.deathDate.notes}</p>}
+            <h4>Birth</h4>
+            <p>{formatDate(birthDate.date)}</p>
+            {birthDate.location && <p>{getAddress(birthDate.location)}</p>}
+            {birthDate.notes && <p>{birthDate.notes}</p>}
           </>
         )}
 
-        {achievements.length > 0 && (
+        {deathDate && (
           <>
-            <h4>Known for</h4>
-            {achievements.map(({ date, achievement }, i) => {
-              let titleElement: ReactNode;
+            <h4>Death</h4>
+            <p>{formatDate(deathDate.date)}</p>
+            {deathDate.location && <p>{getAddress(deathDate.location)}</p>}
+            {deathDate.notes && <p>{deathDate.notes}</p>}
+          </>
+        )}
 
-              switch (achievement!.type) {
-                case AuthorAchievementType.AWARD:
-                  titleElement = achievement!.awardName;
+        {events.length > 0 && (
+          <>
+            <h4>Timeline</h4>
+            {/* TODO: This should be like a miniature Timeline component. */}
+            {events.map((event, i) => {
+              let eventElement: ReactNode;
+
+              switch (event.type) {
+                case 'Timeline':
+                  eventElement = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
                   break;
-                case AuthorAchievementType.RENOWNED_WORK:
+                case 'Milestone':
                 default:
-                  titleElement = achievement!.workTitle;
-
-                  if (achievement!.referenceUrl) {
-                    titleElement = (
-                      <a
-                        href={achievement!.referenceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {titleElement}
-                      </a>
-                    );
-                  }
+                  eventElement = formatDate(event.date);
                   break;
+              }
+
+              if (event.notes) {
+                eventElement = (
+                  <>
+                    {eventElement} - {event.notes}
+                  </>
+                );
               }
 
               return (
                 <Fragment key={i}>
-                  <p>
-                    {formatDate(date)} - {titleElement}
-                  </p>
+                  <p>{eventElement}</p>
                 </Fragment>
               );
             })}

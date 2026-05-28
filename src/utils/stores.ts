@@ -1,12 +1,15 @@
+import sortedBy from 'lodash-es/sortBy';
+
 import {
   Author,
   AuthorEventType,
-  MilestoneEvent,
-  StateStore,
-  TimelineEvent,
+  AuthorTimelineEvent,
+  BirthEvent,
+  DeathEvent,
   USState,
 } from '../models';
 import { getAuthorName } from './names';
+import { getStartingDate } from './dates';
 
 export interface AuthorSort {
   name?: boolean;
@@ -18,40 +21,67 @@ export interface AuthorFilter {
   deceasedOnly?: boolean;
 }
 
-export class AuthorStores {
-  private map: Map<USState, StateStore>;
+export class AuthorMapStores {
+  dateRange: [number, number];
+
   private internalRegistry: Map<Author['id'], Author>;
+  private authorTimelines: Map<
+    Author['id'],
+    Map<AuthorTimelineEvent['id'], AuthorTimelineEvent>
+  >;
+  private majorEvents: Map<AuthorTimelineEvent['id'], AuthorTimelineEvent>;
+  private allEvents: Array<AuthorTimelineEvent>;
+  private birthEventsByAuthor: Map<Author['id'], BirthEvent>;
+  private deathEventsByAuthor: Map<Author['id'], DeathEvent>;
 
   get numAuthors(): number {
-    return this.map.size;
+    return this.internalRegistry.size;
   }
 
-  constructor(authors: Array<Author>) {
-    this.map = new Map<USState, StateStore>([
-      ...Object.values(USState).map(
-        (stateName) =>
-          [
-            stateName,
-            { bornAuthors: [], deceasedAuthors: [], residingAuthors: [] },
-          ] as [USState, StateStore],
-      ),
-    ]);
+  get timelineEvents(): Array<AuthorTimelineEvent> {
+    return this.allEvents;
+  }
 
+  constructor(authors: Array<Author>, timeline: Array<AuthorTimelineEvent>) {
     this.internalRegistry = new Map();
+
+    this.authorTimelines = new Map();
+
+    this.majorEvents = new Map();
+
+    this.allEvents = [];
+
+    this.birthEventsByAuthor = new Map();
+
+    this.deathEventsByAuthor = new Map();
 
     for (const author of authors) {
       this.add(author);
     }
+
+    for (const event of timeline) {
+      this.addTimelineEvent(event);
+    }
+
+    this.sortTimelineEvents();
+
+    this.dateRange = [
+      new Date(getStartingDate(this.allEvents.at(0)!)).getFullYear(),
+      new Date().getFullYear(),
+    ];
   }
 
   getAll(
     sort: AuthorSort = { name: true },
     { deceasedOnly }: AuthorFilter = {},
   ): Array<Author> {
+    // Guaranteeing authors have a birth date.
     let authors = Array.from(this.internalRegistry.values());
 
     if (deceasedOnly) {
-      authors = authors.filter((author) => Boolean(author.deathDate));
+      authors = authors.filter((author) =>
+        Boolean(this.deathEventsByAuthor.get(author.id)),
+      );
     }
 
     if (sort.name) {
@@ -59,23 +89,38 @@ export class AuthorStores {
         getAuthorName(a).localeCompare(getAuthorName(b)),
       );
     } else if (sort.birth) {
-      return authors.sort(
-        (a, b) =>
-          new Date(a.birthDate.date).valueOf() -
-          new Date(b.birthDate.date).valueOf(),
-      );
-    } else if (sort.death) {
       return authors.sort((a, b) => {
-        if (!(a.deathDate || b.deathDate)) {
+        const aBirthDate = this.birthEventsByAuthor.get(a.id)!,
+          bBirthDate = this.birthEventsByAuthor.get(b.id)!;
+
+        if (!(aBirthDate || bBirthDate)) {
           return 0;
-        } else if (!a.deathDate) {
+        } else if (!aBirthDate) {
           return 1;
-        } else if (!b.deathDate) {
+        } else if (!bBirthDate) {
           return -1;
         } else {
           return (
-            new Date(a.deathDate.date).valueOf() -
-            new Date(b.deathDate.date).valueOf()
+            new Date(aBirthDate.date).valueOf() -
+            new Date(bBirthDate.date).valueOf()
+          );
+        }
+      });
+    } else if (sort.death) {
+      return authors.sort((a, b) => {
+        const aDeathDate = this.deathEventsByAuthor.get(a.id)!,
+          bDeathDate = this.deathEventsByAuthor.get(b.id)!;
+
+        if (!(aDeathDate || bDeathDate)) {
+          return 0;
+        } else if (!aDeathDate) {
+          return 1;
+        } else if (!bDeathDate) {
+          return -1;
+        } else {
+          return (
+            new Date(aDeathDate.date).valueOf() -
+            new Date(bDeathDate.date).valueOf()
           );
         }
       });
@@ -84,8 +129,8 @@ export class AuthorStores {
     }
   }
 
-  get(state: USState): StateStore {
-    return this.map.get(state)!;
+  getAuthor(id: Author['id']): Author {
+    return this.internalRegistry.get(id)!;
   }
 
   getAuthors(
@@ -93,99 +138,100 @@ export class AuthorStores {
     eventType?: AuthorEventType,
     address?: string,
   ): Array<Author> {
-    const stateData = this.get(state);
-
     switch (eventType) {
       case AuthorEventType.BIRTHS:
-        return stateData.bornAuthors.filter(
-          (author) =>
-            !Boolean(address) || author.birthDate.location?.address === address,
-        );
+        return [...this.birthEventsByAuthor.entries()]
+          .filter(
+            ([, birthEvent]) =>
+              birthEvent.location?.state === state &&
+              (address ? birthEvent?.location?.address === address : true),
+          )
+          .map(([authorId]) => this.internalRegistry.get(authorId)!);
       case AuthorEventType.DEATHS:
-        return stateData.deceasedAuthors.filter(
-          (author) =>
-            !Boolean(address) ||
-            author.deathDate?.location?.address === address,
-        );
+        return [...this.deathEventsByAuthor.entries()]
+          .filter(
+            ([, deathEvent]) =>
+              deathEvent.location?.state === state &&
+              (address ? deathEvent?.location?.address === address : true),
+          )
+          .map(([authorId]) => this.internalRegistry.get(authorId)!);
       default:
-        return stateData.residingAuthors.filter(
-          (author) =>
-            !Boolean(address) || this.hasAuthorResided(author, state, address),
+        return [...this.internalRegistry.values()].filter((author) =>
+          this.hasAuthorResided(author.id, state),
         );
     }
   }
 
-  add(author: Author): void {
-    const { map } = this;
+  getAuthorTimeline(authorId: Author['id']): Array<AuthorTimelineEvent>;
+  getAuthorTimeline(
+    authorId: Author['id'],
+    noBirthAndDeath: true,
+  ): Array<Exclude<AuthorTimelineEvent, BirthEvent | DeathEvent>>;
+  getAuthorTimeline(authorId: Author['id'], noBirthAndDeath = false) {
+    if (this.authorTimelines.has(authorId)) {
+      const timelineMap = this.authorTimelines.get(authorId)!;
 
-    let fullTimeline: Array<MilestoneEvent | TimelineEvent> = [
-      ...author.timeline,
-    ];
+      let events = [...timelineMap.values()];
 
-    // Birth state
-    const birthEvent = author.birthDate;
-
-    const state = birthEvent.location?.state;
-
-    if (state) {
-      const store = map.get(state)!;
-
-      const birthEventDate = new Date(birthEvent.date);
-
-      const succeedingIndex = store.bornAuthors.findIndex((author) => {
-        return birthEventDate < new Date(author.birthDate.date);
-      });
-
-      if (succeedingIndex === -1) {
-        store.bornAuthors.push(author);
-      } else {
-        store.bornAuthors.splice(succeedingIndex, 0, author);
-      }
-    }
-
-    fullTimeline = [{ ...birthEvent, notes: 'Birth' }, ...fullTimeline];
-
-    // Death state
-    const deathEvent = author.deathDate;
-
-    if (deathEvent) {
-      const state = deathEvent.location?.state;
-
-      if (state) {
-        const store = map.get(state)!;
-
-        const deathEventDate = new Date(deathEvent.date);
-
-        const succeedingIndex = store.deceasedAuthors.findIndex((author) => {
-          return deathEventDate < new Date(author.deathDate!.date);
+      if (noBirthAndDeath) {
+        events = events.filter((event) => {
+          switch (event.type) {
+            case 'Birth':
+            case 'Death':
+              return false;
+            default:
+              return true;
+          }
         });
-
-        if (succeedingIndex === -1) {
-          store.deceasedAuthors.push(author);
-        } else {
-          store.deceasedAuthors.splice(succeedingIndex, 0, author);
-        }
       }
 
-      fullTimeline = [...fullTimeline, { ...deathEvent, notes: 'Death' }];
+      return events;
+    } else {
+      return [];
     }
+  }
 
-    // Residing states
-    fullTimeline.forEach((event) => {
-      const state = event.location?.state;
-      if (state) {
-        const store = map.get(state)!;
+  setAuthorTimeline(
+    authorId: Author['id'],
+    timeline: Array<AuthorTimelineEvent>,
+  ): void {
+    const preexistingEventKeys = new Set(
+      this.authorTimelines.get(authorId)?.keys(),
+    );
 
-        if (
-          !store.residingAuthors.find(
-            (residingAuthor) => residingAuthor.id === author.id,
-          )
-        ) {
-          store.residingAuthors.push(author);
-        }
-      }
-    });
+    this.authorTimelines.set(
+      authorId,
+      new Map(timeline.map((event) => [event.id, event] as const)),
+    );
 
+    this.allEvents = this.allEvents
+      .filter((event) => !preexistingEventKeys.has(event.id))
+      .concat(timeline);
+
+    this.sortTimelineEvents();
+  }
+
+  getBirthDate(authorId: Author['id']): BirthEvent | undefined {
+    return this.birthEventsByAuthor.get(authorId);
+  }
+
+  setBirthDate(authorId: Author['id'], birthEvent: BirthEvent): void {
+    this.birthEventsByAuthor.set(authorId, birthEvent);
+  }
+
+  getDeathDate(authorId: Author['id']): DeathEvent | undefined {
+    return this.deathEventsByAuthor.get(authorId);
+  }
+
+  setDeathDate(authorId: Author['id'], deathEvent: DeathEvent): void {
+    this.deathEventsByAuthor.set(authorId, deathEvent);
+  }
+
+  removeDeathDate(authorId: Author['id']): void {
+    this.deathEventsByAuthor.delete(authorId);
+  }
+
+  add(author: Author): void {
     this.internalRegistry.set(author.id, author);
   }
 
@@ -196,57 +242,146 @@ export class AuthorStores {
   }
 
   remove(authorId: Author['id']) {
-    const { map } = this;
-
     if (this.internalRegistry.has(authorId)) {
-      const keys: Array<keyof StateStore> = [
-        'bornAuthors',
-        'deceasedAuthors',
-        'residingAuthors',
-      ];
-
-      for (const stateStore of map.values()) {
-        keys.forEach((key) => {
-          stateStore[key] = stateStore[key].filter(
-            (existingAuthor) => existingAuthor.id !== authorId,
-          );
-        });
-      }
-
       this.internalRegistry.delete(authorId);
+
+      this.authorTimelines.delete(authorId);
     }
   }
 
-  private hasAuthorResided(
-    author: Author,
-    usState: USState,
-    address?: string,
-  ): boolean {
-    let fullTimeline = [author.birthDate, ...author.timeline];
+  addTimelineEvent(event: AuthorTimelineEvent): void {
+    if (event.authorId) {
+      let authorTimeline: Map<AuthorTimelineEvent['id'], AuthorTimelineEvent>;
 
-    if (author.deathDate) {
-      fullTimeline = fullTimeline.concat(author.deathDate);
+      if (this.authorTimelines.has(event.authorId)) {
+        authorTimeline = this.authorTimelines.get(event.authorId)!;
+      } else {
+        authorTimeline = new Map();
+      }
+
+      authorTimeline.set(event.id, event);
+
+      this.authorTimelines.set(event.authorId, authorTimeline);
+
+      if (event.type === 'Birth') {
+        this.birthEventsByAuthor.set(event.authorId, event);
+      } else if (event.type === 'Death') {
+        this.deathEventsByAuthor.set(event.authorId, event);
+      }
+    } else {
+      this.majorEvents.set(event.id, event);
     }
 
-    return fullTimeline.some((event) => {
-      const { location } = event;
+    this.allEvents.push(event);
+  }
 
-      if (location) {
-        if (location.state) {
-          const value = location.state === usState;
+  removeTimelineEvent(event: AuthorTimelineEvent): void {
+    if (event.authorId) {
+      const authorTimeline = this.authorTimelines.get(event.authorId)!;
 
-          if (address) {
-            return value && location.address === address;
+      authorTimeline.delete(event.id);
+    } else {
+      this.majorEvents.delete(event.id);
+    }
+
+    this.allEvents = this.allEvents.filter((e) => e.id !== event.id);
+  }
+
+  updateTimelineEvent(event: AuthorTimelineEvent): void {
+    this.removeTimelineEvent(event);
+
+    this.addTimelineEvent(event);
+  }
+
+  private sortAuthorTimelineEvents(authorId: Author['id']): void {
+    if (this.authorTimelines.has(authorId)) {
+      const authorTimeline = this.authorTimelines.get(authorId)!;
+
+      const sortedAuthorTimeline = sortedBy(
+        [...authorTimeline.entries()],
+        ([, value]) =>
+          this.getTimelineEventSortingAttribute(value as AuthorTimelineEvent),
+      );
+
+      this.authorTimelines.set(authorId, new Map(sortedAuthorTimeline));
+    }
+  }
+
+  private sortTimelineEvents(): void {
+    for (const authorId of this.authorTimelines.keys()) {
+      this.sortAuthorTimelineEvents(authorId);
+    }
+
+    const sortedMajorEvents = sortedBy(
+      [...this.majorEvents.entries()],
+      ([, value]) =>
+        this.getTimelineEventSortingAttribute(value as AuthorTimelineEvent),
+    );
+
+    this.majorEvents = new Map(sortedMajorEvents);
+
+    this.allEvents = sortedBy(
+      this.allEvents,
+      this.getTimelineEventSortingAttribute,
+    );
+  }
+
+  private getTimelineEventSortingAttribute = (
+    event: AuthorTimelineEvent,
+  ): Date => {
+    switch (event.type) {
+      case 'Milestone':
+      case 'Birth':
+      case 'Death':
+        return new Date(event.date);
+      case 'Timeline':
+        return new Date(event.startDate);
+      default:
+        throw new Error(
+          `No chosen date attribute for AuthorTimelineEvent. ${JSON.stringify(event, undefined, 2)}`,
+        );
+    }
+  };
+
+  private hasAuthorResided(
+    authorId: Author['id'],
+    usState: USState,
+    [yearStart, yearEnd]: [number, number],
+    address?: string,
+  ): boolean {
+    const timeline = this.getAuthorTimeline(authorId);
+
+    return timeline
+      .filter((event) => {
+        switch (event.type) {
+          case 'Timeline':
+            const dateStartYear = new Date(event.startDate).getFullYear(),
+              dateEndYear = new Date(event.endDate).getFullYear();
+            return dateStartYear >= yearStart && dateEndYear <= yearEnd;
+          default:
+            const dateYear = new Date(event.date).getFullYear();
+            return yearStart <= dateYear && dateYear <= yearEnd;
+        }
+      })
+      .some((event) => {
+        const { location } = event;
+
+        if (location) {
+          if (location.state) {
+            const value = location.state === usState;
+
+            if (address) {
+              return value && location.address === address;
+            } else {
+              return value;
+            }
           } else {
-            return value;
+            return false;
           }
         } else {
           return false;
         }
-      } else {
-        return false;
-      }
-    });
+      });
   }
 }
 

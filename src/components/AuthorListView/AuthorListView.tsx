@@ -14,22 +14,25 @@ import {
 import {
   AuthorFilter,
   AuthorSort,
-  AuthorStores,
   createKeyGenerator,
 } from '../../utils/stores';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
-import { Author, AuthorEventType, AuthorGroup, USState } from '../../models';
+import {
+  Author,
+  AuthorEventType,
+  AuthorGroup,
+  AuthorTimelineEvent,
+  USState,
+} from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
-import { AuthorGroupContext } from '../../contexts';
+import { AuthorGroupContext, AuthorMapDataContext } from '../../contexts';
 import { getAuthorName } from '../../utils/names';
 import infiniteScroll from '../../utils/infinite-scroll';
 
 interface Props {
-  statesData: AuthorStores;
-
   onAuthorEdit?: (author: Partial<Author>) => void;
   onAuthorView?: (author: Author) => void;
   onAuthorGroupEdit?: (authorGroup: AuthorGroup) => void;
@@ -48,17 +51,17 @@ enum SortType {
 
 function AuthorListRow({
   author,
-  eventType,
+  events,
   onEdit,
   onView,
 }: {
   author: Author;
-  eventType?: AuthorEventType;
+  events: Array<AuthorTimelineEvent>;
   onEdit: () => void;
   onView: () => void;
 }): JSX.Element {
   return (
-    <AuthorRow author={author} eventType={eventType} showContext>
+    <AuthorRow author={author} events={events} showContext>
       <button
         className={clsx(commonStyles.button, styles.authorListViewEdit)}
         onClick={onView}
@@ -77,11 +80,12 @@ function AuthorListRow({
 }
 
 export function AuthorListView({
-  statesData,
   onAuthorEdit,
   onAuthorGroupEdit,
   onAuthorView,
 }: Props): JSX.Element {
+  const { data: statesData } = useContext(AuthorMapDataContext);
+
   const { groups } = useContext(AuthorGroupContext);
 
   const entriesRef = useRef<HTMLDivElement>(null);
@@ -134,7 +138,7 @@ export function AuthorListView({
     }
   }, [filteringGroup, groups]);
 
-  const initialEntriesShown = 5;
+  const initialEntriesShown = 6;
 
   const [entriesShown, setEntriesShown] = useState(initialEntriesShown);
 
@@ -219,10 +223,16 @@ export function AuthorListView({
       authors = filterAuthors(authors);
 
       listElements = authors.map((author) => {
+        const birthDate = statesData.getBirthDate(author.id),
+          deathDate = statesData.getDeathDate(author.id);
+
         return (
           <AuthorListRow
             key={authorKeyGenerator.getKey(author.id)}
             author={author}
+            events={[birthDate, deathDate].filter(
+              (event): event is NonNullable<typeof event> => Boolean(event),
+            )}
             onView={() => onAuthorView?.(author)}
             onEdit={() => onAuthorEdit?.(author)}
           />
@@ -243,11 +253,29 @@ export function AuthorListView({
             <div className={styles.authorListViewStateSection} key={usState}>
               <h3>{usState}</h3>
               {authors.map((author) => {
+                let events: Array<AuthorTimelineEvent> = [];
+
+                switch (authorEventType) {
+                  case AuthorEventType.BIRTHS:
+                    const birthDate = statesData.getBirthDate(author.id);
+
+                    if (birthDate) {
+                      events = [birthDate];
+                    }
+                    break;
+                  case AuthorEventType.DEATHS:
+                    const deathDate = statesData.getDeathDate(author.id);
+                    if (deathDate) {
+                      events = [deathDate];
+                    }
+                    break;
+                }
+
                 return (
                   <AuthorListRow
                     key={authorKeyGenerator.getKey(author.id)}
                     author={author}
-                    eventType={authorEventType}
+                    events={events}
                     onView={() => onAuthorView?.(author)}
                     onEdit={() => onAuthorEdit?.(author)}
                   />

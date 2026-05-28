@@ -1,7 +1,14 @@
 import commonStyles from '../../common.module.css';
 import styles from './AuthorMapView.module.css';
 
-import { Fragment, JSX, useCallback, useMemo, useState } from 'react';
+import {
+  Fragment,
+  JSX,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 import {
   ComposableMap,
   Geographies,
@@ -10,6 +17,7 @@ import {
   ZoomableGroup,
 } from 'react-simple-maps';
 import { Tooltip } from 'react-tooltip';
+import clsx from 'clsx';
 
 import { geography } from '../../consts/states.const';
 import {
@@ -17,13 +25,11 @@ import {
   AuthorEventType,
   AuthorLocation,
   CityCoordinates,
-  StateStore,
   USState,
 } from '../../models';
 import { StateDrawer } from '../StateDrawer/StateDrawer';
 import { Tabs } from '../Tabs/Tabs';
-import clsx from 'clsx';
-import { AuthorStores } from '../../utils/stores';
+import { AuthorMapDataContext } from '../../contexts';
 
 interface Geography {
   rsmKey: string;
@@ -42,17 +48,17 @@ interface Filters {
 }
 
 interface Props {
-  statesData: AuthorStores;
   cityCoordinates: Array<CityCoordinates>;
 
   onAuthorEdit?: (author: Partial<Author>) => void;
 }
 
 export function AuthorMapView({
-  statesData,
   cityCoordinates,
   onAuthorEdit,
 }: Props): JSX.Element {
+  const { data: statesData } = useContext(AuthorMapDataContext);
+
   const tooltipId = useMemo(() => 'state-labels-tooltip', []);
 
   const STATE_COLORS = useMemo(
@@ -207,16 +213,8 @@ export function AuthorMapView({
               authorFirstName: '',
               authorLastName: '',
               authorFullName: '',
-              timeline: [],
               portrait: {
                 src: '',
-              },
-              birthDate: {
-                date: '',
-                location: {
-                  address: '',
-                  state,
-                },
               },
             });
           }}

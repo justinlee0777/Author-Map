@@ -1,26 +1,26 @@
 import styles from './AuthorTimelineView.module.css';
 
-import { Fragment, JSX, useEffect, useMemo, useRef, useState } from 'react';
-import { AuthorStores } from '../../utils/stores';
+import {
+  Fragment,
+  JSX,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import clsx from 'clsx';
+
 import { controlForTimezone, formatDate } from '../../utils/dates';
 import { getAuthorName } from '../../utils/names';
-import { getMilestoneEvents } from '../../utils/events';
-import {
-  Author,
-  AuthorAchievementType,
-  AuthorGroup,
-  MilestoneEvent,
-} from '../../models';
+import { AuthorGroup, AuthorTimelineEvent, TimelineEvent } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import infiniteScroll from '../../utils/infinite-scroll';
+import { AuthorMapDataContext } from '../../contexts';
 
 interface Props {
-  statesData: AuthorStores;
-
   groups?: Array<AuthorGroup>;
   className?: string;
-  majorEvents?: Array<MilestoneEvent>;
 }
 
 interface AppearanceSettings {
@@ -30,65 +30,49 @@ interface AppearanceSettings {
 /**
  * TODO: Filter by months? Allow a day / month / year filter?
  */
-export function AuthorTimelineView({
-  statesData,
-  className,
-  majorEvents = [],
-}: Props): JSX.Element {
+export function AuthorTimelineView({ className }: Props): JSX.Element {
+  const { data: statesData } = useContext(AuthorMapDataContext);
+
+  const [startingYear, endingYear] = statesData.dateRange;
+
   const entriesRef = useRef<HTMLUListElement>(null);
 
-  const authorEvents: Array<{ author?: Author; event: MilestoneEvent }> =
-    statesData
-      .getAll()
-      .flatMap(
-        (author) =>
-          getMilestoneEvents(author, { achievementsOnly: true }).map(
-            (event) => ({
-              author,
-              event,
-            }),
-          ) as Array<{ author?: Author; event: MilestoneEvent }>,
-      )
-      .concat(majorEvents.map((majorEvent) => ({ event: majorEvent })))
-      .sort((a, b) => {
-        return (
-          new Date(a.event.date).valueOf() - new Date(b.event.date).valueOf()
-        );
-      });
-
-  const firstDate = authorEvents.at(0)!;
-
-  const startingYear = controlForTimezone(firstDate.event.date).getFullYear(),
-    endingYear = new Date().getFullYear();
-
-  const authorEventsByYear = new Map<number, typeof authorEvents>();
-
-  authorEvents.forEach((authorEvent) => {
-    const { event } = authorEvent;
-
-    const year = controlForTimezone(event.date).getFullYear();
-
-    if (authorEventsByYear.has(year)) {
-      authorEventsByYear.get(year)!.push(authorEvent);
-    } else {
-      authorEventsByYear.set(year, [authorEvent]);
+  const timelineEvents = statesData.timelineEvents.filter((event) => {
+    switch (event.type) {
+      case 'Birth':
+      case 'Death':
+        return true;
+      default:
+        return false;
     }
-  });
+  }) as Array<Exclude<AuthorTimelineEvent, TimelineEvent>>;
 
   const [settings, setSettings] = useState<AppearanceSettings>({});
+
+  const timelineEventsByYear = new Map<number, typeof timelineEvents>();
+
+  timelineEvents.forEach((timelineEvent) => {
+    const year = controlForTimezone(timelineEvent.date).getFullYear();
+
+    if (timelineEventsByYear.has(year)) {
+      timelineEventsByYear.get(year)!.push(timelineEvent);
+    } else {
+      timelineEventsByYear.set(year, [timelineEvent]);
+    }
+  });
 
   const eventElements: Array<JSX.Element> = useMemo(() => {
     const temp: Array<JSX.Element> = [];
 
-    const eventsIterator = authorEventsByYear.entries();
+    const eventsIterator = timelineEventsByYear.entries();
 
     let currentEvents = eventsIterator.next();
 
     for (let year = startingYear; year <= endingYear; year++) {
-      let authorEvents;
+      let events;
 
       if (currentEvents.value && currentEvents.value[0] === year) {
-        [, authorEvents] = currentEvents.value;
+        [, events] = currentEvents.value;
 
         currentEvents = eventsIterator.next();
       } else if (settings.removeEmptyYears) {
@@ -99,37 +83,23 @@ export function AuthorTimelineView({
         <li className={styles.authorTimelineViewEntry} key={year}>
           <h4 className={styles.authorTimelineViewYear}>{year}</h4>
           <div className={styles.authorTimelineViewEntryBullet}></div>
-          {authorEvents?.map(({ author, event }, i) => {
-            let achievementElement: JSX.Element | undefined;
+          {events?.map((event, i) => {
+            const author = event.authorId
+              ? statesData.getAuthor(event.authorId)
+              : undefined;
 
-            if (event.achievement) {
-              switch (event.achievement.type) {
-                case AuthorAchievementType.AWARD:
-                  achievementElement = (
-                    <p>Awarded {event.achievement.awardName}</p>
-                  );
-                  break;
-                case AuthorAchievementType.RENOWNED_WORK:
-                default:
-                  let workTitleElement = (
-                    <span>{event.achievement.workTitle}</span>
-                  );
+            let note: string;
 
-                  if (event.achievement.referenceUrl) {
-                    workTitleElement = (
-                      <a
-                        href={event.achievement.referenceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {workTitleElement}
-                      </a>
-                    );
-                  }
-
-                  achievementElement = <p>Known work: {workTitleElement} </p>;
-                  break;
-              }
+            switch (event.type) {
+              case 'Birth':
+                note = 'Birth';
+                break;
+              case 'Death':
+                note = 'Death';
+                break;
+              default:
+                note = event.notes ?? '';
+                break;
             }
 
             return (
@@ -156,9 +126,7 @@ export function AuthorTimelineView({
                     </h4>
                   )}
 
-                  {achievementElement}
-
-                  <p>{event.notes}</p>
+                  <p>{note}</p>
                 </div>
               </Fragment>
             );
@@ -168,7 +136,7 @@ export function AuthorTimelineView({
     }
 
     return temp;
-  }, [settings]);
+  }, [settings, statesData]);
 
   const initialEntriesShown = 20;
 
