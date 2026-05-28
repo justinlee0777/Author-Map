@@ -80,9 +80,13 @@ enum ViewType {
  *
  * TODO: If author residence dates are recorded, then we can do month / year filters of "who was in this state at so and so time"
  *
- * TODO: Need a flag to distinguish which author milestones should be shown on the timeline
- * Filter timeline by births / deaths / milestones
- * TODO: Books and Timeline Events model
+ * TODO: Support TimeSpan events.
+ * TODO: It's fine if TimelineView by default includes Birth and Death, but should be able to select for specific Author timelines.
+ *    Similarly, other Author Timeline events should be lazy loaded.
+ * TODO: Filter timeline by births / deaths / milestones
+ * TODO: It may be wise to specify a year for "Residing authors", rather than storing them all. Alternatively, providing a city to see which authors have lived here works too.
+ *
+ * TODO: Books model
  * TODO: Really need to figure out how to distinguish authors i.e. "What are they known for - genre, masterpieces, blah"
  * TODO: Links to bibliography (bibliography can be part of Timeline, and a special tag can be assigned to the event for filtering)
  *
@@ -184,7 +188,6 @@ export function AuthorMap({
           className={clsx(styles.authorMapComponentContainer, className)}
           ref={componentRef}
         >
-          <div className={styles.authorMapContainer}>{viewElement}</div>
           <Tabs<ViewType>
             className={clsx(
               commonStyles.floatingAction,
@@ -201,7 +204,7 @@ export function AuthorMap({
               }
             }}
           />
-
+          <div className={styles.authorMapContainer}>{viewElement}</div>
           <div
             className={clsx(
               commonStyles.floatingAction,

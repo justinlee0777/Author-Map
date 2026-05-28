@@ -18,15 +18,9 @@
 .floatingAction,
 .sideDrawer {
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-  opacity: 0.7;
   perspective: 500px;
   position: absolute;
   transition: 0.3s opacity;
-}
-
-.floatingAction:hover,
-.sideDrawer:hover {
-  opacity: 1;
 }
 
 .button {

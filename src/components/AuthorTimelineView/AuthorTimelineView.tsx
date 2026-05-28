@@ -33,6 +33,8 @@ interface AppearanceSettings {
 export function AuthorTimelineView({ className }: Props): JSX.Element {
   const { data: statesData } = useContext(AuthorMapDataContext);
 
+  const [startingYear, endingYear] = statesData.dateRange;
+
   const entriesRef = useRef<HTMLUListElement>(null);
 
   const timelineEvents = statesData.timelineEvents.filter((event) => {
@@ -44,11 +46,6 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
         return false;
     }
   }) as Array<Exclude<AuthorTimelineEvent, TimelineEvent>>;
-
-  const firstDate = timelineEvents.at(0)!;
-
-  const startingYear = controlForTimezone(firstDate.date).getFullYear(),
-    endingYear = new Date().getFullYear();
 
   const [settings, setSettings] = useState<AppearanceSettings>({});
 

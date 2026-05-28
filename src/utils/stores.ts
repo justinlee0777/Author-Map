@@ -9,6 +9,7 @@ import {
   USState,
 } from '../models';
 import { getAuthorName } from './names';
+import { getStartingDate } from './dates';
 
 export interface AuthorSort {
   name?: boolean;
@@ -21,6 +22,8 @@ export interface AuthorFilter {
 }
 
 export class AuthorMapStores {
+  dateRange: [number, number];
+
   private internalRegistry: Map<Author['id'], Author>;
   private authorTimelines: Map<
     Author['id'],
@@ -61,6 +64,11 @@ export class AuthorMapStores {
     }
 
     this.sortTimelineEvents();
+
+    this.dateRange = [
+      new Date(getStartingDate(this.allEvents.at(0)!)).getFullYear(),
+      new Date().getFullYear(),
+    ];
   }
 
   getAll(
@@ -148,7 +156,9 @@ export class AuthorMapStores {
           )
           .map(([authorId]) => this.internalRegistry.get(authorId)!);
       default:
-        return [];
+        return [...this.internalRegistry.values()].filter((author) =>
+          this.hasAuthorResided(author.id, state),
+        );
     }
   }
 
@@ -333,49 +343,46 @@ export class AuthorMapStores {
     }
   };
 
-  /* TODO: Fix. Should accept a date / time range
   private hasAuthorResided(
-    author: Author,
+    authorId: Author['id'],
     usState: USState,
+    [yearStart, yearEnd]: [number, number],
     address?: string,
   ): boolean {
-    const birthEvent = this.birthEventsByAuthor.get(author.id);
+    const timeline = this.getAuthorTimeline(authorId);
 
-    let fullTimeline: Array<AuthorTimelineEvent> = [];
+    return timeline
+      .filter((event) => {
+        switch (event.type) {
+          case 'Timeline':
+            const dateStartYear = new Date(event.startDate).getFullYear(),
+              dateEndYear = new Date(event.endDate).getFullYear();
+            return dateStartYear >= yearStart && dateEndYear <= yearEnd;
+          default:
+            const dateYear = new Date(event.date).getFullYear();
+            return yearStart <= dateYear && dateYear <= yearEnd;
+        }
+      })
+      .some((event) => {
+        const { location } = event;
 
-    if (birthEvent) {
-      fullTimeline = [birthEvent];
-    }
+        if (location) {
+          if (location.state) {
+            const value = location.state === usState;
 
-    fullTimeline = fullTimeline.concat(this.getAuthorTimeline(author.id));
-
-    const deathEvent = this.deathEventsByAuthor.get(author.id);
-
-    if (deathEvent) {
-      fullTimeline = fullTimeline.concat(deathEvent);
-    }
-
-    return fullTimeline.some((event) => {
-      const { location } = event;
-
-      if (location) {
-        if (location.state) {
-          const value = location.state === usState;
-
-          if (address) {
-            return value && location.address === address;
+            if (address) {
+              return value && location.address === address;
+            } else {
+              return value;
+            }
           } else {
-            return value;
+            return false;
           }
         } else {
           return false;
         }
-      } else {
-        return false;
-      }
-    });
+      });
   }
-    */
 }
 
 interface KeyGenerator {
