@@ -346,7 +346,7 @@ export class AuthorMapStores {
   private hasAuthorResided(
     authorId: Author['id'],
     usState: USState,
-    [yearStart, yearEnd]: [number, number],
+    [yearStart, yearEnd]: [number, number] = [0, Infinity],
     address?: string,
   ): boolean {
     const timeline = this.getAuthorTimeline(authorId);

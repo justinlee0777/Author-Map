@@ -13,6 +13,11 @@
       "import": "./index.js",
       "require": "./index.js",
       "types": "./index.d.ts"
+    },
+    "./models": {
+      "import": "./models.js",
+      "require": "./models.js",
+      "types": "./models.d.ts"
     }
   },
   "dependencies": {

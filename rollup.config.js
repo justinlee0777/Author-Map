@@ -36,7 +36,7 @@ mkdirSync(dir);
 writeFileSync(`${dir}/package.json`, JSON.stringify(pkg, null, 2));
 copyFileSync('LICENSE', `${dir}/LICENSE`);
 
-const exports = ['src/index.ts'];
+const exports = ['src/index.ts', 'src/models.ts'];
 
 const input = exports.reduce((acc, value) => {
   const [, entryName] = value.split(/\/|\./);
@@ -45,7 +45,7 @@ const input = exports.reduce((acc, value) => {
     ...acc,
     [entryName]: value,
   };
-}, []);
+}, {});
 
 export default [
   {

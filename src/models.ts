@@ -224,11 +224,74 @@ export interface AuthorGroup {
   link?: string;
 }
 
+export interface BaseInclusionReason {
+  /** Meaning, a reference to the webpage where the info was scraped. */
+  referenceUrl: string;
+}
+
+export interface PoetLaureateReason extends BaseInclusionReason {
+  type: 'Poet Laureate';
+  dates: Array<{
+    startYear: number;
+    endYear?: number;
+  }>;
+}
+
+export enum AmericanLiteraryAward {
+  NOBEL_PRIZE_IN_LITERATURE = 'Nobel Prize in Literature',
+  PULITZER = 'Pulitzer',
+}
+
+export enum ClassicPublisher {
+  NYRB = 'NYRB',
+  PENGUIN_CLASSIC = 'Penguin Classic',
+  NORTON = 'Norton',
+  LIBRARY_OF_AMERICA = 'Library of America',
+}
+
+export interface ClassicPublisherCatalog {
+  books: Array<{
+    name: string;
+  }>;
+}
+
+export interface ClassicPublisherReason extends BaseInclusionReason {
+  type: 'Published as classical literature';
+  publishers: Partial<{
+    [publisher in ClassicPublisher]: ClassicPublisherCatalog;
+  }>;
+}
+
+export interface AcademicCitationReason extends BaseInclusionReason {
+  type: 'Academia citation';
+  count: number;
+}
+
+export interface AwardInclusionReason extends BaseInclusionReason {
+  award: AmericanLiteraryAward;
+  year: number;
+  type: 'award';
+
+  book?: string;
+}
+
+/**
+ * It strikes me that this is more useful if there is a cut-off point - ex. the beginning of the millenium or (current date - 10 years).
+ * The purpose of the map is to operate via hindsight and not to shape history as it is happening.
+ */
+export type AuthorInclusionReason =
+  | PoetLaureateReason
+  | ClassicPublisherReason
+  | AcademicCitationReason
+  | AwardInclusionReason;
+
 export interface Author {
   id: string | Symbol;
 
   authorFirstName: string;
   authorLastName: string;
+
+  inclusionReasons: Array<AuthorInclusionReason>;
 
   /** Preferred over first and last name if filled in. Use for those with middle names. */
   authorFullName?: string;
