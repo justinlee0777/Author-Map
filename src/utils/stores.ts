@@ -10,6 +10,7 @@ import {
 } from '../models';
 import { getAuthorName } from './names';
 import { getStartingDate } from './dates';
+import { sortMap } from './sort';
 
 export interface AuthorSort {
   name?: boolean;
@@ -65,9 +66,14 @@ export class AuthorMapStores {
 
     this.sortTimelineEvents();
 
+    const firstEvent = this.allEvents.at(0),
+      currentYear = new Date().getFullYear();
+
     this.dateRange = [
-      new Date(getStartingDate(this.allEvents.at(0)!)).getFullYear(),
-      new Date().getFullYear(),
+      firstEvent
+        ? new Date(getStartingDate(firstEvent)).getFullYear()
+        : currentYear - 1,
+      currentYear,
     ];
   }
 
@@ -297,10 +303,8 @@ export class AuthorMapStores {
     if (this.authorTimelines.has(authorId)) {
       const authorTimeline = this.authorTimelines.get(authorId)!;
 
-      const sortedAuthorTimeline = sortedBy(
-        [...authorTimeline.entries()],
-        ([, value]) =>
-          this.getTimelineEventSortingAttribute(value as AuthorTimelineEvent),
+      const sortedAuthorTimeline = sortMap(authorTimeline, ([, value]) =>
+        this.getTimelineEventSortingAttribute(value),
       );
 
       this.authorTimelines.set(authorId, new Map(sortedAuthorTimeline));
@@ -312,13 +316,14 @@ export class AuthorMapStores {
       this.sortAuthorTimelineEvents(authorId);
     }
 
-    const sortedMajorEvents = sortedBy(
-      [...this.majorEvents.entries()],
-      ([, value]) =>
-        this.getTimelineEventSortingAttribute(value as AuthorTimelineEvent),
-    );
+    const comparatorFn = ([, value]: [Author['id'], AuthorTimelineEvent]) =>
+      this.getTimelineEventSortingAttribute(value);
 
-    this.majorEvents = new Map(sortedMajorEvents);
+    this.majorEvents = sortMap(this.majorEvents, comparatorFn);
+
+    this.birthEventsByAuthor = sortMap(this.birthEventsByAuthor, comparatorFn);
+
+    this.deathEventsByAuthor = sortMap(this.deathEventsByAuthor, comparatorFn);
 
     this.allEvents = sortedBy(
       this.allEvents,

@@ -10,7 +10,7 @@ export function controlForTimezone(date: string): Date {
   } else if (yearAndMonthRegex.test(date)) {
     return parse(date, 'yyyy-MM', new Date());
   } else {
-    return parse(date, 'yyyy-MM-dd', new Date());
+    return new Date(date);
   }
 }
 

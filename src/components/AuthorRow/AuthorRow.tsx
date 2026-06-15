@@ -39,7 +39,7 @@ export function AuthorRow({
   return (
     <div className={clsx(styles.authorRow, className)}>
       {author.portrait && author.portrait.src && (
-        <img {...author.portrait} loading="lazy" />
+        <img {...author.portrait} loading="lazy" height={100} width={100} />
       )}
       <div className={styles.authorRowDetails}>
         <h4>{authorName}</h4>
