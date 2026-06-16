@@ -1,8 +1,8 @@
 import styles from './AuthorTimelineView.module.css';
 
 import {
-  Fragment,
   JSX,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -11,12 +11,11 @@ import {
 } from 'react';
 import clsx from 'clsx';
 
-import { controlForTimezone, formatDate } from '../../utils/dates';
-import { getAuthorName } from '../../utils/names';
+import { controlForTimezone } from '../../utils/dates';
 import { AuthorGroup, AuthorTimelineEvent, TimelineEvent } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
-import infiniteScroll from '../../utils/infinite-scroll';
 import { AuthorMapDataContext } from '../../contexts';
+import { AuthorTimelineEntry } from './AuthorTimelineEntry';
 
 interface Props {
   groups?: Array<AuthorGroup>;
@@ -26,6 +25,11 @@ interface Props {
 interface AppearanceSettings {
   removeEmptyYears?: boolean;
 }
+
+type TimelineEntryItem = Omit<
+  Parameters<typeof AuthorTimelineEntry>[0],
+  'dataRow'
+>;
 
 /**
  * TODO: Filter by months? Allow a day / month / year filter?
@@ -47,119 +51,115 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
     }
   }) as Array<Exclude<AuthorTimelineEvent, TimelineEvent>>;
 
-  const [settings, setSettings] = useState<AppearanceSettings>({});
-
-  const timelineEventsByYear = new Map<number, typeof timelineEvents>();
-
-  timelineEvents.forEach((timelineEvent) => {
-    const year = controlForTimezone(timelineEvent.date).getFullYear();
-
-    if (timelineEventsByYear.has(year)) {
-      timelineEventsByYear.get(year)!.push(timelineEvent);
-    } else {
-      timelineEventsByYear.set(year, [timelineEvent]);
-    }
+  const [settings, setSettings] = useState<AppearanceSettings>({
+    removeEmptyYears: true,
   });
 
-  const eventElements: Array<JSX.Element> = useMemo(() => {
-    const temp: Array<JSX.Element> = [];
+  const timelineEventsByYear = useMemo(() => {
+    const map = new Map<number, typeof timelineEvents>();
 
-    const eventsIterator = timelineEventsByYear.entries();
+    timelineEvents.forEach((timelineEvent) => {
+      const year = controlForTimezone(timelineEvent.date).getFullYear();
 
-    let currentEvents = eventsIterator.next();
+      if (map.has(year)) {
+        map.get(year)!.push(timelineEvent);
+      } else {
+        map.set(year, [timelineEvent]);
+      }
+    });
 
-    for (let year = startingYear; year <= endingYear; year++) {
-      let events;
+    return map;
+  }, [timelineEvents]);
 
-      if (currentEvents.value && currentEvents.value[0] === year) {
-        [, events] = currentEvents.value;
+  const constructTimelineEntries = useCallback(
+    (appSettings: AppearanceSettings) => {
+      const temp: Array<TimelineEntryItem> = [];
 
-        currentEvents = eventsIterator.next();
-      } else if (settings.removeEmptyYears) {
-        continue;
+      const eventsIterator = timelineEventsByYear.entries();
+
+      let currentEvents = eventsIterator.next();
+
+      for (let year = startingYear; year <= endingYear; year++) {
+        let events;
+
+        if (currentEvents.value && currentEvents.value[0] === year) {
+          [, events] = currentEvents.value;
+
+          currentEvents = eventsIterator.next();
+        } else if (appSettings.removeEmptyYears) {
+          continue;
+        }
+
+        temp.push({
+          year,
+          events,
+          show: false,
+        });
       }
 
-      temp.push(
-        <li className={styles.authorTimelineViewEntry} key={year}>
-          <h4 className={styles.authorTimelineViewYear}>{year}</h4>
-          <div className={styles.authorTimelineViewEntryBullet}></div>
-          {events?.map((event, i) => {
-            const author = event.authorId
-              ? statesData.getAuthor(event.authorId)
-              : undefined;
+      return temp;
+    },
+    [],
+  );
 
-            let note: string;
-
-            switch (event.type) {
-              case 'Birth':
-                note = 'Birth';
-                break;
-              case 'Death':
-                note = 'Death';
-                break;
-              default:
-                note = event.notes ?? '';
-                break;
-            }
-
-            return (
-              <Fragment key={i}>
-                <div className={styles.authorTimelineEventDate}>
-                  {formatDate(event.date, event.location?.state, {
-                    dateOnly: true,
-                  })}
-                </div>
-
-                <div className={styles.authorTimelineEntryBisector}></div>
-
-                <div className={styles.authorTimelineViewEntryDetails}>
-                  {author && (
-                    <h4 className={styles.authorTimelineViewAuthorHeader}>
-                      {getAuthorName(author)}
-                      {author.portrait?.src && (
-                        <img
-                          className={styles.authorTimelineViewPortrait}
-                          {...author.portrait}
-                          loading="lazy"
-                        />
-                      )}
-                    </h4>
-                  )}
-
-                  <p>{note}</p>
-                </div>
-              </Fragment>
-            );
-          })}
-        </li>,
-      );
-    }
-
-    return temp;
-  }, [settings, statesData]);
-
-  const initialEntriesShown = 20;
-
-  const [entriesShown, setEntriesShown] = useState(initialEntriesShown);
+  const [timelineEntries, setTimelineEntries] = useState(() =>
+    constructTimelineEntries(settings),
+  );
 
   useEffect(() => {
-    if (entriesRef.current) {
-      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () =>
-        setEntriesShown(
-          Math.min(entriesShown + initialEntriesShown, eventElements.length),
-        ),
+    const entriesElement = entriesRef.current;
+
+    if (entriesElement) {
+      const rowsToShow: Set<number> = new Set();
+
+      const intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const rowNumber = Number(
+              (entry.target as HTMLElement).dataset.row!,
+            );
+
+            if (entry.isIntersecting) {
+              rowsToShow.add(rowNumber);
+            } else {
+              rowsToShow.delete(rowNumber);
+            }
+          }
+
+          setTimelineEntries((timelineEntries) =>
+            timelineEntries.map((entry, i) => {
+              return {
+                ...entry,
+                show: rowsToShow.has(i),
+              };
+            }),
+          );
+        },
+        { rootMargin: '1000px 0px', threshold: 0.1 },
       );
 
+      const listElements = entriesElement.children;
+
+      for (const listElement of listElements) {
+        intersectionObserver.observe(listElement);
+      }
+
       return () => {
-        destroyInfiniteScroll();
+        intersectionObserver.disconnect();
+
+        for (const listElement of listElements) {
+          intersectionObserver.unobserve(listElement);
+        }
       };
     }
-  }, [entriesRef.current, entriesShown]);
+  }, [setTimelineEntries]);
 
   return (
     <div className={clsx(styles.authorTimelineView, className)}>
       <ul className={styles.authorTimelineViewEntries} ref={entriesRef}>
-        {eventElements.slice(0, entriesShown)}
+        {timelineEntries.map((props, i) => (
+          <AuthorTimelineEntry key={i} dataRow={i} {...props} />
+        ))}
       </ul>
       <div className={styles.authorTimelineViewSettings}>
         <Radiogroup<keyof AppearanceSettings>

@@ -79,6 +79,64 @@ export function ViewAuthorModal({
           </>
         )}
 
+        <h4>Reasons for inclusion</h4>
+        {author.inclusionReasons.map((inclusionReason) => {
+          switch (inclusionReason.type) {
+            case 'Poet Laureate':
+              return (
+                <p key="poet-laureate">
+                  <a href={inclusionReason.referenceUrl}>Poet laureate</a> -{' '}
+                  {inclusionReason.dates
+                    .map(
+                      ({ startYear, endYear }) =>
+                        `${startYear}${endYear && ` - ${endYear}`}`,
+                    )
+                    .join(', ')}
+                </p>
+              );
+            case 'Published as classical literature':
+              return (
+                <Fragment key="publisher">
+                  <p>Published by:</p>
+                  {Object.entries(inclusionReason.publishers).map(
+                    ([publisher, catalog]) => {
+                      return (
+                        <div key={publisher} className={styles.publisherList}>
+                          <p>
+                            <b>{publisher}</b>
+                          </p>
+                          <ul>
+                            {catalog.books.map((book) => (
+                              <li key={book.name}>
+                                <a href={book.referenceUrl}>{book.name}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    },
+                  )}
+                </Fragment>
+              );
+            case 'award':
+              return (
+                <p key={`${inclusionReason.type}-${inclusionReason.award}`}>
+                  Awarded{' '}
+                  <a href={inclusionReason.referenceUrl}>
+                    {inclusionReason.award}
+                  </a>{' '}
+                  {inclusionReason.year}
+                </p>
+              );
+            default:
+              console.log(
+                'Inclusion reason has no rendering code.',
+                inclusionReason,
+              );
+              throw new Error('Cannot render.');
+          }
+        })}
+
         {events.length > 0 && (
           <>
             <h4>Timeline</h4>

@@ -16,9 +16,9 @@ interface Props {
   authors: Array<Author>;
 
   eventType?: AuthorEventType;
-  showContext?: boolean;
   onClose?: () => void;
   onEdit?: (author: Author) => void;
+  onView?: (author: Author) => void;
   onAddAuthor?: () => void;
 }
 
@@ -26,9 +26,9 @@ export function StateDrawer({
   title,
   authors,
   eventType,
-  showContext,
   onClose,
   onEdit,
+  onView,
   onAddAuthor,
 }: Props): JSX.Element {
   const { data } = useContext(AuthorMapDataContext);
@@ -84,13 +84,18 @@ export function StateDrawer({
               className={styles.stateDrawerAuthorRow}
               author={author}
               events={events}
-              showContext={showContext}
             >
               <button
                 className={clsx(commonStyles.button, styles.stateDrawerEdit)}
                 onClick={() => onEdit?.(author)}
               >
                 Edit
+              </button>
+              <button
+                className={clsx(commonStyles.button, styles.stateDrawerView)}
+                onClick={() => onView?.(author)}
+              >
+                View
               </button>
             </AuthorRow>
           );

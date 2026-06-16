@@ -51,11 +51,13 @@ interface Props {
   cityCoordinates: Array<CityCoordinates>;
 
   onAuthorEdit?: (author: Partial<Author>) => void;
+  onAuthorView?: (author: Author) => void;
 }
 
 export function AuthorMapView({
   cityCoordinates,
   onAuthorEdit,
+  onAuthorView,
 }: Props): JSX.Element {
   const { data: statesData } = useContext(AuthorMapDataContext);
 
@@ -202,12 +204,12 @@ export function AuthorMapView({
           title={title}
           authors={authors}
           eventType={filters.eventType}
-          showContext={!filters.eventType}
           onClose={() => {
             setHighlightedState(null);
             setHighlightedCity(null);
           }}
           onEdit={onAuthorEdit}
+          onView={onAuthorView}
           onAddAuthor={() => {
             onAuthorEdit?.({
               authorFirstName: '',

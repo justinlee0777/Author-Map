@@ -35,17 +35,25 @@
 
 .stateDrawerEdit {
   left: 0;
+}
+
+.stateDrawerView {
+  right: 0;
+}
+
+.stateDrawerEdit,
+.stateDrawerView {
   position: absolute;
   top: 1em;
   transition: 0.3s opacity;
-}
 
-.stateDrawerAuthorRow .stateDrawerEdit {
-  opacity: 0;
-}
+  .stateDrawerAuthorRow & {
+    opacity: 0;
+  }
 
-.stateDrawerAuthorRow:hover .stateDrawerEdit {
-  opacity: 1;
+  .stateDrawerAuthorRow:hover & {
+    opacity: 1;
+  }
 }
 
 .stateDrawerAdd {

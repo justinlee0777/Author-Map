@@ -33,13 +33,16 @@
   list-style-type: none;
   overflow-y: auto;
   position: relative;
+  will-change: contents;
 }
 
 .authorTimelineViewEntry {
   align-items: center;
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: min-content min-content 1fr;
   gap: 0 1em;
+  min-height: 100px;
 }
 
 .authorTimelineViewYear {

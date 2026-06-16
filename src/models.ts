@@ -224,13 +224,10 @@ export interface AuthorGroup {
   link?: string;
 }
 
-export interface BaseInclusionReason {
+export interface PoetLaureateReason {
+  type: 'Poet Laureate';
   /** Meaning, a reference to the webpage where the info was scraped. */
   referenceUrl: string;
-}
-
-export interface PoetLaureateReason extends BaseInclusionReason {
-  type: 'Poet Laureate';
   dates: Array<{
     startYear: number;
     endYear?: number;
@@ -251,23 +248,29 @@ export enum ClassicPublisher {
 
 export interface ClassicPublisherCatalog {
   books: Array<{
+    /** Meaning, a reference to the webpage where the info was scraped. */
+    referenceUrl: string;
     name: string;
   }>;
 }
 
-export interface ClassicPublisherReason extends BaseInclusionReason {
+export interface ClassicPublisherReason {
   type: 'Published as classical literature';
   publishers: Partial<{
     [publisher in ClassicPublisher]: ClassicPublisherCatalog;
   }>;
 }
 
-export interface AcademicCitationReason extends BaseInclusionReason {
+export interface AcademicCitationReason {
+  /** Meaning, a reference to the webpage where the info was scraped. */
+  referenceUrl: string;
   type: 'Academia citation';
   count: number;
 }
 
-export interface AwardInclusionReason extends BaseInclusionReason {
+export interface AwardInclusionReason {
+  /** Meaning, a reference to the webpage where the info was scraped. */
+  referenceUrl: string;
   award: AmericanLiteraryAward;
   year: number;
   type: 'award';

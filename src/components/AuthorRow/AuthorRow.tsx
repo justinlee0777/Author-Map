@@ -17,16 +17,15 @@ interface Props {
   events: Array<AuthorTimelineEvent>;
 
   className?: string;
-  showContext?: boolean;
   children?: ReactNode;
   eventType?: AuthorEventType;
 }
 
+// Need a view button
 export function AuthorRow({
   author,
   events,
   className,
-  showContext,
   children,
 }: Props): JSX.Element {
   const authorName = useMemo(() => getAuthorName(author), [author]);

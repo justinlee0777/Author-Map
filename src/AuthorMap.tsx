@@ -163,6 +163,7 @@ export function AuthorMap({
         <AuthorMapView
           cityCoordinates={cityCoordinates}
           onAuthorEdit={onAuthorEdit}
+          onAuthorView={setViewingAuthor}
         />
       );
       break;
