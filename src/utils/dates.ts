@@ -1,51 +1,38 @@
-import { AuthorTimelineEvent, stateToTimezoneMap, USState } from '../models';
-import { parse } from 'date-fns';
-import { format, fromZonedTime } from 'date-fns-tz';
-
-const onlyYearRegex = /^\d{4}$/,
-  yearAndMonthRegex = /^\d{4}-\d{2}$/;
-export function controlForTimezone(date: string): Date {
-  if (onlyYearRegex.test(date)) {
-    return parse(date, 'yyyy', new Date());
-  } else if (yearAndMonthRegex.test(date)) {
-    return parse(date, 'yyyy-MM', new Date());
-  } else {
-    return new Date(date);
-  }
-}
+import {
+  AuthorTimelineEvent,
+  monthOptions,
+  stateToTimezoneMap,
+  USState,
+} from '../models';
 
 interface OptionalArgs {
   dateOnly?: boolean;
 }
 
+function getMonthName(monthString: string): string {
+  const monthNumber = Number(monthString);
+
+  return monthOptions.find(({ value }) => value === monthNumber)!.label;
+}
+
 export function formatDate(
   date: string,
-  stateName?: USState,
   { dateOnly }: OptionalArgs = {},
 ): string {
-  let dateFormat: string;
+  const [year, month, day] = date.split(/T|-/);
 
-  if (onlyYearRegex.test(date)) {
-    return date;
-  } else if (yearAndMonthRegex.test(date)) {
-    dateFormat = 'LLLL, y';
-  } else if (dateOnly) {
-    dateFormat = 'LLLL dd';
+  if (day) {
+    const monthName = getMonthName(month);
+
+    if (dateOnly) {
+      return `${monthName} ${day}`;
+    } else {
+      return `${getMonthName(month)} ${day}, ${year}`;
+    }
+  } else if (month) {
+    return `${getMonthName(date)}, ${year}`;
   } else {
-    dateFormat = 'LLLL dd, y';
-  }
-
-  if (stateName) {
-    const timeZone = stateToTimezoneMap.get(stateName)!;
-
-    const zonedDate = fromZonedTime(date, timeZone);
-
-    return format(zonedDate, dateFormat, {
-      timeZone,
-    });
-  } else {
-    const parsedDate = controlForTimezone(date);
-    return format(parsedDate, dateFormat);
+    return year;
   }
 }
 

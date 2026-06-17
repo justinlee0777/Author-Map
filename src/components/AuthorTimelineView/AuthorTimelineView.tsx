@@ -1,40 +1,37 @@
 import styles from './AuthorTimelineView.module.css';
 
-import {
-  JSX,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { JSX, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
-import { controlForTimezone } from '../../utils/dates';
-import { AuthorGroup, AuthorTimelineEvent, TimelineEvent } from '../../models';
+import type {
+  Author,
+  AuthorGroup,
+  AuthorTimelineEvent,
+  TimelineEvent,
+} from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { AuthorMapDataContext } from '../../contexts';
 import { AuthorTimelineEntry } from './AuthorTimelineEntry';
+import infiniteScroll from '../../utils/infinite-scroll';
 
 interface Props {
   groups?: Array<AuthorGroup>;
   className?: string;
+  onAuthorView?: (author: Author) => void;
 }
 
 interface AppearanceSettings {
   removeEmptyYears?: boolean;
 }
 
-type TimelineEntryItem = Omit<
-  Parameters<typeof AuthorTimelineEntry>[0],
-  'dataRow'
->;
-
 /**
  * TODO: Filter by months? Allow a day / month / year filter?
+ * TODO: Need to limit the amount of data shown at a time
  */
-export function AuthorTimelineView({ className }: Props): JSX.Element {
+export function AuthorTimelineView({
+  className,
+  onAuthorView,
+}: Props): JSX.Element {
   const { data: statesData } = useContext(AuthorMapDataContext);
 
   const [startingYear, endingYear] = statesData.dateRange;
@@ -59,7 +56,7 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
     const map = new Map<number, typeof timelineEvents>();
 
     timelineEvents.forEach((timelineEvent) => {
-      const year = controlForTimezone(timelineEvent.date).getFullYear();
+      const year = Number(timelineEvent.date.split('-').at(0)!);
 
       if (map.has(year)) {
         map.get(year)!.push(timelineEvent);
@@ -71,95 +68,59 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
     return map;
   }, [timelineEvents]);
 
-  const constructTimelineEntries = useCallback(
-    (appSettings: AppearanceSettings) => {
-      const temp: Array<TimelineEntryItem> = [];
+  const eventElements: Array<JSX.Element> = useMemo(() => {
+    const temp: Array<JSX.Element> = [];
 
-      const eventsIterator = timelineEventsByYear.entries();
+    const eventsIterator = timelineEventsByYear.entries();
 
-      let currentEvents = eventsIterator.next();
+    let currentEvents = eventsIterator.next();
 
-      for (let year = startingYear; year <= endingYear; year++) {
-        let events;
+    for (let year = startingYear; year <= endingYear; year++) {
+      let events;
 
-        if (currentEvents.value && currentEvents.value[0] === year) {
-          [, events] = currentEvents.value;
+      if (currentEvents.value && currentEvents.value[0] === year) {
+        [, events] = currentEvents.value;
 
-          currentEvents = eventsIterator.next();
-        } else if (appSettings.removeEmptyYears) {
-          continue;
-        }
-
-        temp.push({
-          year,
-          events,
-          show: false,
-        });
+        currentEvents = eventsIterator.next();
+      } else if (settings.removeEmptyYears) {
+        continue;
       }
 
-      return temp;
-    },
-    [],
-  );
+      temp.push(
+        <AuthorTimelineEntry
+          key={year}
+          year={year}
+          events={events}
+          onAuthorView={onAuthorView}
+        />,
+      );
+    }
 
-  const [timelineEntries, setTimelineEntries] = useState(() =>
-    constructTimelineEntries(settings),
-  );
+    return temp;
+  }, [settings, statesData]);
+
+  const initialEntriesShown = 10;
+
+  const [entriesShown, setEntriesShown] = useState(initialEntriesShown);
 
   useEffect(() => {
-    const entriesElement = entriesRef.current;
-
-    if (entriesElement) {
-      const rowsToShow: Set<number> = new Set();
-
-      const intersectionObserver = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            const rowNumber = Number(
-              (entry.target as HTMLElement).dataset.row!,
-            );
-
-            if (entry.isIntersecting) {
-              rowsToShow.add(rowNumber);
-            } else {
-              rowsToShow.delete(rowNumber);
-            }
-          }
-
-          setTimelineEntries((timelineEntries) =>
-            timelineEntries.map((entry, i) => {
-              return {
-                ...entry,
-                show: rowsToShow.has(i),
-              };
-            }),
-          );
-        },
-        { rootMargin: '1000px 0px', threshold: 0.1 },
+    if (entriesRef.current) {
+      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () =>
+        setEntriesShown(
+          Math.min(entriesShown + initialEntriesShown, eventElements.length),
+        ),
       );
 
-      const listElements = entriesElement.children;
-
-      for (const listElement of listElements) {
-        intersectionObserver.observe(listElement);
-      }
-
       return () => {
-        intersectionObserver.disconnect();
-
-        for (const listElement of listElements) {
-          intersectionObserver.unobserve(listElement);
-        }
+        destroyInfiniteScroll();
       };
     }
-  }, [setTimelineEntries]);
+  }, [entriesRef.current, entriesShown]);
 
   return (
     <div className={clsx(styles.authorTimelineView, className)}>
       <ul className={styles.authorTimelineViewEntries} ref={entriesRef}>
-        {timelineEntries.map((props, i) => (
-          <AuthorTimelineEntry key={i} dataRow={i} {...props} />
-        ))}
+        {eventElements.slice(0, entriesShown)}
       </ul>
       <div className={styles.authorTimelineViewSettings}>
         <Radiogroup<keyof AppearanceSettings>

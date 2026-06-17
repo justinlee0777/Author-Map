@@ -178,7 +178,7 @@ export function AuthorMap({
       break;
     case ViewType.TIMELINE:
     default:
-      viewElement = <AuthorTimelineView />;
+      viewElement = <AuthorTimelineView onAuthorView={setViewingAuthor} />;
       break;
   }
 
@@ -189,6 +189,7 @@ export function AuthorMap({
           className={clsx(styles.authorMapComponentContainer, className)}
           ref={componentRef}
         >
+          <div className={styles.authorMapContainer}>{viewElement}</div>
           <Tabs<ViewType>
             className={clsx(
               commonStyles.floatingAction,
@@ -205,7 +206,6 @@ export function AuthorMap({
               }
             }}
           />
-          <div className={styles.authorMapContainer}>{viewElement}</div>
           <div
             className={clsx(
               commonStyles.floatingAction,
