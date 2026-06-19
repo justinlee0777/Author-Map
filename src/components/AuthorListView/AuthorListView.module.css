@@ -1,11 +1,12 @@
 .authorListView {
   align-items: flex-start;
+  box-sizing: border-box;
   display: flex;
-  height: 85vh;
+  height: 95%;
   flex-direction: row;
   gap: 1em;
   left: 50%;
-  padding-top: 3em;
+  padding-top: 1em;
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -20,6 +21,15 @@
 
 .authorListViewEdit {
   align-self: center;
+  transition: 0.3s opacity;
+
+  .authorListViewRow & {
+    opacity: 0;
+  }
+
+  .authorListViewRow:hover & {
+    opacity: 1;
+  }
 }
 
 .authorListViewEntries {

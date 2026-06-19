@@ -3,8 +3,8 @@
   display: flex;
   flex-direction: row;
   gap: 1em;
-  height: 100%;
-  padding: 4em 1em 2em 1em;
+  height: 95%;
+  padding: 1em 1em 0;
   position: relative;
 }
 
@@ -13,9 +13,6 @@
   flex: none;
   gap: 1em;
   flex-direction: column;
-}
-
-.authorTimelineViewAppearance {
 }
 
 .authorTimelineViewAdd {
@@ -53,7 +50,7 @@
   opacity: 0;
   transition: 0.3s opacity;
 
-  .authorTimelineViewEntry:hover & {
+  .authorTimelineViewAuthorHeader:hover > & {
     opacity: 1;
   }
 }

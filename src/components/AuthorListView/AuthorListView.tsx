@@ -61,7 +61,11 @@ function AuthorListRow({
   onView: () => void;
 }): JSX.Element {
   return (
-    <AuthorRow author={author} events={events}>
+    <AuthorRow
+      className={styles.authorListViewRow}
+      author={author}
+      events={events}
+    >
       <button
         className={clsx(commonStyles.button, styles.authorListViewEdit)}
         onClick={onView}

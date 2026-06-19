@@ -52,21 +52,27 @@ export function AuthorTimelineView({
     removeEmptyYears: true,
   });
 
+  const [eventsShown, setEventsShown] = useState<
+    Array<AuthorTimelineEvent['type']>
+  >(['Birth', 'Death']);
+
   const timelineEventsByYear = useMemo(() => {
     const map = new Map<number, typeof timelineEvents>();
 
     timelineEvents.forEach((timelineEvent) => {
-      const year = Number(timelineEvent.date.split('-').at(0)!);
+      if (eventsShown.includes(timelineEvent.type)) {
+        const year = Number(timelineEvent.date.split('-').at(0)!);
 
-      if (map.has(year)) {
-        map.get(year)!.push(timelineEvent);
-      } else {
-        map.set(year, [timelineEvent]);
+        if (map.has(year)) {
+          map.get(year)!.push(timelineEvent);
+        } else {
+          map.set(year, [timelineEvent]);
+        }
       }
     });
 
     return map;
-  }, [timelineEvents]);
+  }, [timelineEvents, eventsShown]);
 
   const eventElements: Array<JSX.Element> = useMemo(() => {
     const temp: Array<JSX.Element> = [];
@@ -97,7 +103,7 @@ export function AuthorTimelineView({
     }
 
     return temp;
-  }, [settings, statesData]);
+  }, [settings, statesData, eventsShown]);
 
   const initialEntriesShown = 10;
 
@@ -124,7 +130,6 @@ export function AuthorTimelineView({
       </ul>
       <div className={styles.authorTimelineViewSettings}>
         <Radiogroup<keyof AppearanceSettings>
-          className={styles.authorTimelineViewAppearance}
           header="Appearance"
           id="timeline-settings"
           type="checkbox"
@@ -158,6 +163,32 @@ export function AuthorTimelineView({
                 };
               }
             });
+          }}
+        />
+
+        <Radiogroup<AuthorTimelineEvent['type']>
+          header="Show"
+          id="timeline-show"
+          type="checkbox"
+          options={[
+            {
+              label: 'Birth',
+              value: 'Birth',
+            },
+            {
+              label: 'Death',
+              value: 'Death',
+            },
+          ]}
+          selected={eventsShown}
+          onChange={(value) => {
+            if (eventsShown.includes(value)) {
+              setEventsShown((eventTypes) =>
+                eventTypes.filter((eventType) => eventType !== value),
+              );
+            } else {
+              setEventsShown((eventTypes) => eventTypes.concat(value));
+            }
           }}
         />
       </div>

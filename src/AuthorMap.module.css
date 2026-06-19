@@ -9,7 +9,13 @@
   margin: 0;
 }
 
-.authorMapContainer,
+.authorMapContainer {
+  box-sizing: border-box;
+  height: 100%;
+  padding-top: 2.5em;
+  width: 100%;
+}
+
 .authorMapContainer > svg {
   height: 100%;
   width: 100%;
