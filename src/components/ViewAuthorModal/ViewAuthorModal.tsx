@@ -126,6 +126,9 @@ export function ViewAuthorModal({
                     {inclusionReason.award}
                   </a>{' '}
                   {inclusionReason.year}
+                  {inclusionReason.book && (
+                    <> for {`"${inclusionReason.book}"`}</>
+                  )}
                 </p>
               );
             default:

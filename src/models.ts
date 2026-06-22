@@ -151,27 +151,6 @@ export interface TimeSpan {
   endDate: string;
 }
 
-/* TODO: Not sure what to do with this or how to do it organically.
-Seems to me that this should be flattened and its own model, mostly because "achievement" is a separate concept from what the author has actually done.
-export enum AuthorAchievementType {
-  RENOWNED_WORK = 'Renowned work',
-  AWARD = 'Award',
-}
-
-export interface AuthorWorkAchievement {
-  workTitle: string;
-  type: AuthorAchievementType.RENOWNED_WORK;
-  referenceUrl?: string;
-}
-
-export interface AuthorAwardAchievement {
-  awardName: string;
-  type: AuthorAchievementType.AWARD;
-}
-
-export type AuthorAchievement = AuthorWorkAchievement | AuthorAwardAchievement;
-*/
-
 export interface BaseTimelineEvent {
   id: string | Symbol;
 
@@ -182,13 +161,17 @@ export interface BaseTimelineEvent {
   referenceUrl?: string;
 }
 
-export interface BirthEvent extends BaseTimelineEvent {
+type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
+export interface BirthEvent
+  extends MakeRequired<BaseTimelineEvent, 'authorId'> {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   date: string;
   type: 'Birth';
 }
 
-export interface DeathEvent extends BaseTimelineEvent {
+export interface DeathEvent
+  extends MakeRequired<BaseTimelineEvent, 'authorId'> {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   date: string;
   type: 'Death';
@@ -236,7 +219,10 @@ export interface PoetLaureateReason {
 
 export enum AmericanLiteraryAward {
   NOBEL_PRIZE_IN_LITERATURE = 'Nobel Prize in Literature',
-  PULITZER = 'Pulitzer',
+  PULITZER_FICTION = 'Pulitzer Prize for Fiction',
+  PULITZER_POETRY = 'Pulitzer Prize for Poetry',
+  NATIONAL_BOOK_FICTION = 'National Book Award for Fiction',
+  NATIONAL_BOOK_POETRY = 'National Book Award for Poetry',
 }
 
 export enum ClassicPublisher {
@@ -244,6 +230,7 @@ export enum ClassicPublisher {
   PENGUIN_CLASSIC = 'Penguin Classic',
   NORTON = 'Norton',
   LIBRARY_OF_AMERICA = 'Library of America',
+  DALKEY = 'Dalkey Archive Press',
 }
 
 export interface ClassicPublisherCatalog {
@@ -278,6 +265,10 @@ export interface AwardInclusionReason {
   book?: string;
 }
 
+export interface PersonalReason {
+  type: 'Because I said so; source: me';
+}
+
 /**
  * It strikes me that this is more useful if there is a cut-off point - ex. the beginning of the millenium or (current date - 10 years).
  * The purpose of the map is to operate via hindsight and not to shape history as it is happening.
@@ -286,7 +277,8 @@ export type AuthorInclusionReason =
   | PoetLaureateReason
   | ClassicPublisherReason
   | AcademicCitationReason
-  | AwardInclusionReason;
+  | AwardInclusionReason
+  | PersonalReason;
 
 export interface Author {
   id: string | Symbol;
