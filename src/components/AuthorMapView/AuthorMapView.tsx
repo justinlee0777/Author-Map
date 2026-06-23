@@ -21,15 +21,22 @@ import clsx from 'clsx';
 
 import { geography } from '../../consts/states.const';
 import {
+  AmericanLiteraryAward,
   Author,
   AuthorEventType,
   AuthorLocation,
   CityCoordinates,
+  ClassicPublisher,
   USState,
 } from '../../models';
 import { StateDrawer } from '../StateDrawer/StateDrawer';
 import { Tabs } from '../Tabs/Tabs';
 import { AuthorMapDataContext } from '../../contexts';
+import {
+  convertValuesToFilters,
+  InclusionReasonSelect,
+  InclusionReasonValues,
+} from '../InclusionReasonSelect/InclusionReasonSelect';
 
 interface Geography {
   rsmKey: string;
@@ -126,17 +133,47 @@ export function AuthorMapView({
     eventType: AuthorEventType.BIRTHS,
   });
 
+  const [inclusionReasons, setInclusionReasons] =
+    useState<InclusionReasonValues>({
+      poetLaureates: true,
+      publishers: {
+        checked: true,
+        collapsed: true,
+        specific: {
+          [ClassicPublisher.DALKEY]: true,
+          [ClassicPublisher.LIBRARY_OF_AMERICA]: true,
+          [ClassicPublisher.NORTON]: true,
+          [ClassicPublisher.NYRB]: true,
+          [ClassicPublisher.PENGUIN_CLASSIC]: true,
+        },
+      },
+      awards: {
+        checked: true,
+        collapsed: true,
+        specific: {
+          [AmericanLiteraryAward.NATIONAL_BOOK_FICTION]: true,
+          [AmericanLiteraryAward.NATIONAL_BOOK_POETRY]: true,
+          [AmericanLiteraryAward.NOBEL_PRIZE_IN_LITERATURE]: true,
+          [AmericanLiteraryAward.PULITZER_FICTION]: true,
+          [AmericanLiteraryAward.PULITZER_POETRY]: true,
+        },
+      },
+      personal: false,
+    });
+
+  const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
+
   const renderedCityCoordinates: Array<
     CityCoordinates & { marker: JSX.Element }
   > = useMemo(() => {
     return cityCoordinates.reduce(
       (acc, cityCoordinate, i) => {
         const { location, coordinates } = cityCoordinate;
-        const numAuthors = statesData.getAuthors(
-          location.state,
-          filters.eventType,
-          location.address,
-        ).length;
+        const numAuthors = statesData.getAuthors(location.state, {
+          eventType: filters.eventType,
+          address: location.address,
+          inclusionReasons: inclusionReasonFilter,
+        }).length;
 
         if (numAuthors > 0) {
           const marker = (
@@ -174,28 +211,28 @@ export function AuthorMapView({
     filters,
     cityCoordinates,
     tooltipId,
+    inclusionReasons,
     toCityID,
     setHighlightedCity,
     setHighlightedState,
   ]);
 
   const stateDrawerElement = useMemo(() => {
-    let title: string | undefined,
-      authors: Array<Author> | undefined,
-      state: USState | undefined;
+    let title: string | undefined, authors: Array<Author> | undefined;
 
     if (highlightedState) {
       title = highlightedState;
-      authors = statesData.getAuthors(highlightedState, filters.eventType);
-      state = highlightedState;
+      authors = statesData.getAuthors(highlightedState, {
+        eventType: filters.eventType,
+        inclusionReasons: inclusionReasonFilter,
+      });
     } else if (highlightedCity) {
       title = `${highlightedCity.address}, ${highlightedCity.state}`;
-      authors = statesData.getAuthors(
-        highlightedCity.state,
-        filters.eventType,
-        highlightedCity.address,
-      );
-      state = highlightedCity.state;
+      authors = statesData.getAuthors(highlightedCity.state, {
+        eventType: filters.eventType,
+        address: highlightedCity.address,
+        inclusionReasons: inclusionReasonFilter,
+      });
     }
 
     if (title && authors) {
@@ -262,7 +299,7 @@ export function AuthorMapView({
                     <Fragment key={geography.rsmKey}>
                       <Geography
                         data-tooltip-id={tooltipId}
-                        data-tooltip-content={`${stateName} (${statesData.getAuthors(stateName, filters.eventType).length})`}
+                        data-tooltip-content={`${stateName} (${statesData.getAuthors(stateName, { eventType: filters.eventType, inclusionReasons: inclusionReasonFilter }).length})`}
                         geography={geography}
                         style={{
                           default: {
@@ -304,30 +341,39 @@ export function AuthorMapView({
         noArrow
       />
       {stateDrawerElement}
-      <Tabs<AuthorEventType>
+      <div
         className={clsx(
           commonStyles.floatingAction,
           styles.authorMapViewFilterPane,
         )}
-        highlightedValue={filters.eventType}
-        values={Object.values(AuthorEventType).map((value) => ({
-          value,
-          label: value,
-        }))}
-        onChange={(value) => {
-          if (value) {
-            setFilters({
-              ...filters,
-              eventType: value,
-            });
-          } else {
-            setFilters({
-              ...filters,
-              eventType: undefined,
-            });
-          }
-        }}
-      />
+      >
+        <Tabs<AuthorEventType>
+          className={styles.authorMapEventType}
+          highlightedValue={filters.eventType}
+          values={Object.values(AuthorEventType).map((value) => ({
+            value,
+            label: value,
+          }))}
+          onChange={(value) => {
+            if (value) {
+              setFilters({
+                ...filters,
+                eventType: value,
+              });
+            } else {
+              setFilters({
+                ...filters,
+                eventType: undefined,
+              });
+            }
+          }}
+        />
+
+        <InclusionReasonSelect
+          selected={inclusionReasons}
+          onSelectedChange={setInclusionReasons}
+        />
+      </div>
     </>
   );
 }

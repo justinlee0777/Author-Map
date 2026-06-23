@@ -246,7 +246,9 @@ export function AuthorListView({
     }
     case AuthorListViewType.STATE: {
       listElements = Object.values(USState).map((usState) => {
-        let authors = statesData.getAuthors(usState, authorEventType);
+        let authors = statesData.getAuthors(usState, {
+          eventType: authorEventType,
+        });
 
         authors = filterAuthors(authors);
 

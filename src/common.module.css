@@ -1,5 +1,5 @@
 .sideDrawer {
-  background-color: white;
+  background-color: var(--floating-element-color);
   border: 1px solid black;
   box-sizing: border-box;
   height: 98%;
@@ -25,7 +25,7 @@
 
 .button {
   align-items: center;
-  background-color: white;
+  background-color: inherit;
   border: 1px solid black;
   cursor: pointer;
   display: flex;

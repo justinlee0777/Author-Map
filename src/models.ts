@@ -267,6 +267,7 @@ export interface AwardInclusionReason {
 
 export interface PersonalReason {
   type: 'Because I said so; source: me';
+  explanation: string;
 }
 
 /**

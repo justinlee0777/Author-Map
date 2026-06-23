@@ -3,7 +3,16 @@
 }
 
 .authorMapViewFilterPane {
+  background-color: var(--floating-element-color);
+  display: flex;
   flex-direction: column;
+  gap: 1em;
+  padding: 0.5em;
   right: 1em;
   top: 1em;
+  width: 200px;
+}
+
+.authorMapEventType {
+  flex-direction: column;
 }

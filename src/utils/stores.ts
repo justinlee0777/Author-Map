@@ -4,8 +4,12 @@ import {
   Author,
   AuthorEventType,
   AuthorTimelineEvent,
+  AwardInclusionReason,
   BirthEvent,
+  ClassicPublisherReason,
   DeathEvent,
+  PersonalReason,
+  PoetLaureateReason,
   USState,
 } from '../models';
 import { getAuthorName } from './names';
@@ -21,6 +25,15 @@ export interface AuthorSort {
 export interface AuthorFilter {
   deceasedOnly?: boolean;
 }
+
+export type InclusionReasonFilter =
+  | PoetLaureateReason['type']
+  | PersonalReason['type']
+  | Pick<AwardInclusionReason, 'type' | 'award'>
+  | {
+      type: ClassicPublisherReason['type'];
+      publishers: Array<keyof ClassicPublisherReason['publishers']>;
+    };
 
 export class AuthorMapStores {
   dateRange: [number, number];
@@ -141,31 +154,72 @@ export class AuthorMapStores {
 
   getAuthors(
     state: USState,
-    eventType?: AuthorEventType,
-    address?: string,
+    {
+      eventType,
+      address,
+      inclusionReasons,
+    }: {
+      eventType?: AuthorEventType;
+      address?: string;
+      inclusionReasons?: Array<InclusionReasonFilter>;
+    } = {},
   ): Array<Author> {
+    let authorIds: Array<Author['id']>;
+
     switch (eventType) {
       case AuthorEventType.BIRTHS:
-        return [...this.birthEventsByAuthor.entries()]
+        authorIds = [...this.birthEventsByAuthor.entries()]
           .filter(
             ([, birthEvent]) =>
               birthEvent.location?.state === state &&
               (address ? birthEvent?.location?.address === address : true),
           )
-          .map(([authorId]) => this.internalRegistry.get(authorId)!);
+          .map(([authorId]) => authorId);
+        break;
       case AuthorEventType.DEATHS:
-        return [...this.deathEventsByAuthor.entries()]
+        authorIds = [...this.deathEventsByAuthor.entries()]
           .filter(
             ([, deathEvent]) =>
               deathEvent.location?.state === state &&
               (address ? deathEvent?.location?.address === address : true),
           )
-          .map(([authorId]) => this.internalRegistry.get(authorId)!);
+          .map(([authorId]) => authorId);
+        break;
       default:
-        return [...this.internalRegistry.values()].filter((author) =>
-          this.hasAuthorResided(author.id, state),
-        );
+        authorIds = [...this.internalRegistry.values()]
+          .filter((author) => this.hasAuthorResided(author.id, state))
+          .map((author) => author.id);
+        break;
     }
+
+    let authors = authorIds.map(
+      (authorId) => this.internalRegistry.get(authorId)!,
+    );
+
+    if (inclusionReasons) {
+      authors = authors.filter((author) => {
+        return author.inclusionReasons.some((reason) => {
+          return inclusionReasons.some((filterReason) => {
+            if (typeof filterReason === 'string') {
+              return filterReason === reason.type;
+            } else if ('award' in filterReason && reason.type === 'award') {
+              return filterReason.award === reason.award;
+            } else if (
+              'publishers' in filterReason &&
+              reason.type === 'Published as classical literature'
+            ) {
+              return filterReason.publishers.some((publisher) =>
+                Boolean(reason.publishers[publisher]),
+              );
+            } else {
+              return false;
+            }
+          });
+        });
+      });
+    }
+
+    return authors;
   }
 
   getAuthorTimeline(authorId: Author['id']): Array<AuthorTimelineEvent>;

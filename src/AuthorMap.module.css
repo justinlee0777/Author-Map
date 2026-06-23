@@ -2,6 +2,8 @@
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+
+  --floating-element-color: white;
 }
 
 .authorMapComponentContainer h3,
