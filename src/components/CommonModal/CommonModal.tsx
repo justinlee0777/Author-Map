@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './CommonModal.module.css';
-
 import clsx from 'clsx';
 import { JSX, ReactNode } from 'react';
 import { MdClear } from 'react-icons/md';
@@ -21,9 +18,9 @@ export function CommonModal({
   onClose,
 }: Props): JSX.Element {
   return (
-    <Modal className={styles.modal} isOpen={opened} appElement={appElement}>
+    <Modal className="modal" isOpen={opened} appElement={appElement}>
       <button
-        className={clsx(commonStyles.button, styles.closeModal)}
+        className={clsx('button', 'closeModal')}
         type="button"
         onClick={onClose}
       >

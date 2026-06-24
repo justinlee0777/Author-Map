@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './AuthorListView.module.css';
-
 import {
   Fragment,
   JSX,
@@ -61,22 +58,12 @@ function AuthorListRow({
   onView: () => void;
 }): JSX.Element {
   return (
-    <AuthorRow
-      className={styles.authorListViewRow}
-      author={author}
-      events={events}
-    >
-      <button
-        className={clsx(commonStyles.button, styles.authorListViewEdit)}
-        onClick={onView}
-      >
+    <AuthorRow className="authorListViewRow" author={author} events={events}>
+      <button className={clsx('button', 'authorListViewEdit')} onClick={onView}>
         View
       </button>
 
-      <button
-        className={clsx(commonStyles.button, styles.authorListViewEdit)}
-        onClick={onEdit}
-      >
+      <button className={clsx('button', 'authorListViewEdit')} onClick={onEdit}>
         Edit
       </button>
     </AuthorRow>
@@ -186,7 +173,7 @@ export function AuthorListView({
       filterElements = [
         <Tabs<AuthorEventType>
           key="authorEventType"
-          className={clsx(styles.authorListViewEventType)}
+          className={clsx('authorListViewEventType')}
           highlightedValue={authorEventType}
           values={Object.values(AuthorEventType).map((value) => ({
             value,
@@ -256,7 +243,7 @@ export function AuthorListView({
           return <Fragment key={usState}></Fragment>;
         } else {
           return (
-            <div className={styles.authorListViewStateSection} key={usState}>
+            <div className="authorListViewStateSection" key={usState}>
               <h3>{usState}</h3>
               {authors.map((author) => {
                 let events: Array<AuthorTimelineEvent> = [];
@@ -296,14 +283,14 @@ export function AuthorListView({
   }
 
   return (
-    <div className={styles.authorListView}>
-      <div className={styles.authorListViewEntries} ref={entriesRef}>
+    <div className="authorListView">
+      <div className="authorListViewEntries" ref={entriesRef}>
         {listElements.slice(0, entriesShown)}
       </div>
-      <div className={styles.authorListViewSettings}>
+      <div className="authorListViewSettings">
         <h2>Appearance</h2>
         <Tabs<AuthorListViewType>
-          className={clsx(styles.authorListViewType)}
+          className={clsx('authorListViewType')}
           highlightedValue={viewType}
           values={[
             {
@@ -345,13 +332,13 @@ export function AuthorListView({
         />
 
         {filteringGroup && (
-          <p className={styles.authorListViewGroupDescription}>
+          <p className="authorListViewGroupDescription">
             {filteringGroup.description}
             {filteringGroup.link && (
               <span>
                 {' '}
                 <a
-                  className={styles.authorListViewGroupLink}
+                  className="authorListViewGroupLink"
                   href={filteringGroup.link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -362,10 +349,7 @@ export function AuthorListView({
             )}
 
             <button
-              className={clsx(
-                commonStyles.button,
-                styles.authorListViewEditGroup,
-              )}
+              className={clsx('button', 'authorListViewEditGroup')}
               onClick={() => onAuthorGroupEdit?.(filteringGroup)}
             >
               Edit

@@ -43,6 +43,7 @@
 
 .stateDrawerEdit,
 .stateDrawerView {
+  background-color: var(--floating-element-color);
   position: absolute;
   top: 1em;
   transition: 0.3s opacity;

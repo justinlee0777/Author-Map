@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './InclusionReasonSelect.module.css';
-
 import { JSX, useMemo } from 'react';
 import { MdArrowDropDown, MdArrowDropUp } from 'react-icons/md';
 import clsx from 'clsx';
@@ -59,7 +56,7 @@ export function InclusionReasonSelect({
         render: (OptionComponent) => (
           <OptionComponent
             key="poet-laureates"
-            className={styles.inclusionReasonOption}
+            className="inclusionReasonOption"
           />
         ),
       };
@@ -72,10 +69,10 @@ export function InclusionReasonSelect({
             return (
               <OptionComponent
                 key="publishers"
-                className={styles.inclusionReasonOption}
+                className="inclusionReasonOption"
               >
                 <button
-                  className={commonStyles.button}
+                  className="button"
                   onClick={() => {
                     const newSelected = structuredClone(selected);
 
@@ -105,11 +102,10 @@ export function InclusionReasonSelect({
               key={value}
               disabled={!selected.publishers.checked}
               className={clsx(
-                styles.inclusionReasonOption,
-                styles.inclusionReasonOptionChild,
+                'inclusionReasonOption',
+                'inclusionReasonOptionChild',
                 {
-                  [styles.inclusionReasonOptionCollapsed]:
-                    selected.publishers.collapsed,
+                  inclusionReasonOptionCollapsed: selected.publishers.collapsed,
                 },
               )}
             />
@@ -120,12 +116,9 @@ export function InclusionReasonSelect({
         label: 'American literary awards',
         value: awardValue,
         render: (OptionComponent) => (
-          <OptionComponent
-            key="awards"
-            className={styles.inclusionReasonOption}
-          >
+          <OptionComponent key="awards" className="inclusionReasonOption">
             <button
-              className={commonStyles.button}
+              className="button"
               onClick={() => {
                 const newSelected = structuredClone(selected);
 
@@ -153,11 +146,10 @@ export function InclusionReasonSelect({
               key={value}
               disabled={!selected.awards.checked}
               className={clsx(
-                styles.inclusionReasonOption,
-                styles.inclusionReasonOptionChild,
+                'inclusionReasonOption',
+                'inclusionReasonOptionChild',
                 {
-                  [styles.inclusionReasonOptionCollapsed]:
-                    selected.awards.collapsed,
+                  inclusionReasonOptionCollapsed: selected.awards.collapsed,
                 },
               )}
             />
@@ -168,7 +160,7 @@ export function InclusionReasonSelect({
         label: 'Me',
         value: personalValue,
         render: (OptionComponent) => (
-          <OptionComponent key="me" className={styles.inclusionReasonOption} />
+          <OptionComponent key="me" className="inclusionReasonOption" />
         ),
       };
 

@@ -1,5 +1,3 @@
-import styles from './EditAuthorGroupModal.module.css';
-
 import { JSX, useState } from 'react';
 
 import { AuthorGroup } from '../../models';
@@ -31,7 +29,7 @@ export function EditAuthorGroupModal({
 
   return (
     <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
-      <div className={styles.editAuthorGroupModal}>
+      <div className="editAuthorGroupModal">
         <RegisterAuthorGroup
           id="create-author-group"
           value={authorGroup}

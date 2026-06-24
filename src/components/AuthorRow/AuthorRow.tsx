@@ -1,5 +1,3 @@
-import styles from './AuthorRow.module.css';
-
 import { Fragment, JSX, ReactNode, useMemo } from 'react';
 import clsx from 'clsx';
 
@@ -36,11 +34,11 @@ export function AuthorRow({
   ) as Array<MilestoneEvent>;
 
   return (
-    <div className={clsx(styles.authorRow, className)}>
+    <div className={clsx('authorRow', className)}>
       {author.portrait && author.portrait.src && (
         <img {...author.portrait} loading="lazy" height={100} width={100} />
       )}
-      <div className={styles.authorRowDetails}>
+      <div className="authorRowDetails">
         <h4>{authorName}</h4>
         {finalEvents.map(({ notes, date, location }, index) => {
           let contextElement: JSX.Element | undefined;
@@ -87,8 +85,8 @@ export function AuthorRow({
 
           return (
             <Fragment key={index}>
-              <div className={styles.authorRowRelevantEvent}>
-                <div className={styles.authorRowRelevantEventContext}>
+              <div className="authorRowRelevantEvent">
+                <div className="authorRowRelevantEventContext">
                   {contextElement}
                   <p>{formatDate(date)}</p>
                   <p>

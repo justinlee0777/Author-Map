@@ -1,5 +1,3 @@
-import styles from './EditMajorEventModal.module.css';
-
 import { JSX, useMemo, useState } from 'react';
 
 import { Formik } from 'formik';
@@ -52,9 +50,9 @@ export function EditMajorEventModal({
       >
         {({ handleSubmit, values, handleChange, setFieldValue, isValid }) => {
           return (
-            <form className={styles.editMajorEventForm} onSubmit={handleSubmit}>
+            <form className="editMajorEventForm" onSubmit={handleSubmit}>
               <button
-                className={styles.editMajorEventCloseModal}
+                className="editMajorEventCloseModal"
                 type="button"
                 onClick={onClose}
               >

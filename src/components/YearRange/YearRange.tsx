@@ -1,5 +1,3 @@
-import styles from './YearRange.module.css';
-
 import { JSX, useMemo, useState } from 'react';
 
 interface Props {
@@ -49,7 +47,7 @@ export function YearRange({
   }, [startingYear, endingYear, userStartingYear]);
 
   return (
-    <div className={styles.authorMapYearRange}>
+    <div className="authorMapYearRange">
       <select
         id={startingYearId}
         value={userStartingYear}

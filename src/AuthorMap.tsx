@@ -1,6 +1,3 @@
-import styles from './AuthorMap.module.css';
-import commonStyles from './common.module.css';
-
 import { useMemo, useRef, useState, JSX, useCallback } from 'react';
 import clsx from 'clsx';
 
@@ -186,14 +183,11 @@ export function AuthorMap({
     <AuthorMapDataContext.Provider value={{ data: statesData }}>
       <AuthorGroupContext.Provider value={{ groups }}>
         <div
-          className={clsx(styles.authorMapComponentContainer, className)}
+          className={clsx('authorMapComponentContainer', className)}
           ref={componentRef}
         >
           <Tabs<ViewType>
-            className={clsx(
-              commonStyles.floatingAction,
-              styles.authorMapViewSwitch,
-            )}
+            className={clsx('floatingAction', 'authorMapViewSwitch')}
             highlightedValue={viewType}
             values={Object.values(ViewType).map((value) => ({
               value,
@@ -205,13 +199,8 @@ export function AuthorMap({
               }
             }}
           />
-          <div className={styles.authorMapContainer}>{viewElement}</div>
-          <div
-            className={clsx(
-              commonStyles.floatingAction,
-              styles.authorMapAddButtons,
-            )}
-          >
+          <div className="authorMapContainer">{viewElement}</div>
+          <div className={clsx('floatingAction', 'authorMapAddButtons')}>
             <AddAuthor
               children={{ right: 'Add author' }}
               onClick={() => {

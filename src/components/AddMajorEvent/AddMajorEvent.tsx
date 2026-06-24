@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './AddMajorEvent.module.css';
-
 import { MdAdd } from 'react-icons/md';
 import { clsx } from 'clsx';
 import { JSX, ReactNode } from 'react';
@@ -22,7 +19,7 @@ export function AddMajorEvent({
 }: Props): JSX.Element {
   return (
     <button
-      className={clsx(commonStyles.button, styles.addMajorEvent, className)}
+      className={clsx('button', 'addMajorEvent', className)}
       onClick={onClick}
     >
       {children?.left}

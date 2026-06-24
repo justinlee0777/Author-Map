@@ -1,5 +1,3 @@
-import styles from './EditAuthorModal.module.css';
-
 import { JSX, useMemo, useState } from 'react';
 
 import { Formik, useFormikContext } from 'formik';
@@ -112,7 +110,7 @@ export function EditAuthorModal({
               header: (
                 <>
                   <input
-                    className={styles.editAuthorMilestoneToggle}
+                    className="editAuthorMilestoneToggle"
                     id={eventTypeId}
                     type="checkbox"
                     onChange={async (event) => {
@@ -232,21 +230,14 @@ export function EditAuthorModal({
           const timeline = values.timeline ?? [];
 
           return (
-            <form className={styles.editAuthorForm} onSubmit={handleSubmit}>
-              <button
-                className={styles.editAuthorCloseModal}
-                type="button"
-                onClick={onClose}
-              >
-                <MdClear />
-              </button>
-              <div className={styles.editAuthorPortraitRow}>
-                <div className={styles.editAuthorPortraitContainer}>
+            <form className="editAuthorForm" onSubmit={handleSubmit}>
+              <div className="editAuthorPortraitRow">
+                <div className="editAuthorPortraitContainer">
                   {values.author?.portrait?.src && (
                     <img src={values.author?.portrait?.src} loading="lazy" />
                   )}
                 </div>
-                <div className={styles.editAuthorPortraitDetails}>
+                <div className="editAuthorPortraitDetails">
                   <label htmlFor={portraitId}>Portrait</label>
                   <input
                     id={portraitId}
@@ -309,7 +300,7 @@ export function EditAuthorModal({
 
               <BirthField item={values.birthDate!} />
 
-              <div className={styles.editAuthorDeceasedRow}>
+              <div className="editAuthorDeceasedRow">
                 <input
                   id={deceasedId}
                   type="checkbox"
@@ -332,11 +323,11 @@ export function EditAuthorModal({
 
               {values.deathDate && <DeathField item={values.deathDate!} />}
 
-              <label className={styles.editAuthorTimelineLabel}>Timeline</label>
+              <label className="editAuthorTimelineLabel">Timeline</label>
               <DynamicList<RecursivePartial<AuthorTimelineEvent>>
                 classes={{
-                  component: styles.editAuthorTimelineEventsContainer,
-                  listItems: styles.editAuthorTimelineEvents,
+                  component: 'editAuthorTimelineEventsContainer',
+                  listItems: 'editAuthorTimelineEvents',
                 }}
                 items={
                   (values.timeline as Array<
@@ -365,7 +356,7 @@ export function EditAuthorModal({
               <h4>Groups</h4>
 
               <AuthorGroupInput
-                className={styles.editAuthorGroupsContainer}
+                className="editAuthorGroupsContainer"
                 values={
                   (values.author?.groups as Array<AuthorGroup['id']>) ?? []
                 }

@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import styles from './Radiogroup.module.css';
 
 import { JSX, ReactNode } from 'react';
 
@@ -43,7 +42,7 @@ export function Radiogroup<T extends string>({
   const selectedValues = selected ? ([] as Array<T>).concat(selected) : [];
 
   return (
-    <fieldset id={id} className={clsx(styles.radiogroup, className)}>
+    <fieldset id={id} className={clsx('radiogroup', className)}>
       <legend>{header}</legend>
 
       {options.map(({ value, label, render }) => {
@@ -66,7 +65,7 @@ export function Radiogroup<T extends string>({
                   onChange?.(value);
                 }}
               />
-              <label className={styles.radioLabel} htmlFor={radioId}>
+              <label className="radioLabel" htmlFor={radioId}>
                 {label}
               </label>
               {children}

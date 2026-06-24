@@ -1,5 +1,3 @@
-import styles from './ViewAuthorModal.module.css';
-
 import { Fragment, JSX, ReactNode, useContext } from 'react';
 import { Author } from '../../models';
 import { getAuthorName } from '../../utils/names';
@@ -43,8 +41,8 @@ export function ViewAuthorModal({
 
   return (
     <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
-      <div className={styles.viewAuthorModal}>
-        <div className={styles.viewAuthorPortraitContainer}>
+      <div className="viewAuthorModal">
+        <div className="viewAuthorPortraitContainer">
           {author.portrait?.src && (
             <img src={author.portrait?.src} loading="lazy" />
           )}
@@ -93,7 +91,7 @@ export function ViewAuthorModal({
                   {Object.entries(inclusionReason.publishers).map(
                     ([publisher, catalog]) => {
                       return (
-                        <div key={publisher} className={styles.publisherList}>
+                        <div key={publisher} className="publisherList">
                           <p>
                             <b>{publisher}</b>
                           </p>

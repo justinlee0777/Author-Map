@@ -1,6 +1,3 @@
-import styles from './StateDrawer.module.css';
-import commonStyles from '../../common.module.css';
-
 import clsx from 'clsx';
 import { JSX, ReactNode, useContext, useMemo } from 'react';
 import { Author, AuthorEventType, AuthorTimelineEvent } from '../../models';
@@ -36,19 +33,19 @@ export function StateDrawer({
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   return (
-    <div className={clsx(styles.stateDrawerUSState, commonStyles.sideDrawer)}>
-      <AddAuthor className={styles.stateDrawerAdd} onClick={onAddAuthor} />
+    <div className={clsx('stateDrawerUSState', 'sideDrawer')}>
+      <AddAuthor className="stateDrawerAdd" onClick={onAddAuthor} />
       <h3>
         {title}
 
         <button
-          className={clsx(commonStyles.button, styles.stateDrawerClose)}
+          className={clsx('button', 'stateDrawerClose')}
           onClick={onClose}
         >
           <MdClose />
         </button>
       </h3>
-      <div className={styles.stateDrawerList}>
+      <div className="stateDrawerList">
         {authors.map((author) => {
           let authorName: ReactNode = getAuthorName(author);
 
@@ -81,18 +78,18 @@ export function StateDrawer({
           return (
             <AuthorRow
               key={authorKeyGenerator.getKey(author.id)}
-              className={styles.stateDrawerAuthorRow}
+              className="stateDrawerAuthorRow"
               author={author}
               events={events}
             >
               <button
-                className={clsx(commonStyles.button, styles.stateDrawerEdit)}
+                className={clsx('button', 'stateDrawerEdit')}
                 onClick={() => onEdit?.(author)}
               >
                 Edit
               </button>
               <button
-                className={clsx(commonStyles.button, styles.stateDrawerView)}
+                className={clsx('button', 'stateDrawerView')}
                 onClick={() => onView?.(author)}
               >
                 View

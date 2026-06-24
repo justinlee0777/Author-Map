@@ -1,4 +1,3 @@
-import commonStyles from '../../common.module.css';
 import styles from './AuthorMapView.module.css';
 
 import {
@@ -341,12 +340,7 @@ export function AuthorMapView({
         noArrow
       />
       {stateDrawerElement}
-      <div
-        className={clsx(
-          commonStyles.floatingAction,
-          styles.authorMapViewFilterPane,
-        )}
-      >
+      <div className={clsx('floatingAction', styles.authorMapViewFilterPane)}>
         <Tabs<AuthorEventType>
           className={styles.authorMapEventType}
           highlightedValue={filters.eventType}

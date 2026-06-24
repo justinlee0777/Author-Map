@@ -1,5 +1,3 @@
-import styles from './AuthorTimelineView.module.css';
-
 import { Fragment, JSX, useContext } from 'react';
 
 import { AuthorMapDataContext } from '../../contexts';
@@ -27,11 +25,11 @@ export function AuthorTimelineEntry({
   const { data: statesData } = useContext(AuthorMapDataContext);
 
   return (
-    <li className={styles.authorTimelineViewEntry} key={year}>
+    <li className="authorTimelineViewEntry" key={year}>
       {
         <>
-          <h4 className={styles.authorTimelineViewYear}>{year}</h4>
-          <div className={styles.authorTimelineViewEntryBullet}></div>
+          <h4 className="authorTimelineViewYear">{year}</h4>
+          <div className="authorTimelineViewEntryBullet"></div>
           {events?.map((event, i) => {
             const author = event.authorId
               ? statesData.getAuthor(event.authorId)
@@ -53,27 +51,27 @@ export function AuthorTimelineEntry({
 
             return (
               <Fragment key={i}>
-                <div className={styles.authorTimelineEventDate}>
+                <div className="authorTimelineEventDate">
                   {formatDate(event.date, {
                     dateOnly: true,
                   })}
                 </div>
 
-                <div className={styles.authorTimelineEntryBisector}></div>
+                <div className="authorTimelineEntryBisector"></div>
 
-                <div className={styles.authorTimelineViewEntryDetails}>
+                <div className="authorTimelineViewEntryDetails">
                   {author && (
-                    <h4 className={styles.authorTimelineViewAuthorHeader}>
+                    <h4 className="authorTimelineViewAuthorHeader">
                       {getAuthorName(author)}
                       <img
-                        className={styles.authorTimelineViewPortrait}
+                        className="authorTimelineViewPortrait"
                         {...author.portrait}
                         height={48}
                         width={48}
                         loading="lazy"
                       />
                       <button
-                        className={styles.authorTimelineViewAction}
+                        className="authorTimelineViewAction"
                         onClick={() => onAuthorView?.(author)}
                       >
                         View

@@ -1,5 +1,3 @@
-import styles from './TimelineEvent.module.css';
-
 import { ChangeEvent, Fragment, JSX, ReactNode, useMemo } from 'react';
 
 import { BaseTimelineEvent, USState } from '../../../models';
@@ -71,7 +69,7 @@ export function TimelineEvent({
   );
 
   return (
-    <div id={id} className={styles.timelineEvent}>
+    <div id={id} className="timelineEvent">
       <h4>
         {headerText} {children?.header}
       </h4>
@@ -101,7 +99,7 @@ export function TimelineEvent({
         value={item.location?.address}
         onChange={handleChange}
       />
-      <p className={styles.hint}>
+      <p className="hint">
         The address can be partial. For example, the vast majority of locations
         will only have city.
       </p>

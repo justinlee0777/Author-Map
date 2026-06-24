@@ -1,5 +1,3 @@
-import styles from './AuthorTimelineView.module.css';
-
 import { JSX, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
@@ -124,11 +122,11 @@ export function AuthorTimelineView({
   }, [entriesRef.current, entriesShown]);
 
   return (
-    <div className={clsx(styles.authorTimelineView, className)}>
-      <ul className={styles.authorTimelineViewEntries} ref={entriesRef}>
+    <div className={clsx('authorTimelineView', className)}>
+      <ul className="authorTimelineViewEntries" ref={entriesRef}>
         {eventElements.slice(0, entriesShown)}
       </ul>
-      <div className={styles.authorTimelineViewSettings}>
+      <div className="authorTimelineViewSettings">
         <Radiogroup<keyof AppearanceSettings>
           header="Appearance"
           id="timeline-settings"
