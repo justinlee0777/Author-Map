@@ -2,12 +2,11 @@ import styles from './ViewAuthorModal.module.css';
 
 import { Fragment, JSX, ReactNode, useContext } from 'react';
 import { Author } from '../../models';
-import Modal from 'react-modal';
-import { MdClear } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { formatDate } from '../../utils/dates';
 import { getAddress } from '../../utils/address';
 import { AuthorGroupContext, AuthorMapDataContext } from '../../contexts';
+import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
   appElement: HTMLElement;
@@ -43,15 +42,8 @@ export function ViewAuthorModal({
     deathDate = data.getDeathDate(author.id);
 
   return (
-    <Modal isOpen={opened} appElement={appElement}>
+    <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
       <div className={styles.viewAuthorModal}>
-        <button
-          className={styles.viewAuthorCloseModal}
-          type="button"
-          onClick={onClose}
-        >
-          <MdClear />
-        </button>
         <div className={styles.viewAuthorPortraitContainer}>
           {author.portrait?.src && (
             <img src={author.portrait?.src} loading="lazy" />
@@ -213,6 +205,6 @@ export function ViewAuthorModal({
           </>
         )}
       </div>
-    </Modal>
+    </CommonModal>
   );
 }

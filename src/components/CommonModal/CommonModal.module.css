@@ -1,0 +1,23 @@
+.modal {
+  background-color: white;
+  border: 1px solid slategray;
+  border-radius: 4px;
+  height: 90%;
+  left: 50%;
+  margin: auto;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(90vw, 800px);
+}
+
+.closeModal {
+  border: none;
+  border-radius: 50%;
+  font-size: 1rem;
+  height: 2em;
+  position: absolute;
+  right: 1em;
+  top: 1em;
+  width: 2em;
+}

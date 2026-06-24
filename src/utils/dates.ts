@@ -25,9 +25,9 @@ export function formatDate(
     const monthName = getMonthName(month);
 
     if (dateOnly) {
-      return `${monthName} ${day}`;
+      return `${monthName} ${Number(day)}`;
     } else {
-      return `${getMonthName(month)} ${day}, ${year}`;
+      return `${getMonthName(month)} ${Number(day)}, ${year}`;
     }
   } else if (month) {
     return `${getMonthName(date)}, ${year}`;

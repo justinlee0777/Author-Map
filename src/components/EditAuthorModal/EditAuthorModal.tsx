@@ -3,7 +3,6 @@ import styles from './EditAuthorModal.module.css';
 import { JSX, useMemo, useState } from 'react';
 
 import { Formik, useFormikContext } from 'formik';
-import Modal from 'react-modal';
 import { PulseLoader } from 'react-spinners';
 
 import {
@@ -20,6 +19,7 @@ import { MdClear } from 'react-icons/md';
 import { TimelineEvent as TimelineEventComponent } from './TimelineEvent/TimelineEvent';
 import { AuthorGroupInput } from '../AuthorGroupInput/AuthorGroupInput';
 import { Tooltip } from 'react-tooltip';
+import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
   appElement: HTMLElement;
@@ -198,7 +198,7 @@ export function EditAuthorModal({
   }, []);
 
   return (
-    <Modal isOpen={opened} appElement={appElement}>
+    <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
       <Formik<RecursivePartial<AuthorData>>
         initialValues={initialData}
         onSubmit={async (finalData) => {
@@ -398,6 +398,6 @@ export function EditAuthorModal({
           );
         }}
       </Formik>
-    </Modal>
+    </CommonModal>
   );
 }

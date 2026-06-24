@@ -3,11 +3,10 @@
   display: flex;
   flex-direction: column;
   gap: 1em;
-  margin: auto;
-  max-width: min(600px, 60%);
+  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 1em;
+  padding: 1em 10%;
   position: relative;
   transition: 0.3s opacity;
 }

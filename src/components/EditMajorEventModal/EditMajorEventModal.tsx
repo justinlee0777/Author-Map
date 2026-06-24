@@ -3,13 +3,13 @@ import styles from './EditMajorEventModal.module.css';
 import { JSX, useMemo, useState } from 'react';
 
 import { Formik } from 'formik';
-import Modal from 'react-modal';
 import { PulseLoader } from 'react-spinners';
 import { MdClear } from 'react-icons/md';
 
 import { BaseTimelineEvent, MilestoneEvent } from '../../models';
 import { TimelineEvent } from '../EditAuthorModal/TimelineEvent/TimelineEvent';
 import { Tooltip } from 'react-tooltip';
+import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
   appElement: HTMLElement;
@@ -37,7 +37,7 @@ export function EditMajorEventModal({
   );
 
   return (
-    <Modal isOpen={opened} appElement={appElement}>
+    <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
       <Formik<Partial<MilestoneEvent>>
         initialValues={initialEvent}
         onSubmit={async (finalEvent) => {
@@ -102,6 +102,6 @@ export function EditMajorEventModal({
           );
         }}
       </Formik>
-    </Modal>
+    </CommonModal>
   );
 }
