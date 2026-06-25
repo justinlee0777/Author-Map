@@ -1,18 +1,13 @@
 import {
   Fragment,
   JSX,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import {
-  AuthorFilter,
-  AuthorSort,
-  createKeyGenerator,
-} from '../../utils/stores';
+import { AuthorMapStores, createKeyGenerator } from '../../utils/stores';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
@@ -24,9 +19,7 @@ import {
   USState,
 } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
-import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
-import { AuthorGroupContext, AuthorMapDataContext } from '../../contexts';
-import { getAuthorName } from '../../utils/names';
+import { AuthorMapDataContext } from '../../contexts';
 import infiniteScroll from '../../utils/infinite-scroll';
 
 interface Props {
@@ -75,9 +68,11 @@ export function AuthorListView({
   onAuthorGroupEdit,
   onAuthorView,
 }: Props): JSX.Element {
-  const { data: statesData } = useContext(AuthorMapDataContext);
-
-  const { groups } = useContext(AuthorGroupContext);
+  const {
+    data: statesData,
+    filters: { eventType, search, groupId },
+    groups,
+  } = useContext(AuthorMapDataContext);
 
   const entriesRef = useRef<HTMLDivElement>(null);
 
@@ -86,48 +81,7 @@ export function AuthorListView({
   const [viewType, setViewType] = useState<AuthorListViewType>(
       AuthorListViewType.AUTHOR,
     ),
-    [authorEventType, setAuthorEventType] = useState<AuthorEventType>(
-      AuthorEventType.BIRTHS,
-    ),
-    [sortType, setSortType] = useState<SortType>(SortType.NAME),
-    [filteringGroup, setFilteringGroup] = useState<AuthorGroup | null>(null),
-    [search, setSearch] = useState<string | null>(null);
-
-  const filterAuthors: (authors: Array<Author>) => Array<Author> = useCallback(
-    (authors) => {
-      if (filteringGroup) {
-        authors = authors.filter((author) =>
-          author.groups?.includes(filteringGroup.id),
-        );
-      }
-
-      if (search) {
-        const searchRegex = new RegExp(search, 'i');
-
-        authors = authors.filter((author) => {
-          return searchRegex.test(getAuthorName(author));
-        });
-      }
-
-      return authors;
-    },
-    [filteringGroup, search],
-  );
-
-  const [groupsFilterId, searchId] = useMemo(
-    () => ['groups-filter', 'list-search-input'],
-    [],
-  );
-
-  useEffect(() => {
-    if (filteringGroup) {
-      const foundGroup = groups.find((group) => group.id === filteringGroup.id);
-
-      if (foundGroup && foundGroup !== filteringGroup) {
-        setFilteringGroup(foundGroup);
-      }
-    }
-  }, [filteringGroup, groups]);
+    [sortType, setSortType] = useState<SortType>(SortType.NAME);
 
   const initialEntriesShown = 6;
 
@@ -170,31 +124,22 @@ export function AuthorListView({
       ];
       break;
     case AuthorListViewType.STATE:
-      filterElements = [
-        <Tabs<AuthorEventType>
-          key="authorEventType"
-          className={clsx('authorListViewEventType')}
-          highlightedValue={authorEventType}
-          values={Object.values(AuthorEventType).map((value) => ({
-            value,
-            label: value,
-          }))}
-          onChange={(value) => {
-            if (value) {
-              setAuthorEventType(value);
-            }
-          }}
-        />,
-      ];
+      filterElements = [];
       break;
   }
 
   let listElements: Array<JSX.Element>;
 
+  const filterArg: Parameters<AuthorMapStores['getAll']>[0] = {
+    eventType,
+    search,
+    groupId,
+  };
+
   switch (viewType) {
     case AuthorListViewType.AUTHOR: {
+      /*
       const sortArg: AuthorSort = {},
-        filterArg: AuthorFilter = {};
 
       switch (sortType) {
         case SortType.NAME:
@@ -205,13 +150,11 @@ export function AuthorListView({
           break;
         case SortType.DEATH:
           sortArg.death = true;
-          filterArg.deceasedOnly = true;
           break;
       }
+          */
 
-      let authors = statesData.getAll(sortArg, filterArg);
-
-      authors = filterAuthors(authors);
+      const authors = statesData.getAll(filterArg);
 
       listElements = authors.map((author) => {
         const birthDate = statesData.getBirthDate(author.id),
@@ -233,11 +176,10 @@ export function AuthorListView({
     }
     case AuthorListViewType.STATE: {
       listElements = Object.values(USState).map((usState) => {
-        let authors = statesData.getAuthors(usState, {
-          eventType: authorEventType,
+        const authors = statesData.getAll({
+          ...filterArg,
+          state: usState,
         });
-
-        authors = filterAuthors(authors);
 
         if (authors.length === 0) {
           return <Fragment key={usState}></Fragment>;
@@ -248,7 +190,7 @@ export function AuthorListView({
               {authors.map((author) => {
                 let events: Array<AuthorTimelineEvent> = [];
 
-                switch (authorEventType) {
+                switch (eventType) {
                   case AuthorEventType.BIRTHS:
                     const birthDate = statesData.getBirthDate(author.id);
 
@@ -282,6 +224,8 @@ export function AuthorListView({
     }
   }
 
+  const filteringGroup = groups.find((group) => group.id === groupId);
+
   return (
     <div className="authorListView">
       <div className="authorListViewEntries" ref={entriesRef}>
@@ -310,26 +254,6 @@ export function AuthorListView({
         />
 
         {filterElements}
-
-        <label htmlFor={searchId}>Search</label>
-        <input
-          id={searchId}
-          value={search ?? ''}
-          type="text"
-          onChange={(event) => {
-            if (event.target.value) {
-              setSearch(event.target.value.replaceAll(/[^a-zA-Z\d\s:]/g, ''));
-            } else {
-              setSearch(null);
-            }
-          }}
-        />
-
-        <SelectAuthorGroup
-          id={groupsFilterId}
-          label="Groups"
-          onSelect={setFilteringGroup}
-        />
 
         {filteringGroup && (
           <p className="authorListViewGroupDescription">

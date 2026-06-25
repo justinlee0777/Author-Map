@@ -1,5 +1,5 @@
 import { JSX, useCallback, useContext, useMemo, useState } from 'react';
-import { AuthorGroupContext } from '../../contexts';
+import { AuthorMapDataContext } from '../../contexts';
 import { RegisterAuthorGroup } from '../RegisterAuthorGroup/RegisterAuthorGroup';
 import { AuthorGroup } from '../../models';
 import { MdAdd, MdClear } from 'react-icons/md';
@@ -25,7 +25,7 @@ export function AuthorGroupInput({
   onChange,
   registerAuthorGroup,
 }: Props): JSX.Element {
-  const { groups } = useContext(AuthorGroupContext);
+  const { groups } = useContext(AuthorMapDataContext);
 
   const [creatingAuthorGroupId, selectAuthorGroupId] = useMemo(
     () => ['create-author-group', 'select-existing-author-group'],

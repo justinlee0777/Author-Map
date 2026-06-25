@@ -30,7 +30,10 @@ export function AuthorTimelineView({
   className,
   onAuthorView,
 }: Props): JSX.Element {
-  const { data: statesData } = useContext(AuthorMapDataContext);
+  const {
+    data: statesData,
+    filters: { eventType },
+  } = useContext(AuthorMapDataContext);
 
   const [startingYear, endingYear] = statesData.dateRange;
 
@@ -50,15 +53,11 @@ export function AuthorTimelineView({
     removeEmptyYears: true,
   });
 
-  const [eventsShown, setEventsShown] = useState<
-    Array<AuthorTimelineEvent['type']>
-  >(['Birth', 'Death']);
-
   const timelineEventsByYear = useMemo(() => {
     const map = new Map<number, typeof timelineEvents>();
 
     timelineEvents.forEach((timelineEvent) => {
-      if (eventsShown.includes(timelineEvent.type)) {
+      if (!eventType || timelineEvent.type === eventType) {
         const year = Number(timelineEvent.date.split('-').at(0)!);
 
         if (map.has(year)) {
@@ -70,7 +69,7 @@ export function AuthorTimelineView({
     });
 
     return map;
-  }, [timelineEvents, eventsShown]);
+  }, [timelineEvents, eventType]);
 
   const eventElements: Array<JSX.Element> = useMemo(() => {
     const temp: Array<JSX.Element> = [];
@@ -101,7 +100,7 @@ export function AuthorTimelineView({
     }
 
     return temp;
-  }, [settings, statesData, eventsShown]);
+  }, [settings, statesData, eventType]);
 
   const initialEntriesShown = 10;
 
@@ -161,32 +160,6 @@ export function AuthorTimelineView({
                 };
               }
             });
-          }}
-        />
-
-        <Radiogroup<AuthorTimelineEvent['type']>
-          header="Show"
-          id="timeline-show"
-          type="checkbox"
-          options={[
-            {
-              label: 'Birth',
-              value: 'Birth',
-            },
-            {
-              label: 'Death',
-              value: 'Death',
-            },
-          ]}
-          selected={eventsShown}
-          onChange={(value) => {
-            if (eventsShown.includes(value)) {
-              setEventsShown((eventTypes) =>
-                eventTypes.filter((eventType) => eventType !== value),
-              );
-            } else {
-              setEventsShown((eventTypes) => eventTypes.concat(value));
-            }
           }}
         />
       </div>

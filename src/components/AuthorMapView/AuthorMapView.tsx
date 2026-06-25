@@ -16,26 +16,13 @@ import {
   ZoomableGroup,
 } from 'react-simple-maps';
 import { Tooltip } from 'react-tooltip';
-import clsx from 'clsx';
 
 import { geography } from '../../consts/states.const';
-import {
-  AmericanLiteraryAward,
-  Author,
-  AuthorEventType,
-  AuthorLocation,
-  CityCoordinates,
-  ClassicPublisher,
-  USState,
-} from '../../models';
+import { Author, AuthorLocation, CityCoordinates, USState } from '../../models';
 import { StateDrawer } from '../StateDrawer/StateDrawer';
-import { Tabs } from '../Tabs/Tabs';
 import { AuthorMapDataContext } from '../../contexts';
-import {
-  convertValuesToFilters,
-  InclusionReasonSelect,
-  InclusionReasonValues,
-} from '../InclusionReasonSelect/InclusionReasonSelect';
+import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
+import { AuthorMapStores } from '../../utils/stores';
 
 interface Geography {
   rsmKey: string;
@@ -47,10 +34,6 @@ interface Geography {
 interface MapPosition {
   coordinates: [number, number];
   zoom: number;
-}
-
-interface Filters {
-  eventType?: AuthorEventType;
 }
 
 interface Props {
@@ -65,7 +48,7 @@ export function AuthorMapView({
   onAuthorEdit,
   onAuthorView,
 }: Props): JSX.Element {
-  const { data: statesData } = useContext(AuthorMapDataContext);
+  const { data: statesData, filters } = useContext(AuthorMapDataContext);
 
   const tooltipId = useMemo(() => 'state-labels-tooltip', []);
 
@@ -128,39 +111,16 @@ export function AuthorMapView({
   const [highlightedCity, setHighlightedCity] =
     useState<Required<AuthorLocation> | null>(null);
 
-  const [filters, setFilters] = useState<Filters>({
-    eventType: AuthorEventType.BIRTHS,
-  });
-
-  const [inclusionReasons, setInclusionReasons] =
-    useState<InclusionReasonValues>({
-      poetLaureates: true,
-      publishers: {
-        checked: true,
-        collapsed: true,
-        specific: {
-          [ClassicPublisher.DALKEY]: true,
-          [ClassicPublisher.LIBRARY_OF_AMERICA]: true,
-          [ClassicPublisher.NORTON]: true,
-          [ClassicPublisher.NYRB]: true,
-          [ClassicPublisher.PENGUIN_CLASSIC]: true,
-        },
-      },
-      awards: {
-        checked: true,
-        collapsed: true,
-        specific: {
-          [AmericanLiteraryAward.NATIONAL_BOOK_FICTION]: true,
-          [AmericanLiteraryAward.NATIONAL_BOOK_POETRY]: true,
-          [AmericanLiteraryAward.NOBEL_PRIZE_IN_LITERATURE]: true,
-          [AmericanLiteraryAward.PULITZER_FICTION]: true,
-          [AmericanLiteraryAward.PULITZER_POETRY]: true,
-        },
-      },
-      personal: false,
-    });
+  const { eventType, inclusionReasons, search, groupId } = filters;
 
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
+
+  const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
+    eventType,
+    inclusionReasons: inclusionReasonFilter,
+    search,
+    groupId,
+  };
 
   const renderedCityCoordinates: Array<
     CityCoordinates & { marker: JSX.Element }
@@ -168,10 +128,10 @@ export function AuthorMapView({
     return cityCoordinates.reduce(
       (acc, cityCoordinate, i) => {
         const { location, coordinates } = cityCoordinate;
-        const numAuthors = statesData.getAuthors(location.state, {
-          eventType: filters.eventType,
+        const numAuthors = statesData.getAll({
+          ...filterArgs,
           address: location.address,
-          inclusionReasons: inclusionReasonFilter,
+          state: location.state,
         }).length;
 
         if (numAuthors > 0) {
@@ -207,10 +167,9 @@ export function AuthorMapView({
     );
   }, [
     MARKER_COLORS,
-    filters,
+    filterArgs,
     cityCoordinates,
     tooltipId,
-    inclusionReasons,
     toCityID,
     setHighlightedCity,
     setHighlightedState,
@@ -221,16 +180,16 @@ export function AuthorMapView({
 
     if (highlightedState) {
       title = highlightedState;
-      authors = statesData.getAuthors(highlightedState, {
-        eventType: filters.eventType,
-        inclusionReasons: inclusionReasonFilter,
+      authors = statesData.getAll({
+        ...filterArgs,
+        state: highlightedState,
       });
     } else if (highlightedCity) {
       title = `${highlightedCity.address}, ${highlightedCity.state}`;
-      authors = statesData.getAuthors(highlightedCity.state, {
-        eventType: filters.eventType,
+      authors = statesData.getAll({
+        ...filterArgs,
+        state: highlightedCity.state,
         address: highlightedCity.address,
-        inclusionReasons: inclusionReasonFilter,
       });
     }
 
@@ -265,7 +224,7 @@ export function AuthorMapView({
     statesData,
     highlightedState,
     highlightedCity,
-    filters,
+    filterArgs,
     setHighlightedState,
     setHighlightedCity,
     onAuthorEdit,
@@ -298,7 +257,7 @@ export function AuthorMapView({
                     <Fragment key={geography.rsmKey}>
                       <Geography
                         data-tooltip-id={tooltipId}
-                        data-tooltip-content={`${stateName} (${statesData.getAuthors(stateName, { eventType: filters.eventType, inclusionReasons: inclusionReasonFilter }).length})`}
+                        data-tooltip-content={`${stateName} (${statesData.getAll({ ...filterArgs, state: stateName }).length})`}
                         geography={geography}
                         style={{
                           default: {
@@ -340,34 +299,6 @@ export function AuthorMapView({
         noArrow
       />
       {stateDrawerElement}
-      <div className={clsx('floatingAction', styles.authorMapViewFilterPane)}>
-        <Tabs<AuthorEventType>
-          className={styles.authorMapEventType}
-          highlightedValue={filters.eventType}
-          values={Object.values(AuthorEventType).map((value) => ({
-            value,
-            label: value,
-          }))}
-          onChange={(value) => {
-            if (value) {
-              setFilters({
-                ...filters,
-                eventType: value,
-              });
-            } else {
-              setFilters({
-                ...filters,
-                eventType: undefined,
-              });
-            }
-          }}
-        />
-
-        <InclusionReasonSelect
-          selected={inclusionReasons}
-          onSelectedChange={setInclusionReasons}
-        />
-      </div>
     </>
   );
 }

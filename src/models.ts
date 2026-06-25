@@ -135,8 +135,8 @@ export interface AuthorLocation {
 }
 
 export enum AuthorEventType {
-  BIRTHS = 'Births',
-  DEATHS = 'Deaths',
+  BIRTHS = 'Birth',
+  DEATHS = 'Death',
 }
 
 export interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
@@ -198,7 +198,7 @@ export type AuthorTimelineEvent =
  * For example, "Jewish American writers", "Belonging to the Harlem Renaissance", "pre-Republic", etc.
  */
 export interface AuthorGroup {
-  id: string | Symbol;
+  id: string;
 
   /** Assumed to be unique. */
   name: string;
@@ -319,4 +319,30 @@ export interface AuthorData {
 
   deathDate?: DeathEvent;
   timeline?: Array<AuthorTimelineEvent>;
+}
+
+export interface InclusionReasonValues {
+  poetLaureates: boolean;
+  personal: boolean;
+  publishers: {
+    collapsed: boolean;
+    checked: boolean;
+    specific: {
+      [key in ClassicPublisher]: boolean;
+    };
+  };
+  awards: {
+    collapsed: boolean;
+    checked: boolean;
+    specific: {
+      [key in AmericanLiteraryAward]: boolean;
+    };
+  };
+}
+export interface AuthorMapFilters {
+  inclusionReasons: InclusionReasonValues;
+
+  eventType?: AuthorEventType;
+  search?: string;
+  groupId?: AuthorGroup['id'];
 }

@@ -1,12 +1,13 @@
 import clsx from 'clsx';
 import { JSX, ReactNode, useContext, useMemo } from 'react';
+
 import { Author, AuthorEventType, AuthorTimelineEvent } from '../../models';
 import { createKeyGenerator } from '../../utils/stores';
-import { MdClose } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { AddAuthor } from '../AddAuthor/AddAuthor';
 import { AuthorMapDataContext } from '../../contexts';
+import { SideDrawer } from '../SideDrawer';
 
 interface Props {
   title: string;
@@ -33,18 +34,9 @@ export function StateDrawer({
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   return (
-    <div className={clsx('stateDrawerUSState', 'sideDrawer')}>
+    <SideDrawer className="stateDrawerUSState" title={title} onClose={onClose}>
       <AddAuthor className="stateDrawerAdd" onClick={onAddAuthor} />
-      <h3>
-        {title}
 
-        <button
-          className={clsx('button', 'stateDrawerClose')}
-          onClick={onClose}
-        >
-          <MdClose />
-        </button>
-      </h3>
       <div className="stateDrawerList">
         {authors.map((author) => {
           let authorName: ReactNode = getAuthorName(author);
@@ -98,6 +90,6 @@ export function StateDrawer({
           );
         })}
       </div>
-    </div>
+    </SideDrawer>
   );
 }

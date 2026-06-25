@@ -1,18 +1,24 @@
 import { JSX, useContext, useMemo } from 'react';
 import { AuthorGroup } from '../../models';
-import { AuthorGroupContext } from '../../contexts';
+import { AuthorMapDataContext } from '../../contexts';
 import { formatDate } from '../../utils/dates';
 import { createKeyGenerator } from '../../utils/stores';
 
 interface Props {
   id: string;
   label: string;
-
   onSelect: (group: AuthorGroup | null) => void;
+
+  value?: string;
 }
 
-export function SelectAuthorGroup({ id, label, onSelect }: Props): JSX.Element {
-  const { groups } = useContext(AuthorGroupContext);
+export function SelectAuthorGroup({
+  id,
+  value,
+  label,
+  onSelect,
+}: Props): JSX.Element {
+  const { groups } = useContext(AuthorMapDataContext);
 
   const keyGenerator = useMemo(() => createKeyGenerator(), []);
 
@@ -21,6 +27,7 @@ export function SelectAuthorGroup({ id, label, onSelect }: Props): JSX.Element {
       <label htmlFor={id}>{label}</label>
       <select
         id={id}
+        value={value}
         onChange={(event) => {
           if (event.currentTarget.value) {
             const index = Number(event.currentTarget.value);

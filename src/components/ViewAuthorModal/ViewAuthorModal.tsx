@@ -3,7 +3,7 @@ import { Author } from '../../models';
 import { getAuthorName } from '../../utils/names';
 import { formatDate } from '../../utils/dates';
 import { getAddress } from '../../utils/address';
-import { AuthorGroupContext, AuthorMapDataContext } from '../../contexts';
+import { AuthorMapDataContext } from '../../contexts';
 import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
@@ -22,7 +22,7 @@ export function ViewAuthorModal({
 }: Props): JSX.Element {
   const { data } = useContext(AuthorMapDataContext);
 
-  const { groups } = useContext(AuthorGroupContext);
+  const { groups } = useContext(AuthorMapDataContext);
 
   let authorNameElement: ReactNode = getAuthorName(author);
 

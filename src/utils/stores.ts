@@ -3,6 +3,7 @@ import sortedBy from 'lodash-es/sortBy';
 import {
   Author,
   AuthorEventType,
+  AuthorGroup,
   AuthorTimelineEvent,
   AwardInclusionReason,
   BirthEvent,
@@ -89,7 +90,7 @@ export class AuthorMapStores {
       currentYear,
     ];
   }
-
+  /*
   getAll(
     sort: AuthorSort = { name: true },
     { deceasedOnly }: AuthorFilter = {},
@@ -147,47 +148,55 @@ export class AuthorMapStores {
       return authors;
     }
   }
+    */
 
-  getAuthor(id: Author['id']): Author {
-    return this.internalRegistry.get(id)!;
-  }
-
-  getAuthors(
-    state: USState,
-    {
-      eventType,
-      address,
-      inclusionReasons,
-    }: {
-      eventType?: AuthorEventType;
-      address?: string;
-      inclusionReasons?: Array<InclusionReasonFilter>;
-    } = {},
-  ): Array<Author> {
+  getAll({
+    eventType,
+    address,
+    inclusionReasons,
+    groupId,
+    search,
+    state,
+  }: {
+    eventType?: AuthorEventType;
+    address?: string;
+    inclusionReasons?: Array<InclusionReasonFilter>;
+    groupId?: AuthorGroup['id'];
+    search?: string;
+    state?: USState;
+  } = {}): Array<Author> {
     let authorIds: Array<Author['id']>;
+
+    function filterByStateAndAddress(event: BirthEvent | DeathEvent): boolean {
+      let value = true;
+
+      if (state) {
+        value = event.location?.state === state && value;
+      }
+
+      if (address) {
+        value = event.location?.address === address && value;
+      }
+
+      return value;
+    }
 
     switch (eventType) {
       case AuthorEventType.BIRTHS:
         authorIds = [...this.birthEventsByAuthor.entries()]
-          .filter(
-            ([, birthEvent]) =>
-              birthEvent.location?.state === state &&
-              (address ? birthEvent?.location?.address === address : true),
-          )
+          .filter(([, birthEvent]) => filterByStateAndAddress(birthEvent))
           .map(([authorId]) => authorId);
         break;
       case AuthorEventType.DEATHS:
         authorIds = [...this.deathEventsByAuthor.entries()]
-          .filter(
-            ([, deathEvent]) =>
-              deathEvent.location?.state === state &&
-              (address ? deathEvent?.location?.address === address : true),
-          )
+          .filter(([, deathEvent]) => filterByStateAndAddress(deathEvent))
           .map(([authorId]) => authorId);
         break;
       default:
         authorIds = [...this.internalRegistry.values()]
-          .filter((author) => this.hasAuthorResided(author.id, state))
+          .filter((author) =>
+            state ? this.hasAuthorResided(author.id, state) : true,
+          )
           .map((author) => author.id);
         break;
     }
@@ -219,8 +228,44 @@ export class AuthorMapStores {
       });
     }
 
+    if (groupId) {
+      authors = authors.filter((author) => author.groups?.includes(groupId));
+    }
+
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+
+      authors = authors.filter((author) => {
+        return searchRegex.test(getAuthorName(author));
+      });
+    }
+
     return authors;
   }
+
+  getAuthor(id: Author['id']): Author {
+    return this.internalRegistry.get(id)!;
+  }
+  /*
+  getAuthors(
+    state: USState,
+    {
+      eventType,
+      address,
+      inclusionReasons,
+      groupId,
+      search
+    }: {
+      eventType?: AuthorEventType;
+      address?: string;
+      inclusionReasons?: Array<InclusionReasonFilter>;
+      groupId?: AuthorGroup['id'];
+      search?: string;
+    } = {},
+  ): Array<Author> {
+
+  }
+  */
 
   getAuthorTimeline(authorId: Author['id']): Array<AuthorTimelineEvent>;
   getAuthorTimeline(

@@ -8,29 +8,11 @@ import {
   AwardInclusionReason,
   ClassicPublisher,
   ClassicPublisherReason,
+  InclusionReasonValues,
   PersonalReason,
   type PoetLaureateReason,
 } from '../../models';
 import { InclusionReasonFilter } from '../../utils/stores';
-
-export interface InclusionReasonValues {
-  poetLaureates: boolean;
-  personal: boolean;
-  publishers: {
-    collapsed: boolean;
-    checked: boolean;
-    specific: {
-      [key in ClassicPublisher]: boolean;
-    };
-  };
-  awards: {
-    collapsed: boolean;
-    checked: boolean;
-    specific: {
-      [key in AmericanLiteraryAward]: boolean;
-    };
-  };
-}
 
 interface Props {
   selected: InclusionReasonValues;

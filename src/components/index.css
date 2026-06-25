@@ -1,6 +1,8 @@
 @import './AddAuthor/AddAuthor.css';
 @import './AddAuthorGroup/AddAuthorGroup.css';
 @import './AddMajorEvent/AddMajorEvent.css';
+@import './AuthorFilterDrawer/index.css';
+@import './AuthorFilterView/index.css';
 @import './AuthorGroupInput/AuthorGroupInput.css';
 @import './AuthorListView/AuthorListView.css';
 @import './AuthorRow/AuthorRow.css';
@@ -14,6 +16,7 @@
 @import './InclusionReasonSelect/InclusionReasonSelect.css';
 @import './Radiogroup/Radiogroup.css';
 @import './RegisterAuthorGroup/RegisterAuthorGroup.css';
+@import './SideDrawer/index.css';
 @import './StateDrawer/StateDrawer.css';
 @import './Tabs/Tabs.css';
 @import './ViewAuthorModal/ViewAuthorModal.css';
