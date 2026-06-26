@@ -341,6 +341,7 @@ export interface InclusionReasonValues {
 }
 export interface AuthorMapFilters {
   inclusionReasons: InclusionReasonValues;
+  yearRange: [number, number];
 
   eventType?: AuthorEventType;
   search?: string;

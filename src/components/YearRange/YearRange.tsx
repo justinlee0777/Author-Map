@@ -1,4 +1,4 @@
-import { JSX, useMemo, useState } from 'react';
+import { JSX, useMemo } from 'react';
 
 interface Props {
   /** Unique ID for the component. Will be used to construct the IDs for its child elements. */
@@ -8,25 +8,22 @@ interface Props {
   /** The latest possible year to select. */
   endingYear: number;
 
+  value: [number, number];
+
   onYearRangeChange: (startingYear: number, endingYear: number) => void;
 }
 
-/**
- * TODO: Finish this later.
- */
 export function YearRange({
   id,
   startingYear,
   endingYear,
+  value: [userStartingYear, userEndingYear],
   onYearRangeChange,
 }: Props): JSX.Element {
   const [startingYearId, endingYearId] = useMemo(
     () => [`${id}-starting-year`, `${id}-ending-year`],
     [id],
   );
-
-  const [userStartingYear, setUserStartingYear] = useState(startingYear),
-    [userEndingYear, setUserEndingYear] = useState(endingYear);
 
   const [startingYearOptions, endingYearOptions] = useMemo(() => {
     const uiOptions: Array<JSX.Element> = [];
@@ -40,11 +37,11 @@ export function YearRange({
     }
 
     return [
-      uiOptions,
+      uiOptions.slice(0, userEndingYear - endingYear - 1),
       // This operates under the assumption "userStartingYear" is greater than "startingYear", which logically should hold.
       uiOptions.slice(userStartingYear - startingYear),
     ];
-  }, [startingYear, endingYear, userStartingYear]);
+  }, [startingYear, endingYear, userStartingYear, userEndingYear]);
 
   return (
     <div className="authorMapYearRange">
@@ -55,13 +52,20 @@ export function YearRange({
           if (event.currentTarget.value) {
             const year = Number(event.currentTarget.value);
 
-            setUserStartingYear(year);
-            onYearRangeChange(year, userEndingYear);
+            let finalEndYear = userEndingYear;
+            if (year > finalEndYear) {
+              finalEndYear = year;
+            }
+
+            onYearRangeChange(year, finalEndYear);
           }
         }}
       >
         {startingYearOptions}
       </select>
+
+      <span> - </span>
+
       <select
         id={endingYearId}
         value={userEndingYear}
@@ -69,7 +73,6 @@ export function YearRange({
           if (event.currentTarget.value) {
             const year = Number(event.currentTarget.value);
 
-            setUserEndingYear(year);
             onYearRangeChange(userStartingYear, year);
           }
         }}

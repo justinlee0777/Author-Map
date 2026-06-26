@@ -45,5 +45,6 @@ export const AuthorMapDataContext = createContext<AuthorMapDataContextValue>({
       },
       personal: false,
     },
+    yearRange: [-Infinity, Infinity],
   },
 });

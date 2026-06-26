@@ -28,11 +28,17 @@ interface AuthorGroupProps {
   type: 'authorGroup';
 }
 
+interface YearRangeProps {
+  yearRange: [number, number];
+  type: 'yearRange';
+}
+
 type TagProps =
   | EventTypeProps
   | InclusionReasonProps
   | SearchProps
-  | AuthorGroupProps;
+  | AuthorGroupProps
+  | YearRangeProps;
 
 type Props = TagProps & {
   tooltipId: string;
@@ -94,6 +100,11 @@ export function AuthorFilterTag(props: Props): JSX.Element {
       const authorGroup = groups.find((group) => group.id === groupId)!;
 
       tagContents = `Group: "${authorGroup.name}"`;
+      break;
+    case 'yearRange':
+      const { yearRange } = props;
+
+      tagContents = `Year range: ${yearRange.join(' - ')}`;
       break;
   }
 

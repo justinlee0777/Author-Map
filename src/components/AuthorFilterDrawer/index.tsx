@@ -6,6 +6,7 @@ import { AuthorMapDataContext } from '../../contexts';
 import { Tabs } from '../Tabs/Tabs';
 import { AuthorEventType, AuthorMapFilters } from '../../models';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
+import { YearRange } from '../YearRange/YearRange';
 
 interface Props {
   onFiltersChange: (filters: AuthorMapFilters) => void;
@@ -19,14 +20,18 @@ export function AuthorFilterDrawer({
   className,
   onClose,
 }: Props): JSX.Element {
-  const { filters } = useContext(AuthorMapDataContext);
+  const { data, filters } = useContext(AuthorMapDataContext);
 
-  const [groupsFilterId, searchId] = useMemo(
-    () => ['groups-filter', 'list-search-input'],
+  const [groupsFilterId, searchId, yearRangeId] = useMemo(
+    () => [
+      'author-filters-group',
+      'author-filters-search',
+      'author-filters-year-range',
+    ],
     [],
   );
 
-  const { inclusionReasons, groupId, eventType, search } = filters;
+  const { inclusionReasons, groupId, eventType, search, yearRange } = filters;
 
   return (
     <SideDrawer className={className} title="Filters" onClose={onClose}>
@@ -84,6 +89,20 @@ export function AuthorFilterDrawer({
           onFiltersChange({
             ...filters,
             groupId: value?.id ?? undefined,
+          });
+        }}
+      />
+
+      <label htmlFor={yearRangeId}>Year range</label>
+      <YearRange
+        id={yearRangeId}
+        startingYear={data.dateRange[0]}
+        endingYear={data.dateRange[1]}
+        value={yearRange}
+        onYearRangeChange={(startingYear, endingYear) => {
+          onFiltersChange({
+            ...filters,
+            yearRange: [startingYear, endingYear],
           });
         }}
       />

@@ -152,6 +152,36 @@ export function AuthorMap({
 
   const [modalState, setModalState] = useState<ModalState | null>(null);
 
+  // TODO: If it's a lot of data, do async? Return a promise?
+  const statesData = useMemo(() => {
+    return new AuthorMapStores(authors, timeline);
+  }, [authors, timeline]);
+
+  const onAuthorEdit = useCallback(
+    (author: Partial<Author>) => {
+      let birthDate: BirthEvent | undefined,
+        deathDate: DeathEvent | undefined,
+        timeline: Array<AuthorTimelineEvent> = [];
+
+      if (author.id) {
+        ((birthDate = statesData.getBirthDate(author.id)),
+          (deathDate = statesData.getDeathDate(author.id)));
+        timeline = statesData.getAuthorTimeline(author.id, true);
+      }
+
+      setModalState({
+        type: 'editingAuthor',
+        editingAuthor: {
+          author,
+          birthDate,
+          deathDate,
+          timeline,
+        },
+      });
+    },
+    [statesData, setModalState],
+  );
+
   const [filters, setFilters] = useState<AuthorMapFilters>({
     eventType: AuthorEventType.BIRTHS,
     inclusionReasons: {
@@ -180,37 +210,8 @@ export function AuthorMap({
       },
       personal: false,
     },
+    yearRange: statesData.dateRange,
   });
-
-  // TODO: If it's a lot of data, do async? Return a promise?
-  const statesData = useMemo(() => {
-    return new AuthorMapStores(authors, timeline);
-  }, [authors]);
-
-  const onAuthorEdit = useCallback(
-    (author: Partial<Author>) => {
-      let birthDate: BirthEvent | undefined,
-        deathDate: DeathEvent | undefined,
-        timeline: Array<AuthorTimelineEvent> = [];
-
-      if (author.id) {
-        ((birthDate = statesData.getBirthDate(author.id)),
-          (deathDate = statesData.getDeathDate(author.id)));
-        timeline = statesData.getAuthorTimeline(author.id, true);
-      }
-
-      setModalState({
-        type: 'editingAuthor',
-        editingAuthor: {
-          author,
-          birthDate,
-          deathDate,
-          timeline,
-        },
-      });
-    },
-    [statesData, setModalState],
-  );
 
   let viewElement: JSX.Element;
 

@@ -22,19 +22,28 @@ export function AuthorFilterView({
 
   return (
     <div className={clsx('authorFilterView', className)}>
+      <button className="button" onClick={onClick}>
+        <MdFilterList />
+      </button>
+
+      <AuthorFilterTag
+        type="yearRange"
+        yearRange={filters.yearRange}
+        tooltipId={tooltipId}
+        onClick={onClick}
+      />
+
+      <AuthorFilterTag
+        type="inclusionReason"
+        values={filters.inclusionReasons}
+        tooltipId={tooltipId}
+        onClick={onClick}
+      />
+
       {filters.eventType && (
         <AuthorFilterTag
           type="event"
           eventType={filters.eventType}
-          tooltipId={tooltipId}
-          onClick={onClick}
-        />
-      )}
-
-      {filters.inclusionReasons && (
-        <AuthorFilterTag
-          type="inclusionReason"
-          values={filters.inclusionReasons}
           tooltipId={tooltipId}
           onClick={onClick}
         />
@@ -57,10 +66,6 @@ export function AuthorFilterView({
           onClick={onClick}
         />
       )}
-
-      <button className="button" onClick={onClick}>
-        <MdFilterList />
-      </button>
 
       <Tooltip className="authorFilterViewTooltip" id={tooltipId} noArrow />
     </div>

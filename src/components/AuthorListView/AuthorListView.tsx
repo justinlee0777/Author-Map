@@ -7,7 +7,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import { AuthorMapStores, createKeyGenerator } from '../../utils/stores';
+import {
+  AuthorMapStores,
+  AuthorSort,
+  createKeyGenerator,
+} from '../../utils/stores';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
@@ -70,7 +74,7 @@ export function AuthorListView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: { eventType, search, groupId },
+    filters: { eventType, search, groupId, yearRange },
     groups,
   } = useContext(AuthorMapDataContext);
 
@@ -131,6 +135,7 @@ export function AuthorListView({
   let listElements: Array<JSX.Element>;
 
   const filterArg: Parameters<AuthorMapStores['getAll']>[0] = {
+    yearRange,
     eventType,
     search,
     groupId,
@@ -138,8 +143,7 @@ export function AuthorListView({
 
   switch (viewType) {
     case AuthorListViewType.AUTHOR: {
-      /*
-      const sortArg: AuthorSort = {},
+      const sortArg: AuthorSort = {};
 
       switch (sortType) {
         case SortType.NAME:
@@ -152,9 +156,8 @@ export function AuthorListView({
           sortArg.death = true;
           break;
       }
-          */
 
-      const authors = statesData.getAll(filterArg);
+      const authors = statesData.getAll(filterArg, sortArg);
 
       listElements = authors.map((author) => {
         const birthDate = statesData.getBirthDate(author.id),

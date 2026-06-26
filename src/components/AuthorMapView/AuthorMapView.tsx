@@ -111,11 +111,12 @@ export function AuthorMapView({
   const [highlightedCity, setHighlightedCity] =
     useState<Required<AuthorLocation> | null>(null);
 
-  const { eventType, inclusionReasons, search, groupId } = filters;
+  const { eventType, inclusionReasons, search, groupId, yearRange } = filters;
 
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
   const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
+    yearRange,
     eventType,
     inclusionReasons: inclusionReasonFilter,
     search,
