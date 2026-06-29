@@ -1,16 +1,13 @@
 import { JSX, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
-import type {
-  Author,
-  AuthorGroup,
-  AuthorTimelineEvent,
-  TimelineEvent,
-} from '../../models';
+import type { Author, AuthorGroup } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { AuthorMapDataContext } from '../../contexts';
 import { AuthorTimelineEntry } from './AuthorTimelineEntry';
 import infiniteScroll from '../../utils/infinite-scroll';
+import { AuthorMapStores } from '../../utils/stores';
+import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
 
 interface Props {
   groups?: Array<AuthorGroup>;
@@ -24,7 +21,6 @@ interface AppearanceSettings {
 
 /**
  * TODO: Filter by months? Allow a day / month / year filter?
- * TODO: Need to limit the amount of data shown at a time
  */
 export function AuthorTimelineView({
   className,
@@ -32,22 +28,24 @@ export function AuthorTimelineView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: { eventType },
+    filters: { eventType, yearRange, search, groupId, inclusionReasons },
   } = useContext(AuthorMapDataContext);
 
   const [startingYear, endingYear] = statesData.dateRange;
 
   const entriesRef = useRef<HTMLUListElement>(null);
 
-  const timelineEvents = statesData.timelineEvents.filter((event) => {
-    switch (event.type) {
-      case 'Birth':
-      case 'Death':
-        return true;
-      default:
-        return false;
-    }
-  }) as Array<Exclude<AuthorTimelineEvent, TimelineEvent>>;
+  const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
+
+  const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
+    yearRange,
+    eventType,
+    inclusionReasons: inclusionReasonFilter,
+    search,
+    groupId,
+  };
+
+  const timelineEvents = statesData.getTimelineEvents(filterArgs);
 
   const [settings, setSettings] = useState<AppearanceSettings>({
     removeEmptyYears: true,
@@ -57,7 +55,7 @@ export function AuthorTimelineView({
     const map = new Map<number, typeof timelineEvents>();
 
     timelineEvents.forEach((timelineEvent) => {
-      if (!eventType || timelineEvent.type === eventType) {
+      if ('date' in timelineEvent) {
         const year = Number(timelineEvent.date.split('-').at(0)!);
 
         if (map.has(year)) {
@@ -69,7 +67,7 @@ export function AuthorTimelineView({
     });
 
     return map;
-  }, [timelineEvents, eventType]);
+  }, [timelineEvents]);
 
   const eventElements: Array<JSX.Element> = useMemo(() => {
     const temp: Array<JSX.Element> = [];
@@ -93,14 +91,14 @@ export function AuthorTimelineView({
         <AuthorTimelineEntry
           key={year}
           year={year}
-          events={events}
+          events={events as any}
           onAuthorView={onAuthorView}
         />,
       );
     }
 
     return temp;
-  }, [settings, statesData, eventType]);
+  }, [timelineEventsByYear, settings]);
 
   const initialEntriesShown = 10;
 

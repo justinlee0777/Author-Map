@@ -8,26 +8,28 @@ const App = () => {
     type: 'JSON',
   });
 
-  return (
-    <>
-      {loading && <p>Loading...</p>}
-      <AuthorMap
-        className="authorMap"
-        authors={authors}
-        groups={groups}
-        timeline={timeline}
-        cityCoordinates={cityCoordinates}
-        syncAuthorUpdate={async (author) => {
-          console.log('author updated', author);
+  if (loading) {
+    return <p>Loading...</p>;
+  } else {
+    return (
+      <>
+        <AuthorMap
+          className="authorMap"
+          authors={authors}
+          groups={groups}
+          timeline={timeline}
+          cityCoordinates={cityCoordinates}
+          syncAuthorUpdate={async (author) => {
+            console.log('author updated', author);
 
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }}
-        syncAuthorAdded={(author) => {
-          console.log('author added', author);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }}
+          syncAuthorAdded={(author) => {
+            console.log('author added', author);
 
-          author.author.id = Symbol();
-        }}
-        /*
+            author.author.id = Symbol();
+          }}
+          /*
         onGroupCreated={(group) =>
           setGroups((currentGroups) =>
             currentGroups.concat({
@@ -37,8 +39,8 @@ const App = () => {
           )
         }
           */
-        onGroupUpdated={(group) => {
-          /*setGroups((currentGroups) => {
+          onGroupUpdated={(group) => {
+            /*setGroups((currentGroups) => {
             const index = currentGroups.findIndex(
               (currentGroup) => currentGroup.id === group.id,
             );
@@ -50,8 +52,8 @@ const App = () => {
             ];
           });
           */
-        }}
-        /*
+          }}
+          /*
         onTimelineEventCreated={(event) =>
           setTimeline((currentEvents) =>
             currentEvents.concat({
@@ -61,8 +63,8 @@ const App = () => {
           )
         }
           */
-        onTimelineEventUpdated={(event) => {
-          /*
+          onTimelineEventUpdated={(event) => {
+            /*
           setTimeline((currentEvents) => {
             const index = currentEvents.findIndex(
               (currentEvent) => currentEvent.id === event.id,
@@ -75,10 +77,11 @@ const App = () => {
             ];
           });
           */
-        }}
-      />
-    </>
-  );
+          }}
+        />
+      </>
+    );
+  }
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);

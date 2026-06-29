@@ -77,6 +77,7 @@ export function useDemoData(config: Config): {
               milestoneEvents,
               timelineEvents,
               cityCoordinates,
+              majorEvents,
             } = json;
 
             setAuthors(jsonAuthors as any);
@@ -86,11 +87,12 @@ export function useDemoData(config: Config): {
               ...deathEvents,
               ...milestoneEvents,
               ...timelineEvents,
+              ...majorEvents,
             ] as any);
             setCityCoordinates(
               cityCoordinates.filter(
                 (coordinate) => coordinate.location.state !== 'Puerto Rico',
-              ),
+              ) as Array<CityCoordinates>,
             );
 
             setLoading(false);

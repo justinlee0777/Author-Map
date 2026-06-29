@@ -1,5 +1,7 @@
 .authorMapComponentContainer {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   position: relative;
 
@@ -13,7 +15,8 @@
 
 .authorMapContainer {
   box-sizing: border-box;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   width: 100%;
 }
 
@@ -45,21 +48,11 @@
   padding: 1em;
 }
 
-.authorMapFilterSideDrawer {
-  background-color: var(--floating-element-color);
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-  padding: 0.5em;
-  right: 1em;
-  top: 1em;
-  width: 200px;
-}
-
 .authorMapActions {
   align-items: center;
   box-sizing: border-box;
   display: flex;
+  flex: none;
   flex-direction: row;
   justify-content: space-between;
   padding: 1em;

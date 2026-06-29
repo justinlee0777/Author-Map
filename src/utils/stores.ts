@@ -3,7 +3,6 @@ import sortedBy from 'lodash-es/sortBy';
 import {
   Author,
   AuthorEventType,
-  AuthorGroup,
   AuthorMapFilters,
   AuthorTimelineEvent,
   AwardInclusionReason,
@@ -24,10 +23,6 @@ export interface AuthorSort {
   death?: boolean;
 }
 
-export interface AuthorFilter {
-  deceasedOnly?: boolean;
-}
-
 export type InclusionReasonFilter =
   | PoetLaureateReason['type']
   | PersonalReason['type']
@@ -36,6 +31,13 @@ export type InclusionReasonFilter =
       type: ClassicPublisherReason['type'];
       publishers: Array<keyof ClassicPublisherReason['publishers']>;
     };
+
+export interface AuthorStoreFilters
+  extends Omit<AuthorMapFilters, 'inclusionReasons'> {
+  address?: string;
+  inclusionReasons?: Array<InclusionReasonFilter>;
+  state?: USState;
+}
 
 export class AuthorMapStores {
   readonly dateRange: [number, number];
@@ -101,11 +103,7 @@ export class AuthorMapStores {
       search,
       state,
       yearRange,
-    }: Omit<AuthorMapFilters, 'inclusionReasons'> & {
-      address?: string;
-      inclusionReasons?: Array<InclusionReasonFilter>;
-      state?: USState;
-    },
+    }: AuthorStoreFilters,
     sort?: AuthorSort,
   ): Array<Author> {
     let authorIds: Array<Author['id']>;
@@ -150,26 +148,9 @@ export class AuthorMapStores {
     );
 
     if (inclusionReasons) {
-      authors = authors.filter((author) => {
-        return author.inclusionReasons.some((reason) => {
-          return inclusionReasons.some((filterReason) => {
-            if (typeof filterReason === 'string') {
-              return filterReason === reason.type;
-            } else if ('award' in filterReason && reason.type === 'award') {
-              return filterReason.award === reason.award;
-            } else if (
-              'publishers' in filterReason &&
-              reason.type === 'Published as classical literature'
-            ) {
-              return filterReason.publishers.some((publisher) =>
-                Boolean(reason.publishers[publisher]),
-              );
-            } else {
-              return false;
-            }
-          });
-        });
-      });
+      authors = authors.filter((author) =>
+        this.filterAuthorByReason(author, inclusionReasons),
+      );
     }
 
     if (groupId) {
@@ -189,6 +170,90 @@ export class AuthorMapStores {
     }
 
     return authors;
+  }
+
+  getTimelineEvents({
+    eventType,
+    address,
+    inclusionReasons,
+    groupId,
+    search,
+    state,
+    yearRange: [startingYear, endingYear],
+  }: AuthorStoreFilters): Array<AuthorTimelineEvent> {
+    let events = this.allEvents.filter((event) => {
+      if ('date' in event) {
+        const year = new Date(event.date).getFullYear();
+        return startingYear <= year && endingYear >= year;
+      } else {
+        const dateStartYear = new Date(event.startDate).getFullYear(),
+          dateEndYear = new Date(event.endDate).getFullYear();
+
+        return startingYear <= dateStartYear && dateEndYear >= dateEndYear;
+      }
+    });
+
+    if (inclusionReasons) {
+      events = events.filter((event) => {
+        if (event.authorId) {
+          const author = this.getAuthor(event.authorId)!;
+
+          return this.filterAuthorByReason(author, inclusionReasons);
+        } else {
+          return true;
+        }
+      });
+    }
+
+    if (groupId) {
+      events = events.filter((event) => {
+        if (event.authorId) {
+          const author = this.getAuthor(event.authorId)!;
+
+          return author.groups?.includes(groupId);
+        } else {
+          return true;
+        }
+      });
+    }
+
+    if (eventType) {
+      events = events.filter((event) => event.type === eventType);
+    }
+
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+
+      events = events.filter((event) => {
+        if (event.authorId) {
+          const author = this.getAuthor(event.authorId)!;
+
+          return searchRegex.test(getAuthorName(author));
+        } else {
+          return true;
+        }
+      });
+    }
+
+    events = events.filter((event) => {
+      if (state || address) {
+        let value = true;
+
+        if (state) {
+          value = true && state === event.location?.state;
+        }
+
+        if (address) {
+          value = true && address === event.location?.address;
+        }
+
+        return value;
+      } else {
+        return true;
+      }
+    });
+
+    return events;
   }
 
   getAuthor(id: Author['id']): Author {
@@ -324,6 +389,30 @@ export class AuthorMapStores {
     this.removeTimelineEvent(event);
 
     this.addTimelineEvent(event);
+  }
+
+  private filterAuthorByReason(
+    author: Author,
+    inclusionReasons: Array<InclusionReasonFilter>,
+  ): boolean {
+    return author.inclusionReasons.some((reason) => {
+      return inclusionReasons.some((filterReason) => {
+        if (typeof filterReason === 'string') {
+          return filterReason === reason.type;
+        } else if ('award' in filterReason && reason.type === 'award') {
+          return filterReason.award === reason.award;
+        } else if (
+          'publishers' in filterReason &&
+          reason.type === 'Published as classical literature'
+        ) {
+          return filterReason.publishers.some((publisher) =>
+            Boolean(reason.publishers[publisher]),
+          );
+        } else {
+          return false;
+        }
+      });
+    });
   }
 
   private sortAuthorTimelineEvents(authorId: Author['id']): void {

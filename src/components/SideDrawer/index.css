@@ -3,6 +3,7 @@
   border: 1px solid black;
   box-sizing: border-box;
   height: 98%;
+  overflow-y: auto;
   padding: 1em;
   top: 1%;
   width: 33%;
