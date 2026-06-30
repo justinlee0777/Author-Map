@@ -37,10 +37,9 @@ export function formatDate(
 }
 
 export function getStartingDate(event: AuthorTimelineEvent): string {
-  switch (event.type) {
-    case 'Timeline':
-      return event.startDate;
-    default:
-      return event.date;
+  if ('date' in event) {
+    return event.date;
+  } else {
+    return event.startDate;
   }
 }

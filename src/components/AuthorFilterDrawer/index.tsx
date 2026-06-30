@@ -3,10 +3,10 @@ import { JSX, useContext, useMemo } from 'react';
 import { SideDrawer } from '../SideDrawer';
 import { InclusionReasonSelect } from '../InclusionReasonSelect/InclusionReasonSelect';
 import { AuthorMapDataContext } from '../../contexts';
-import { Tabs } from '../Tabs/Tabs';
-import { AuthorEventType, AuthorMapFilters } from '../../models';
+import { AuthorMapFilters, AuthorTimelineEvent } from '../../models';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 import { YearRange } from '../YearRange/YearRange';
+import { Radiogroup } from '../Radiogroup/Radiogroup';
 
 interface Props {
   onFiltersChange: (filters: AuthorMapFilters) => void;
@@ -31,27 +31,30 @@ export function AuthorFilterDrawer({
     [],
   );
 
-  const { inclusionReasons, groupId, eventType, search, yearRange } = filters;
+  const { inclusionReasons, groupId, eventTypes, search, yearRange } = filters;
 
   return (
     <SideDrawer className={className} title="Filters" onClose={onClose}>
-      <Tabs<AuthorEventType>
+      <Radiogroup<AuthorTimelineEvent['type']>
+        id="author-event-type"
         className="authorFilterDrawerEventType"
-        highlightedValue={eventType}
-        values={Object.values(AuthorEventType).map((value) => ({
-          value,
+        header="Events"
+        options={(['Birth', 'Death'] as const).map((value) => ({
           label: value,
+          value,
         }))}
+        selected={filters.eventTypes}
+        type="checkbox"
         onChange={(value) => {
-          if (value) {
+          if (eventTypes.includes(value)) {
             onFiltersChange({
               ...filters,
-              eventType: value,
+              eventTypes: eventTypes.filter((type) => type !== value),
             });
           } else {
             onFiltersChange({
               ...filters,
-              eventType: undefined,
+              eventTypes: eventTypes.concat(value),
             });
           }
         }}

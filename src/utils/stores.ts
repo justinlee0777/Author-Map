@@ -2,7 +2,7 @@ import sortedBy from 'lodash-es/sortBy';
 
 import {
   Author,
-  AuthorEventType,
+  AuthorGroupReason,
   AuthorMapFilters,
   AuthorTimelineEvent,
   AwardInclusionReason,
@@ -26,6 +26,7 @@ export interface AuthorSort {
 export type InclusionReasonFilter =
   | PoetLaureateReason['type']
   | PersonalReason['type']
+  | AuthorGroupReason['type']
   | Pick<AwardInclusionReason, 'type' | 'award'>
   | {
       type: ClassicPublisherReason['type'];
@@ -96,7 +97,7 @@ export class AuthorMapStores {
 
   getAll(
     {
-      eventType,
+      eventTypes,
       address,
       inclusionReasons,
       groupId,
@@ -106,8 +107,6 @@ export class AuthorMapStores {
     }: AuthorStoreFilters,
     sort?: AuthorSort,
   ): Array<Author> {
-    let authorIds: Array<Author['id']>;
-
     function filterEvent(event: BirthEvent | DeathEvent): boolean {
       const dateYear = new Date(event.date).getFullYear();
       let value = yearRange[0] <= dateYear && yearRange[1] >= dateYear;
@@ -123,25 +122,26 @@ export class AuthorMapStores {
       return value;
     }
 
-    switch (eventType) {
-      case AuthorEventType.BIRTHS:
-        authorIds = [...this.birthEventsByAuthor.entries()]
-          .filter(([, birthEvent]) => filterEvent(birthEvent))
-          .map(([authorId]) => authorId);
-        break;
-      case AuthorEventType.DEATHS:
-        authorIds = [...this.deathEventsByAuthor.entries()]
-          .filter(([, deathEvent]) => filterEvent(deathEvent))
-          .map(([authorId]) => authorId);
-        break;
-      default:
-        authorIds = [...this.internalRegistry.values()]
-          .filter((author) =>
-            state ? this.hasAuthorResided(author.id, state, yearRange) : true,
-          )
-          .map((author) => author.id);
-        break;
-    }
+    const uniqueAuthorIds: Set<Author['id']> = new Set();
+
+    eventTypes.forEach((eventType) => {
+      switch (eventType) {
+        case 'Birth':
+          [...this.birthEventsByAuthor.entries()]
+            .filter(([, birthEvent]) => filterEvent(birthEvent))
+            .forEach(([authorId]) => uniqueAuthorIds.add(authorId));
+          break;
+        case 'Death':
+          [...this.deathEventsByAuthor.entries()]
+            .filter(([, deathEvent]) => filterEvent(deathEvent))
+            .forEach(([authorId]) => uniqueAuthorIds.add(authorId));
+          break;
+        default:
+          console.log('Ignoring event type when filtering authors', eventType);
+      }
+    });
+
+    const authorIds = [...uniqueAuthorIds];
 
     let authors = authorIds.map(
       (authorId) => this.internalRegistry.get(authorId)!,
@@ -173,7 +173,7 @@ export class AuthorMapStores {
   }
 
   getTimelineEvents({
-    eventType,
+    eventTypes,
     address,
     inclusionReasons,
     groupId,
@@ -217,8 +217,8 @@ export class AuthorMapStores {
       });
     }
 
-    if (eventType) {
-      events = events.filter((event) => event.type === eventType);
+    if (eventTypes) {
+      events = events.filter((event) => eventTypes.includes(event.type));
     }
 
     if (search) {
@@ -450,17 +450,10 @@ export class AuthorMapStores {
   private getTimelineEventSortingAttribute = (
     event: AuthorTimelineEvent,
   ): Date => {
-    switch (event.type) {
-      case 'Milestone':
-      case 'Birth':
-      case 'Death':
-        return new Date(event.date);
-      case 'Timeline':
-        return new Date(event.startDate);
-      default:
-        throw new Error(
-          `No chosen date attribute for AuthorTimelineEvent. ${JSON.stringify(event, undefined, 2)}`,
-        );
+    if ('date' in event) {
+      return new Date(event.date);
+    } else {
+      return new Date(event.startDate);
     }
   };
 
@@ -520,14 +513,13 @@ export class AuthorMapStores {
 
     return timeline
       .filter((event) => {
-        switch (event.type) {
-          case 'Timeline':
-            const dateStartYear = new Date(event.startDate).getFullYear(),
-              dateEndYear = new Date(event.endDate).getFullYear();
-            return dateStartYear >= yearStart && dateEndYear <= yearEnd;
-          default:
-            const dateYear = new Date(event.date).getFullYear();
-            return yearStart <= dateYear && dateYear <= yearEnd;
+        if ('date' in event) {
+          const dateYear = new Date(event.date).getFullYear();
+          return yearStart <= dateYear && dateYear <= yearEnd;
+        } else {
+          const dateStartYear = new Date(event.startDate).getFullYear(),
+            dateEndYear = new Date(event.endDate).getFullYear();
+          return dateStartYear >= yearStart && dateEndYear <= yearEnd;
         }
       })
       .some((event) => {

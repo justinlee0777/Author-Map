@@ -3,7 +3,6 @@ import clsx from 'clsx';
 
 import {
   AmericanLiteraryAward,
-  AuthorEventType,
   AuthorMapFilters,
   ClassicPublisher,
   type Author,
@@ -183,7 +182,7 @@ export function AuthorMap({
   );
 
   const [filters, setFilters] = useState<AuthorMapFilters>({
-    eventType: AuthorEventType.BIRTHS,
+    eventTypes: ['Birth'],
     inclusionReasons: {
       poetLaureates: true,
       publishers: {

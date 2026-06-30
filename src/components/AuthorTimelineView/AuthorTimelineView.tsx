@@ -17,6 +17,7 @@ interface Props {
 
 interface AppearanceSettings {
   removeEmptyYears?: boolean;
+  includeMajorEvents?: boolean;
 }
 
 /**
@@ -28,7 +29,7 @@ export function AuthorTimelineView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: { eventType, yearRange, search, groupId, inclusionReasons },
+    filters: { eventTypes, yearRange, search, groupId, inclusionReasons },
   } = useContext(AuthorMapDataContext);
 
   const [startingYear, endingYear] = statesData.dateRange;
@@ -37,19 +38,24 @@ export function AuthorTimelineView({
 
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
+  const [settings, setSettings] = useState<AppearanceSettings>({
+    removeEmptyYears: true,
+    includeMajorEvents: false,
+  });
+
   const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
     yearRange,
-    eventType,
+    eventTypes,
     inclusionReasons: inclusionReasonFilter,
     search,
     groupId,
   };
 
-  const timelineEvents = statesData.getTimelineEvents(filterArgs);
+  if (settings.includeMajorEvents) {
+    filterArgs.eventTypes = [...filterArgs.eventTypes, 'Major event'];
+  }
 
-  const [settings, setSettings] = useState<AppearanceSettings>({
-    removeEmptyYears: true,
-  });
+  const timelineEvents = statesData.getTimelineEvents(filterArgs);
 
   const timelineEventsByYear = useMemo(() => {
     const map = new Map<number, typeof timelineEvents>();
@@ -132,6 +138,10 @@ export function AuthorTimelineView({
             {
               label: 'Remove empty years',
               value: 'removeEmptyYears',
+            },
+            {
+              label: 'Show major events',
+              value: 'includeMajorEvents',
             },
           ]}
           selected={Object.entries(settings).reduce(

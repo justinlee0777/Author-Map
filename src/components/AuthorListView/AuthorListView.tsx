@@ -17,7 +17,6 @@ import { Tabs } from '../Tabs/Tabs';
 import clsx from 'clsx';
 import {
   Author,
-  AuthorEventType,
   AuthorGroup,
   AuthorTimelineEvent,
   USState,
@@ -74,7 +73,7 @@ export function AuthorListView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: { eventType, search, groupId, yearRange },
+    filters: { eventTypes, search, groupId, yearRange },
     groups,
   } = useContext(AuthorMapDataContext);
 
@@ -136,7 +135,7 @@ export function AuthorListView({
 
   const filterArg: Parameters<AuthorMapStores['getAll']>[0] = {
     yearRange,
-    eventType,
+    eventTypes,
     search,
     groupId,
   };
@@ -193,20 +192,22 @@ export function AuthorListView({
               {authors.map((author) => {
                 let events: Array<AuthorTimelineEvent> = [];
 
-                switch (eventType) {
-                  case AuthorEventType.BIRTHS:
-                    const birthDate = statesData.getBirthDate(author.id);
+                for (const eventType of eventTypes) {
+                  switch (eventType) {
+                    case 'Birth':
+                      const birthDate = statesData.getBirthDate(author.id);
 
-                    if (birthDate) {
-                      events = [birthDate];
-                    }
-                    break;
-                  case AuthorEventType.DEATHS:
-                    const deathDate = statesData.getDeathDate(author.id);
-                    if (deathDate) {
-                      events = [deathDate];
-                    }
-                    break;
+                      if (birthDate) {
+                        events.push(birthDate);
+                      }
+                      break;
+                    case 'Death':
+                      const deathDate = statesData.getDeathDate(author.id);
+                      if (deathDate) {
+                        events.push(deathDate);
+                      }
+                      break;
+                  }
                 }
 
                 return (

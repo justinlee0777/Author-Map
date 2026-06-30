@@ -137,14 +137,10 @@ export function ViewAuthorModal({
             {events.map((event, i) => {
               let eventElement: ReactNode;
 
-              switch (event.type) {
-                case 'Timeline':
-                  eventElement = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
-                  break;
-                case 'Milestone':
-                default:
-                  eventElement = formatDate(event.date);
-                  break;
+              if ('date' in event) {
+                eventElement = formatDate(event.date);
+              } else {
+                eventElement = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
               }
 
               if (event.notes) {

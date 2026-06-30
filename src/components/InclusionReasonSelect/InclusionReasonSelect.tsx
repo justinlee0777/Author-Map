@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Radiogroup, RadiogroupOption } from '../Radiogroup/Radiogroup';
 import {
   AmericanLiteraryAward,
+  AuthorGroupReason,
   AwardInclusionReason,
   ClassicPublisher,
   ClassicPublisherReason,
@@ -28,6 +29,7 @@ export function InclusionReasonSelect({
     publisherValue: ClassicPublisherReason['type'] =
       'Published as classical literature',
     awardValue: AwardInclusionReason['type'] = 'award',
+    authorGroupValue: AuthorGroupReason['type'] = 'Belongs to a renowned group',
     personalValue: PersonalReason['type'] = 'Because I said so; source: me';
 
   const inclusionReasonOptions: Parameters<typeof Radiogroup>[0]['options'] =
@@ -138,6 +140,17 @@ export function InclusionReasonSelect({
           ),
         }));
 
+      const authorGroupOption: RadiogroupOption<AuthorGroupReason['type']> = {
+        label: 'Belongs in a renowned group',
+        value: authorGroupValue,
+        render: (OptionComponent) => (
+          <OptionComponent
+            key="authorGroup"
+            className="inclusionReasonOption"
+          />
+        ),
+      };
+
       const personalOption: RadiogroupOption<PersonalReason['type']> = {
         label: 'Me',
         value: personalValue,
@@ -152,6 +165,7 @@ export function InclusionReasonSelect({
         ...publisherOptions,
         awardOption,
         ...awardOptions,
+        authorGroupOption,
         personalOption,
       ];
     }, [selected, onSelectedChange]);
@@ -176,6 +190,10 @@ export function InclusionReasonSelect({
   ]
     .filter(([, value]) => value)
     .forEach(([key]) => selectedValues.push(key));
+
+  if (selected.authorGroup) {
+    selectedValues.push(authorGroupValue);
+  }
 
   return (
     <Radiogroup
@@ -216,6 +234,8 @@ export function InclusionReasonSelect({
           const awardValue = value as AmericanLiteraryAward;
           newSelected.awards.specific[awardValue] =
             !newSelected.awards.specific[awardValue];
+        } else if (value === authorGroupValue) {
+          newSelected.authorGroup = !newSelected.authorGroup;
         }
 
         onSelectedChange(newSelected);
@@ -255,6 +275,10 @@ export function convertValuesToFilters(
         .filter(([, value]) => value)
         .map(([key]) => key as ClassicPublisher),
     });
+  }
+
+  if (values.authorGroup) {
+    result.push('Belongs to a renowned group');
   }
 
   return result;

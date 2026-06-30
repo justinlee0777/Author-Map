@@ -1,7 +1,6 @@
 import { createContext } from 'react';
 import {
   AmericanLiteraryAward,
-  AuthorEventType,
   AuthorGroup,
   AuthorMapFilters,
   ClassicPublisher,
@@ -18,7 +17,7 @@ export const AuthorMapDataContext = createContext<AuthorMapDataContextValue>({
   data: new AuthorMapStores([], []),
   groups: [],
   filters: {
-    eventType: AuthorEventType.BIRTHS,
+    eventTypes: ['Birth'],
     inclusionReasons: {
       poetLaureates: true,
       publishers: {

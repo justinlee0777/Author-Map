@@ -40,10 +40,10 @@ export function AuthorFilterView({
         onClick={onClick}
       />
 
-      {filters.eventType && (
+      {filters.eventTypes && (
         <AuthorFilterTag
           type="event"
-          eventType={filters.eventType}
+          eventTypes={filters.eventTypes}
           tooltipId={tooltipId}
           onClick={onClick}
         />

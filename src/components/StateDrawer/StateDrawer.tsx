@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { JSX, ReactNode, useContext, useMemo } from 'react';
 
-import { Author, AuthorEventType, AuthorTimelineEvent } from '../../models';
+import { Author, AuthorTimelineEvent } from '../../models';
 import { createKeyGenerator } from '../../utils/stores';
 import { getAuthorName } from '../../utils/names';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
@@ -12,8 +12,8 @@ import { SideDrawer } from '../SideDrawer';
 interface Props {
   title: string;
   authors: Array<Author>;
+  eventTypes: Array<AuthorTimelineEvent['type']>;
 
-  eventType?: AuthorEventType;
   onClose?: () => void;
   onEdit?: (author: Author) => void;
   onView?: (author: Author) => void;
@@ -23,7 +23,7 @@ interface Props {
 export function StateDrawer({
   title,
   authors,
-  eventType,
+  eventTypes,
   onClose,
   onEdit,
   onView,
@@ -54,17 +54,19 @@ export function StateDrawer({
 
           let events: Array<AuthorTimelineEvent> = [];
 
-          switch (eventType) {
-            case AuthorEventType.BIRTHS:
-              if (birthDate) {
-                events = [birthDate];
-              }
-              break;
-            case AuthorEventType.DEATHS:
-              if (deathDate) {
-                events = [deathDate];
-              }
-              break;
+          for (const eventType of eventTypes) {
+            switch (eventType) {
+              case 'Birth':
+                if (birthDate) {
+                  events.push(birthDate);
+                }
+                break;
+              case 'Death':
+                if (deathDate) {
+                  events.push(deathDate);
+                }
+                break;
+            }
           }
 
           return (

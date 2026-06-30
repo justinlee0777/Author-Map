@@ -1,7 +1,7 @@
 import { JSX, ReactNode, useContext } from 'react';
 import {
-  AuthorEventType,
   AuthorGroup,
+  AuthorTimelineEvent,
   InclusionReasonValues,
 } from '../../models';
 import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import { AuthorMapDataContext } from '../../contexts';
 
 interface EventTypeProps {
-  eventType: AuthorEventType;
+  eventTypes: Array<AuthorTimelineEvent['type']>;
   type: 'event';
 }
 
@@ -55,8 +55,8 @@ export function AuthorFilterTag(props: Props): JSX.Element {
 
   switch (type) {
     case 'event':
-      const { eventType } = props;
-      tagContents = `Event: ${eventType}`;
+      const { eventTypes } = props;
+      tagContents = `Event: ${eventTypes.join(', ')}`;
       break;
     case 'inclusionReason':
       const { values } = props;

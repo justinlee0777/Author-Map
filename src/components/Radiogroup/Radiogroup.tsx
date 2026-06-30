@@ -54,7 +54,7 @@ export function Radiogroup<T extends string>({
           const radioId = `${id}-${value}-option`;
 
           return (
-            <div key={value} className={clsx(className)}>
+            <div key={value} className={clsx('radiogroupOption', className)}>
               <input
                 type={type}
                 id={radioId}

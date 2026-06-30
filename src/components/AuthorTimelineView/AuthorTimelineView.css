@@ -42,7 +42,7 @@
   display: grid;
   flex: 0 0 auto;
   grid-template-columns: min-content min-content 1fr;
-  gap: 0 1em;
+  gap: 0.5em 1em;
   min-height: 100px;
 }
 
@@ -56,7 +56,6 @@
 }
 
 .authorTimelineViewYear {
-  align-self: flex-start;
   position: sticky;
   top: 1em;
   width: 100px;
@@ -64,7 +63,6 @@
 
 .authorTimelineEventDate {
   grid-column: 1;
-  padding-top: 1em;
 }
 
 .authorTimelineEntryBisector {
@@ -78,15 +76,13 @@
   background-color: black;
   border-radius: 50%;
   height: 1em;
-  margin-bottom: 1em;
   width: 1em;
 }
 
 .authorTimelineViewEntryDetails {
-  align-self: flex-start;
   justify-self: start;
   gap: 1em;
-  padding-top: 1em;
+  padding: 1em 0;
 }
 
 .authorTimelineViewEntryDetails > p {

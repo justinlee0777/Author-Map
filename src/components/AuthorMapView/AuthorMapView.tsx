@@ -111,13 +111,13 @@ export function AuthorMapView({
   const [highlightedCity, setHighlightedCity] =
     useState<Required<AuthorLocation> | null>(null);
 
-  const { eventType, inclusionReasons, search, groupId, yearRange } = filters;
+  const { eventTypes, inclusionReasons, search, groupId, yearRange } = filters;
 
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
   const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
     yearRange,
-    eventType,
+    eventTypes,
     inclusionReasons: inclusionReasonFilter,
     search,
     groupId,
@@ -199,7 +199,7 @@ export function AuthorMapView({
         <StateDrawer
           title={title}
           authors={authors}
-          eventType={filters.eventType}
+          eventTypes={filters.eventTypes}
           onClose={() => {
             setHighlightedState(null);
             setHighlightedCity(null);

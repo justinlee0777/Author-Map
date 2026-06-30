@@ -134,11 +134,6 @@ export interface AuthorLocation {
   address?: string;
 }
 
-export enum AuthorEventType {
-  BIRTHS = 'Birth',
-  DEATHS = 'Death',
-}
-
 export interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
   /** Use to properly credit the photo source. */
   attribution?: string;
@@ -187,11 +182,23 @@ export interface MilestoneEvent extends BaseTimelineEvent {
   type: 'Milestone';
 }
 
+export interface MajorTimelineEvent extends BaseTimelineEvent, TimeSpan {}
+
+export interface MajorMilestoneEvent extends BaseTimelineEvent {
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
+  date: string;
+}
+
+export type MajorEvent = (MajorMilestoneEvent | MajorTimelineEvent) & {
+  type: 'Major event';
+};
+
 export type AuthorTimelineEvent =
   | BirthEvent
   | DeathEvent
   | TimelineEvent
-  | MilestoneEvent;
+  | MilestoneEvent
+  | MajorEvent;
 
 /**
  * Does not refer to a group in a physical sense. "Group" is arbitrary and can refer to any possible interesting category.
@@ -215,6 +222,12 @@ export interface PoetLaureateReason {
     startYear: number;
     endYear?: number;
   }>;
+}
+
+export interface AuthorGroupReason {
+  type: 'Belongs to a renowned group';
+  referenceUrl: string;
+  groupId: AuthorGroup['id'];
 }
 
 export enum AmericanLiteraryAward {
@@ -267,7 +280,6 @@ export interface AwardInclusionReason {
 
 export interface PersonalReason {
   type: 'Because I said so; source: me';
-  explanation: string;
 }
 
 /**
@@ -279,7 +291,8 @@ export type AuthorInclusionReason =
   | ClassicPublisherReason
   | AcademicCitationReason
   | AwardInclusionReason
-  | PersonalReason;
+  | PersonalReason
+  | AuthorGroupReason;
 
 export interface Author {
   id: string | Symbol;
@@ -324,6 +337,7 @@ export interface AuthorData {
 export interface InclusionReasonValues {
   poetLaureates: boolean;
   personal: boolean;
+  authorGroup: boolean;
   publishers: {
     collapsed: boolean;
     checked: boolean;
@@ -342,8 +356,8 @@ export interface InclusionReasonValues {
 export interface AuthorMapFilters {
   inclusionReasons: InclusionReasonValues;
   yearRange: [number, number];
+  eventTypes: Array<AuthorTimelineEvent['type']>;
 
-  eventType?: AuthorEventType;
   search?: string;
   groupId?: AuthorGroup['id'];
 }

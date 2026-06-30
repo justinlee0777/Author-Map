@@ -79,7 +79,7 @@ export function AuthorTimelineEntry({
                     </h4>
                   )}
 
-                  <p>{note}</p>
+                  {author ? <p>{note}</p> : <h4>{note}</h4>}
                 </div>
               </Fragment>
             );

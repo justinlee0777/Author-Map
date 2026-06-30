@@ -1,12 +1,7 @@
 import { Fragment, JSX, ReactNode, useMemo } from 'react';
 import clsx from 'clsx';
 
-import {
-  Author,
-  AuthorEventType,
-  AuthorTimelineEvent,
-  MilestoneEvent,
-} from '../../models';
+import { Author, AuthorTimelineEvent, MilestoneEvent } from '../../models';
 import { getAuthorName } from '../../utils/names';
 import { formatDate } from '../../utils/dates';
 
@@ -16,10 +11,8 @@ interface Props {
 
   className?: string;
   children?: ReactNode;
-  eventType?: AuthorEventType;
 }
 
-// Need a view button
 export function AuthorRow({
   author,
   events,
