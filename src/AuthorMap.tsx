@@ -208,6 +208,7 @@ export function AuthorMap({
         },
       },
       personal: false,
+      authorGroup: false,
     },
     yearRange: statesData.dateRange,
   });

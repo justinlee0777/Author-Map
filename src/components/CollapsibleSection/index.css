@@ -1,0 +1,16 @@
+.collapsibleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.collapsibleSectionHeader {
+  align-items: center;
+  border-width: 0 0 1px;
+  display: flex;
+  flex-direction: row;
+}
+
+.collapsibleSectionHeaderIcon {
+  margin-left: auto;
+}

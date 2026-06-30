@@ -16,14 +16,19 @@ import {
 import { InclusionReasonFilter } from '../../utils/stores';
 
 interface Props {
+  id: string;
   selected: InclusionReasonValues;
 
   onSelectedChange: (values: InclusionReasonValues) => void;
+
+  header?: string;
 }
 
 export function InclusionReasonSelect({
+  id,
   selected,
   onSelectedChange,
+  header,
 }: Props): JSX.Element {
   const poetLaureateValue: PoetLaureateReason['type'] = 'Poet Laureate',
     publisherValue: ClassicPublisherReason['type'] =
@@ -197,8 +202,8 @@ export function InclusionReasonSelect({
 
   return (
     <Radiogroup
-      header="Reasons for inclusion"
-      id="inclusion-reason-select"
+      header={header}
+      id={id}
       type="checkbox"
       options={inclusionReasonOptions}
       selected={selectedValues}

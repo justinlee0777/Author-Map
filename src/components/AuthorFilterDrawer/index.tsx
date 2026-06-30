@@ -7,6 +7,7 @@ import { AuthorMapFilters, AuthorTimelineEvent } from '../../models';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 import { YearRange } from '../YearRange/YearRange';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
+import { CollapsibleSection } from '../CollapsibleSection';
 
 interface Props {
   onFiltersChange: (filters: AuthorMapFilters) => void;
@@ -22,8 +23,16 @@ export function AuthorFilterDrawer({
 }: Props): JSX.Element {
   const { data, filters } = useContext(AuthorMapDataContext);
 
-  const [groupsFilterId, searchId, yearRangeId] = useMemo(
+  const [
+    eventTypeId,
+    inclusionFilterId,
+    groupsFilterId,
+    searchId,
+    yearRangeId,
+  ] = useMemo(
     () => [
+      'author-event-type',
+      'author-inclusion-reasons',
       'author-filters-group',
       'author-filters-search',
       'author-filters-year-range',
@@ -35,80 +44,104 @@ export function AuthorFilterDrawer({
 
   return (
     <SideDrawer className={className} title="Filters" onClose={onClose}>
-      <Radiogroup<AuthorTimelineEvent['type']>
-        id="author-event-type"
-        className="authorFilterDrawerEventType"
-        header="Events"
-        options={(['Birth', 'Death'] as const).map((value) => ({
-          label: value,
-          value,
-        }))}
-        selected={filters.eventTypes}
-        type="checkbox"
-        onChange={(value) => {
-          if (eventTypes.includes(value)) {
+      <CollapsibleSection
+        initialOpened
+        header={<label htmlFor={eventTypeId}>Events</label>}
+      >
+        <Radiogroup<AuthorTimelineEvent['type']>
+          id={eventTypeId}
+          className="authorFilterDrawerEventType"
+          options={(['Birth', 'Death'] as const).map((value) => ({
+            label: value,
+            value,
+          }))}
+          selected={filters.eventTypes}
+          type="checkbox"
+          onChange={(value) => {
+            if (eventTypes.includes(value)) {
+              onFiltersChange({
+                ...filters,
+                eventTypes: eventTypes.filter((type) => type !== value),
+              });
+            } else {
+              onFiltersChange({
+                ...filters,
+                eventTypes: eventTypes.concat(value),
+              });
+            }
+          }}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        initialOpened={false}
+        header={
+          <label htmlFor={inclusionFilterId}>Reasons for inclusion</label>
+        }
+      >
+        <InclusionReasonSelect
+          id={inclusionFilterId}
+          selected={inclusionReasons}
+          onSelectedChange={(inclusionReasons) => {
+            onFiltersChange({ ...filters, inclusionReasons });
+          }}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        initialOpened={false}
+        header={<label htmlFor={searchId}>Search</label>}
+      >
+        <input
+          id={searchId}
+          value={search ?? ''}
+          type="text"
+          onChange={(event) => {
+            if (event.target.value) {
+              onFiltersChange({
+                ...filters,
+                search: event.target.value.replaceAll(/[^a-zA-Z\d\s:]/g, ''),
+              });
+            } else {
+              onFiltersChange({ ...filters, search: undefined });
+            }
+          }}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        initialOpened={false}
+        header={<label htmlFor={groupId}>Groups</label>}
+      >
+        <SelectAuthorGroup
+          id={groupsFilterId}
+          value={groupId}
+          onSelect={(value) => {
             onFiltersChange({
               ...filters,
-              eventTypes: eventTypes.filter((type) => type !== value),
+              groupId: value?.id ?? undefined,
             });
-          } else {
+          }}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        initialOpened={false}
+        header={<label htmlFor={yearRangeId}>Year range</label>}
+      >
+        <YearRange
+          id={yearRangeId}
+          startingYear={data.dateRange[0]}
+          endingYear={data.dateRange[1]}
+          value={yearRange}
+          onYearRangeChange={(startingYear, endingYear) => {
             onFiltersChange({
               ...filters,
-              eventTypes: eventTypes.concat(value),
+              yearRange: [startingYear, endingYear],
             });
-          }
-        }}
-      />
-
-      <InclusionReasonSelect
-        selected={inclusionReasons}
-        onSelectedChange={(inclusionReasons) => {
-          onFiltersChange({ ...filters, inclusionReasons });
-        }}
-      />
-
-      <label htmlFor={searchId}>Search</label>
-      <input
-        id={searchId}
-        value={search ?? ''}
-        type="text"
-        onChange={(event) => {
-          if (event.target.value) {
-            onFiltersChange({
-              ...filters,
-              search: event.target.value.replaceAll(/[^a-zA-Z\d\s:]/g, ''),
-            });
-          } else {
-            onFiltersChange({ ...filters, search: undefined });
-          }
-        }}
-      />
-
-      <SelectAuthorGroup
-        id={groupsFilterId}
-        value={groupId}
-        label="Groups"
-        onSelect={(value) => {
-          onFiltersChange({
-            ...filters,
-            groupId: value?.id ?? undefined,
-          });
-        }}
-      />
-
-      <label htmlFor={yearRangeId}>Year range</label>
-      <YearRange
-        id={yearRangeId}
-        startingYear={data.dateRange[0]}
-        endingYear={data.dateRange[1]}
-        value={yearRange}
-        onYearRangeChange={(startingYear, endingYear) => {
-          onFiltersChange({
-            ...filters,
-            yearRange: [startingYear, endingYear],
-          });
-        }}
-      />
+          }}
+        />
+      </CollapsibleSection>
     </SideDrawer>
   );
 }

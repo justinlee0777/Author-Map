@@ -61,9 +61,9 @@ export function AuthorGroupInput({
   } else {
     content = (
       <>
+        <label htmlFor={selectAuthorGroupId}>Pick group</label>
         <SelectAuthorGroup
           id={selectAuthorGroupId}
-          label="Pick group"
           onSelect={(group) => {
             if (
               group &&

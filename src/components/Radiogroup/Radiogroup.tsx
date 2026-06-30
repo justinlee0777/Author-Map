@@ -20,11 +20,11 @@ export interface RadiogroupOption<T extends string> {
 }
 
 interface Props<T extends string> {
-  header: string;
   id: string;
   options: Array<RadiogroupOption<T>>;
   type: 'checkbox' | 'radio';
 
+  header?: string;
   className?: string;
   selected?: T | Array<T>;
   onChange?: (value: T) => void;
@@ -43,7 +43,7 @@ export function Radiogroup<T extends string>({
 
   return (
     <fieldset id={id} className={clsx('radiogroup', className)}>
-      <legend>{header}</legend>
+      {header && <legend>{header}</legend>}
 
       {options.map(({ value, label, render }) => {
         const componentFn: RadiogroupOptionRenderCallback = ({
