@@ -33,12 +33,18 @@ interface YearRangeProps {
   type: 'yearRange';
 }
 
+interface FormulaProps {
+  threshold: number;
+  type: 'formula';
+}
+
 type TagProps =
   | EventTypeProps
   | InclusionReasonProps
   | SearchProps
   | AuthorGroupProps
-  | YearRangeProps;
+  | YearRangeProps
+  | FormulaProps;
 
 type Props = TagProps & {
   tooltipId: string;
@@ -105,6 +111,10 @@ export function AuthorFilterTag(props: Props): JSX.Element {
       const { yearRange } = props;
 
       tagContents = `Year range: ${yearRange.join(' - ')}`;
+      break;
+    case 'formula':
+      const { threshold } = props;
+      tagContents = `Score threshold: ${threshold}`;
       break;
   }
 

@@ -55,5 +55,6 @@
   flex: none;
   flex-direction: row;
   justify-content: space-between;
+  gap: 1em;
   padding: 1em;
 }

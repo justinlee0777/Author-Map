@@ -1,4 +1,5 @@
 import type { ImgHTMLAttributes } from 'react';
+import { AuthorMapFormulaFilter } from './models/formula';
 
 export enum USState {
   ALABAMA = 'Alabama',
@@ -289,7 +290,7 @@ export interface PersonalReason {
 export type AuthorInclusionReason =
   | PoetLaureateReason
   | ClassicPublisherReason
-  | AcademicCitationReason
+  /*| AcademicCitationReason*/ // TODO
   | AwardInclusionReason
   | PersonalReason
   | AuthorGroupReason;
@@ -357,7 +358,10 @@ export interface AuthorMapFilters {
   inclusionReasons: InclusionReasonValues;
   yearRange: [number, number];
   eventTypes: Array<AuthorTimelineEvent['type']>;
+  formula: AuthorMapFormulaFilter;
 
   search?: string;
   groupId?: AuthorGroup['id'];
 }
+
+export * from './models/formula';

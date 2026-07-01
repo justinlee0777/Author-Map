@@ -1,0 +1,50 @@
+.formulaHelp {
+  border: none;
+  margin-left: auto;
+  padding: 0.5em;
+}
+
+.formulaHelpModal {
+  background-color: white;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  left: 50%;
+  line-height: 1.5;
+  max-height: 400px;
+  max-width: 600px;
+  overflow-y: auto;
+  padding: 1em;
+  position: absolute;
+  text-indent: 1.5em;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.formula {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8em;
+  gap: 0.5em;
+}
+
+.formulaRow {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+
+  & > label {
+    margin-right: auto;
+    text-transform: capitalize;
+  }
+
+  &:last-of-type {
+    border-top: 1px dashed black;
+    padding-top: 0.5em;
+  }
+}
+
+.formulaRowThreshold,
+.formulaRowScale {
+  width: 2em;
+}

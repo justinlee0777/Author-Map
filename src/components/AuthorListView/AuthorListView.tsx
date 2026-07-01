@@ -73,7 +73,7 @@ export function AuthorListView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: { eventTypes, search, groupId, yearRange },
+    filters: { eventTypes, search, groupId, yearRange, formula },
     groups,
   } = useContext(AuthorMapDataContext);
 
@@ -138,6 +138,7 @@ export function AuthorListView({
     eventTypes,
     search,
     groupId,
+    formula,
   };
 
   switch (viewType) {

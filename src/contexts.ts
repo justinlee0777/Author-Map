@@ -43,6 +43,29 @@ export const AuthorMapDataContext = createContext<AuthorMapDataContextValue>({
         },
       },
       personal: false,
+      authorGroup: false,
+    },
+    formula: {
+      equation: {
+        'Because I said so; source: me': {
+          type: 'scale',
+          value: 0,
+        },
+        'Belongs to a renowned group': {
+          type: 'tanh',
+        },
+        'Poet Laureate': {
+          type: 'scale',
+          value: 2,
+        },
+        award: {
+          type: 'tanh',
+        },
+        'Published as classical literature': {
+          type: 'tanh',
+        },
+      },
+      threshold: 0,
     },
     yearRange: [-Infinity, Infinity],
   },

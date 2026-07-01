@@ -5,7 +5,6 @@ import { RegisterAuthorGroup } from '../RegisterAuthorGroup/RegisterAuthorGroup'
 import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
-  appElement: HTMLElement;
   opened: boolean;
 
   initialAuthorGroup: Partial<AuthorGroup>;
@@ -16,7 +15,6 @@ interface Props {
 }
 
 export function EditAuthorGroupModal({
-  appElement,
   opened,
   initialAuthorGroup,
   disabled,
@@ -28,7 +26,7 @@ export function EditAuthorGroupModal({
   const [authorGroup, setAuthorGroup] = useState(initialAuthorGroup);
 
   return (
-    <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
+    <CommonModal opened={opened} onClose={onClose}>
       <div className="editAuthorGroupModal">
         <RegisterAuthorGroup
           id="create-author-group"

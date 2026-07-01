@@ -4,21 +4,15 @@ import { MdClear } from 'react-icons/md';
 import Modal from 'react-modal';
 
 interface Props {
-  appElement: HTMLElement;
   children: ReactNode;
   opened: boolean;
 
   onClose?: () => void;
 }
 
-export function CommonModal({
-  appElement,
-  children,
-  opened,
-  onClose,
-}: Props): JSX.Element {
+export function CommonModal({ children, opened, onClose }: Props): JSX.Element {
   return (
-    <Modal className="modal" isOpen={opened} appElement={appElement}>
+    <Modal className="modal" isOpen={opened}>
       <button
         className={clsx('button', 'closeModal')}
         type="button"

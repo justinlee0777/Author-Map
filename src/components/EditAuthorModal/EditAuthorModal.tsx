@@ -13,14 +13,12 @@ import {
   DeathEvent,
 } from '../../models';
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
-import { MdClear } from 'react-icons/md';
 import { TimelineEvent as TimelineEventComponent } from './TimelineEvent/TimelineEvent';
 import { AuthorGroupInput } from '../AuthorGroupInput/AuthorGroupInput';
 import { Tooltip } from 'react-tooltip';
 import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
-  appElement: HTMLElement;
   opened: boolean;
   initialData: RecursivePartial<AuthorData>;
 
@@ -34,7 +32,6 @@ interface TimelineEventProps
   extends ItemProps<RecursivePartial<AuthorTimelineEvent>> {}
 
 export function EditAuthorModal({
-  appElement,
   opened,
   disabled,
   onSubmit,
@@ -196,7 +193,7 @@ export function EditAuthorModal({
   }, []);
 
   return (
-    <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
+    <CommonModal opened={opened} onClose={onClose}>
       <Formik<RecursivePartial<AuthorData>>
         initialValues={initialData}
         onSubmit={async (finalData) => {

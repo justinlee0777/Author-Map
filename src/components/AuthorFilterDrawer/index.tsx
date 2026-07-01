@@ -8,6 +8,7 @@ import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 import { YearRange } from '../YearRange/YearRange';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { CollapsibleSection } from '../CollapsibleSection';
+import { Formula } from '../Formula';
 
 interface Props {
   onFiltersChange: (filters: AuthorMapFilters) => void;
@@ -85,6 +86,13 @@ export function AuthorFilterDrawer({
           onSelectedChange={(inclusionReasons) => {
             onFiltersChange({ ...filters, inclusionReasons });
           }}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection initialOpened={false} header={<label>Formula</label>}>
+        <Formula
+          value={filters.formula}
+          onChange={(formula) => onFiltersChange({ ...filters, formula })}
         />
       </CollapsibleSection>
 

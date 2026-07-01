@@ -10,7 +10,6 @@ import { Tooltip } from 'react-tooltip';
 import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
-  appElement: HTMLElement;
   opened: boolean;
 
   disabled?: boolean | string;
@@ -20,7 +19,6 @@ interface Props {
 }
 
 export function EditMajorEventModal({
-  appElement,
   opened,
   disabled,
   onSubmit,
@@ -35,7 +33,7 @@ export function EditMajorEventModal({
   );
 
   return (
-    <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
+    <CommonModal opened={opened} onClose={onClose}>
       <Formik<Partial<MilestoneEvent>>
         initialValues={initialEvent}
         onSubmit={async (finalEvent) => {

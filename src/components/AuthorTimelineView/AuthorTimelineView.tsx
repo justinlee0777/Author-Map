@@ -29,7 +29,14 @@ export function AuthorTimelineView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: { eventTypes, yearRange, search, groupId, inclusionReasons },
+    filters: {
+      eventTypes,
+      yearRange,
+      search,
+      groupId,
+      inclusionReasons,
+      formula,
+    },
   } = useContext(AuthorMapDataContext);
 
   const [startingYear, endingYear] = statesData.dateRange;
@@ -49,6 +56,7 @@ export function AuthorTimelineView({
     inclusionReasons: inclusionReasonFilter,
     search,
     groupId,
+    formula,
   };
 
   if (settings.includeMajorEvents) {

@@ -7,7 +7,6 @@ import { AuthorMapDataContext } from '../../contexts';
 import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
-  appElement: HTMLElement;
   opened: boolean;
   author: Author;
 
@@ -15,7 +14,6 @@ interface Props {
 }
 
 export function ViewAuthorModal({
-  appElement,
   opened,
   onClose,
   author,
@@ -40,7 +38,7 @@ export function ViewAuthorModal({
     deathDate = data.getDeathDate(author.id);
 
   return (
-    <CommonModal opened={opened} appElement={appElement} onClose={onClose}>
+    <CommonModal opened={opened} onClose={onClose}>
       <div className="viewAuthorModal">
         <div className="viewAuthorPortraitContainer">
           {author.portrait?.src && (
@@ -70,7 +68,7 @@ export function ViewAuthorModal({
         )}
 
         <h4>Reasons for inclusion</h4>
-        {author.inclusionReasons.map((inclusionReason) => {
+        {author.inclusionReasons.map((inclusionReason, i) => {
           switch (inclusionReason.type) {
             case 'Poet Laureate':
               return (
@@ -110,7 +108,9 @@ export function ViewAuthorModal({
               );
             case 'award':
               return (
-                <p key={`${inclusionReason.type}-${inclusionReason.award}`}>
+                <p
+                  key={`${inclusionReason.type}-${inclusionReason.award}-${i}`}
+                >
                   Awarded{' '}
                   <a href={inclusionReason.referenceUrl}>
                     {inclusionReason.award}

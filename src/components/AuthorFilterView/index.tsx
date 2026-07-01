@@ -40,6 +40,13 @@ export function AuthorFilterView({
         onClick={onClick}
       />
 
+      <AuthorFilterTag
+        type="formula"
+        threshold={filters.formula.threshold}
+        tooltipId={tooltipId}
+        onClick={onClick}
+      />
+
       {filters.eventTypes && (
         <AuthorFilterTag
           type="event"

@@ -111,7 +111,8 @@ export function AuthorMapView({
   const [highlightedCity, setHighlightedCity] =
     useState<Required<AuthorLocation> | null>(null);
 
-  const { eventTypes, inclusionReasons, search, groupId, yearRange } = filters;
+  const { eventTypes, inclusionReasons, search, groupId, yearRange, formula } =
+    filters;
 
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
@@ -121,6 +122,7 @@ export function AuthorMapView({
     inclusionReasons: inclusionReasonFilter,
     search,
     groupId,
+    formula,
   };
 
   const renderedCityCoordinates: Array<

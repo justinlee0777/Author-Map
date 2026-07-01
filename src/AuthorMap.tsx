@@ -1,5 +1,6 @@
-import { useMemo, useRef, useState, JSX, useCallback } from 'react';
+import { useMemo, useRef, useState, JSX, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
+import Modal from 'react-modal';
 
 import {
   AmericanLiteraryAward,
@@ -151,6 +152,12 @@ export function AuthorMap({
 
   const [modalState, setModalState] = useState<ModalState | null>(null);
 
+  useEffect(() => {
+    if (componentRef.current) {
+      Modal.setAppElement(componentRef.current);
+    }
+  }, [componentRef]);
+
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => {
     return new AuthorMapStores(authors, timeline);
@@ -209,6 +216,28 @@ export function AuthorMap({
       },
       personal: false,
       authorGroup: false,
+    },
+    formula: {
+      equation: {
+        'Because I said so; source: me': {
+          type: 'scale',
+          value: 0,
+        },
+        'Belongs to a renowned group': {
+          type: 'tanh',
+        },
+        'Poet Laureate': {
+          type: 'scale',
+          value: 2,
+        },
+        award: {
+          type: 'tanh',
+        },
+        'Published as classical literature': {
+          type: 'tanh',
+        },
+      },
+      threshold: 0,
     },
     yearRange: statesData.dateRange,
   });
@@ -351,7 +380,6 @@ export function AuthorMap({
 
         {modalState?.type === 'editingAuthor' && (
           <EditAuthorModal
-            appElement={componentRef.current!}
             opened
             initialData={modalState.editingAuthor}
             disabled={loading || disabled}
@@ -413,7 +441,6 @@ export function AuthorMap({
 
         {modalState?.type === 'editingGroup' && (
           <EditAuthorGroupModal
-            appElement={componentRef.current!}
             opened
             initialAuthorGroup={modalState.editingGroup}
             disabled={loading || disabled}
@@ -456,7 +483,6 @@ export function AuthorMap({
 
         {modalState?.type === 'editingMajorEvent' && (
           <EditMajorEventModal
-            appElement={componentRef.current!}
             opened
             initialEvent={modalState.editingMajorEvent}
             disabled={loading || disabled}
@@ -499,7 +525,6 @@ export function AuthorMap({
 
         {modalState?.type === 'viewingAuthor' && (
           <ViewAuthorModal
-            appElement={componentRef.current!}
             opened
             author={modalState.viewingAuthor}
             onClose={() => setModalState(null)}

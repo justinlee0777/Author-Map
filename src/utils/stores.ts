@@ -16,6 +16,7 @@ import {
 import { getAuthorName } from './names';
 import { getStartingDate } from './dates';
 import { sortMap } from './sort';
+import { calculateScore } from './formula';
 
 export interface AuthorSort {
   name?: boolean;
@@ -104,6 +105,7 @@ export class AuthorMapStores {
       search,
       state,
       yearRange,
+      formula,
     }: AuthorStoreFilters,
     sort?: AuthorSort,
   ): Array<Author> {
@@ -168,6 +170,12 @@ export class AuthorMapStores {
     if (sort) {
       authors = this.sortAuthors(authors, sort);
     }
+
+    authors = authors.filter((author) => {
+      const score = calculateScore(author.inclusionReasons, formula.equation);
+
+      return score > formula.threshold;
+    });
 
     return authors;
   }
