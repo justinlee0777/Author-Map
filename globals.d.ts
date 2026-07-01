@@ -1,4 +1,5 @@
 declare module '*.module.css';
+declare module 'mathjs/lib/esm/number';
 
 type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
