@@ -1,15 +1,9 @@
-import { Fragment, JSX, useMemo, useState } from 'react';
+import { JSX, useMemo, useState } from 'react';
 import { MdHelpOutline } from 'react-icons/md';
 import Modal from 'react-modal';
-import snakeCase from 'lodash-es/snakeCase';
 
-import {
-  AuthorInclusionReason,
-  AuthorMapFormulaEquation,
-  AuthorMapFormulaFilter,
-  ScaleTransform,
-  ValueTransform,
-} from '../../models';
+import { AuthorMapFormulaFilter } from '../../models';
+import { evaluateFormula, mathDocumentation } from '../../utils/formula';
 
 interface Props {
   value: AuthorMapFormulaFilter;
@@ -21,90 +15,10 @@ export function Formula({ value, onChange }: Props): JSX.Element {
   const { equation, threshold } = value;
   const [helpOpened, setHelpOpened] = useState(false);
 
-  const [thresholdId] = useMemo(() => ['author-formula-threshold'], []);
-
-  const transformTypes: Array<{
-    value: ValueTransform['type'];
-    label: string;
-  }> = [
-    { value: 'scale', label: 'Scale' },
-    { value: 'identity', label: 'None' },
-    { value: 'tanh', label: 'Tanh' },
-  ];
-
-  const inputRows = Object.entries(equation).map(([reasonType, transform]) => {
-    switch (reasonType as AuthorInclusionReason['type']) {
-      case 'Because I said so; source: me':
-        // skip
-        return <Fragment key={reasonType} />;
-      default:
-        const inputId = `formula-${snakeCase(reasonType)}`;
-
-        return (
-          <div className="formulaRow" key={reasonType}>
-            <label htmlFor={inputId}>{reasonType}</label>
-
-            <select
-              id={`${inputId}-select`}
-              value={transform.type}
-              onChange={(event) => {
-                const newValue = structuredClone(value);
-
-                const transformType = event.target
-                  .value as ValueTransform['type'];
-
-                let transform: ValueTransform;
-
-                if (transformType === 'scale') {
-                  transform = {
-                    type: 'scale',
-                    value: 1,
-                  };
-                } else {
-                  transform = { type: transformType };
-                }
-
-                newValue.equation[reasonType as AuthorInclusionReason['type']] =
-                  transform;
-
-                onChange(newValue);
-              }}
-            >
-              {transformTypes.map(({ value, label }) => {
-                return (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                );
-              })}
-            </select>
-
-            {transform.type === 'scale' && (
-              <input
-                id={`${inputId}-scale`}
-                className="formulaRowScale"
-                value={transform.value}
-                onChange={(event) => {
-                  const scaleValue = Number(event.target.value);
-
-                  if (scaleValue) {
-                    const newValue = structuredClone(value);
-
-                    (
-                      newValue.equation[
-                        reasonType as AuthorInclusionReason['type']
-                      ] as ScaleTransform
-                    ).value = scaleValue;
-
-                    onChange(newValue);
-                  }
-                }}
-              />
-            )}
-          </div>
-        );
-    }
-  });
+  const [equationId, thresholdId] = useMemo(
+    () => ['author-formula-equation', 'author-formula-threshold'],
+    [],
+  );
 
   return (
     <div className="formula">
@@ -115,7 +29,25 @@ export function Formula({ value, onChange }: Props): JSX.Element {
         <MdHelpOutline />
       </button>
 
-      {inputRows}
+      <div className="formulaRow">
+        <label htmlFor={equationId}>Equation</label>
+        <textarea
+          id={equationId}
+          value={equation}
+          onChange={(event) => {
+            onChange({
+              ...value,
+              equation: event.target.value,
+            });
+          }}
+        />
+      </div>
+
+      {!evaluateFormula(equation) && (
+        <p className="formulaInvalidMessage">
+          Formula invalid. See help for rules.
+        </p>
+      )}
 
       <div className="formulaRow">
         <label htmlFor={thresholdId}>Threshold</label>
@@ -123,11 +55,11 @@ export function Formula({ value, onChange }: Props): JSX.Element {
           id={thresholdId}
           className="formulaRowThreshold"
           type="number"
-          value={value.threshold}
+          value={threshold}
           onChange={(event) => {
             const thresholdValue = Number(event.target.value);
 
-            if (thresholdValue) {
+            if (!isNaN(thresholdValue)) {
               onChange({
                 ...value,
                 threshold: thresholdValue,
@@ -160,17 +92,9 @@ export function Formula({ value, onChange }: Props): JSX.Element {
         </p>
         <p>
           There are innumerable ways to make a calculation, so forgive me if a
-          method is lacking. I am currently not working with a math parser for
-          performance concerns.
-        </p>
-        <p>
-          Scaling transforms are simple; "this value is twice as important as
-          the other values."
-        </p>
-        <p>
-          Tanh transforms are most useful for non-unique values i.e. appearing
-          multiple times in a publisher's catalog. Tanh essentially caps the
-          ultimate value to 1.
+          method is lacking. I am working with a math parser, but I have limited
+          it to basic arithmetic and trigonometric functions (sin, cos, tan,
+          sinh, etc).
         </p>
         <p>
           For context, each entry in a catalog and award count as 1, so the
@@ -191,6 +115,10 @@ export function Formula({ value, onChange }: Props): JSX.Element {
           struck as "0". If ever they appear under some criteria, they will be
           stripped of this "Me" category and will thenceforth be calculated
           correctly.
+        </p>
+        <p>
+          Reference:
+          <code>{mathDocumentation}</code>
         </p>
       </Modal>
     </div>

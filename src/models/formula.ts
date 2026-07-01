@@ -1,23 +1,5 @@
-import { AuthorInclusionReason } from '../models';
-
-export interface IdentityTransform {
-  type: 'identity';
-}
-
-export interface ScaleTransform {
-  type: 'scale';
-  value: number;
-}
-
-export interface TanhTransform {
-  type: 'tanh';
-}
-
-export type ValueTransform = ScaleTransform | TanhTransform | IdentityTransform;
-
-export type AuthorMapFormulaEquation = {
-  [key in AuthorInclusionReason['type']]: ValueTransform;
-};
+/** A Math.js compatible expression string; @see src/consts/math.const.ts for valid operations. */
+export type AuthorMapFormulaEquation = string;
 
 export interface AuthorMapFormulaFilter {
   equation: AuthorMapFormulaEquation;

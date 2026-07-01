@@ -171,11 +171,22 @@ export class AuthorMapStores {
       authors = this.sortAuthors(authors, sort);
     }
 
-    authors = authors.filter((author) => {
-      const score = calculateScore(author.inclusionReasons, formula.equation);
+    try {
+      let scoredAuthors = [];
 
-      return score > formula.threshold;
-    });
+      for (const author of authors) {
+        const score = calculateScore(author.inclusionReasons, formula.equation);
+
+        if (score === null) {
+          // This means the formula is invalid.
+          throw new Error('Formula is invalid. Skipping the filter by score.');
+        } else if (score >= formula.threshold) {
+          scoredAuthors.push(author);
+        }
+      }
+
+      authors = scoredAuthors;
+    } catch {}
 
     return authors;
   }

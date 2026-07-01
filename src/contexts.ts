@@ -6,6 +6,7 @@ import {
   ClassicPublisher,
 } from './models';
 import { AuthorMapStores } from './utils/stores';
+import { defaultFormula } from './consts/formula.const';
 
 interface AuthorMapDataContextValue {
   data: AuthorMapStores;
@@ -46,25 +47,7 @@ export const AuthorMapDataContext = createContext<AuthorMapDataContextValue>({
       authorGroup: false,
     },
     formula: {
-      equation: {
-        'Because I said so; source: me': {
-          type: 'scale',
-          value: 0,
-        },
-        'Belongs to a renowned group': {
-          type: 'tanh',
-        },
-        'Poet Laureate': {
-          type: 'scale',
-          value: 2,
-        },
-        award: {
-          type: 'tanh',
-        },
-        'Published as classical literature': {
-          type: 'tanh',
-        },
-      },
+      equation: defaultFormula,
       threshold: 0,
     },
     yearRange: [-Infinity, Infinity],

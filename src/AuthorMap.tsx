@@ -30,6 +30,7 @@ import { EditMajorEventModal } from './components/EditMajorEventModal/EditMajorE
 import { ViewAuthorModal } from './components/ViewAuthorModal/ViewAuthorModal';
 import { AuthorFilterView } from './components/AuthorFilterView';
 import { AuthorFilterDrawer } from './components/AuthorFilterDrawer';
+import { defaultFormula } from './consts/formula.const';
 
 interface Props {
   authors: Array<Author>;
@@ -218,25 +219,7 @@ export function AuthorMap({
       authorGroup: false,
     },
     formula: {
-      equation: {
-        'Because I said so; source: me': {
-          type: 'scale',
-          value: 0,
-        },
-        'Belongs to a renowned group': {
-          type: 'tanh',
-        },
-        'Poet Laureate': {
-          type: 'scale',
-          value: 2,
-        },
-        award: {
-          type: 'tanh',
-        },
-        'Published as classical literature': {
-          type: 'tanh',
-        },
-      },
+      equation: defaultFormula,
       threshold: 0,
     },
     yearRange: statesData.dateRange,

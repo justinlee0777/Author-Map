@@ -5,6 +5,7 @@ import { formatDate } from '../../utils/dates';
 import { getAddress } from '../../utils/address';
 import { AuthorMapDataContext } from '../../contexts';
 import { CommonModal } from '../CommonModal/CommonModal';
+import { calculateScore } from '../../utils/formula';
 
 interface Props {
   opened: boolean;
@@ -18,7 +19,7 @@ export function ViewAuthorModal({
   onClose,
   author,
 }: Props): JSX.Element {
-  const { data } = useContext(AuthorMapDataContext);
+  const { data, filters } = useContext(AuthorMapDataContext);
 
   const { groups } = useContext(AuthorMapDataContext);
 
@@ -36,6 +37,11 @@ export function ViewAuthorModal({
 
   const birthDate = data.getBirthDate(author.id),
     deathDate = data.getDeathDate(author.id);
+
+  const score = calculateScore(
+    author.inclusionReasons,
+    filters.formula.equation,
+  );
 
   return (
     <CommonModal opened={opened} onClose={onClose}>
@@ -77,7 +83,7 @@ export function ViewAuthorModal({
                   {inclusionReason.dates
                     .map(
                       ({ startYear, endYear }) =>
-                        `${startYear}${endYear && ` - ${endYear}`}`,
+                        `${startYear}${endYear ? ` - ${endYear}` : ''}`,
                     )
                     .join(', ')}
                 </p>
@@ -196,6 +202,13 @@ export function ViewAuthorModal({
                 </Fragment>
               );
             })}
+          </>
+        )}
+
+        {score && (
+          <>
+            <h4>Calculation</h4>
+            {score.toFixed(2)}
           </>
         )}
       </div>
