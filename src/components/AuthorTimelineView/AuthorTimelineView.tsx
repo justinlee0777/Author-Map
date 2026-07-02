@@ -1,13 +1,14 @@
 import { JSX, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
-import type { Author, AuthorGroup } from '../../models';
+import type { Author, AuthorGroup, AuthorTimelineEvent } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { AuthorMapDataContext } from '../../contexts';
 import { AuthorTimelineEntry } from './AuthorTimelineEntry';
 import infiniteScroll from '../../utils/infinite-scroll';
 import { AuthorMapStores } from '../../utils/stores';
 import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
+import { sortMap } from '../../utils/sort';
 
 interface Props {
   groups?: Array<AuthorGroup>;
@@ -66,21 +67,52 @@ export function AuthorTimelineView({
   const timelineEvents = statesData.getTimelineEvents(filterArgs);
 
   const timelineEventsByYear = useMemo(() => {
-    const map = new Map<number, typeof timelineEvents>();
+    const map = new Map();
 
     timelineEvents.forEach((timelineEvent) => {
+      const appendedEvents = [];
+
       if ('date' in timelineEvent) {
-        const year = Number(timelineEvent.date.split('-').at(0)!);
+        appendedEvents.push(timelineEvent);
+      } else if (timelineEvent.type !== 'Timeline') {
+        // TODO: I'm honestly not sure what to do with the 'Timeline' type.
+        const { startDate, endDate, notes, ...remainingEvent } = timelineEvent;
+
+        appendedEvents.push(
+          {
+            ...remainingEvent,
+            date: startDate,
+            notes: `(Start) ${notes}`,
+          },
+          {
+            ...remainingEvent,
+            date: endDate,
+            notes: `(End) ${notes}`,
+          },
+        );
+      }
+
+      appendedEvents.forEach((event) => {
+        const year = Number(event.date.split('-').at(0)!);
 
         if (map.has(year)) {
-          map.get(year)!.push(timelineEvent);
+          const existingEvents = map.get(year)!;
+          map.set(
+            year,
+            existingEvents
+              .concat(event)
+              .sort(
+                (a, b) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime(),
+              ),
+          );
         } else {
-          map.set(year, [timelineEvent]);
+          map.set(year, [event]);
         }
-      }
+      });
     });
 
-    return map;
+    return sortMap(map, ([year]) => year);
   }, [timelineEvents]);
 
   const eventElements: Array<JSX.Element> = useMemo(() => {
@@ -120,17 +152,17 @@ export function AuthorTimelineView({
 
   useEffect(() => {
     if (entriesRef.current) {
-      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () =>
+      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () => {
         setEntriesShown(
           Math.min(entriesShown + initialEntriesShown, eventElements.length),
-        ),
-      );
+        );
+      });
 
       return () => {
         destroyInfiniteScroll();
       };
     }
-  }, [entriesRef.current, entriesShown]);
+  }, [entriesRef.current, setEntriesShown, entriesShown, eventElements.length]);
 
   return (
     <div className={clsx('authorTimelineView', className)}>

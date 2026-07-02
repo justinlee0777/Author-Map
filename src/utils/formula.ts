@@ -99,9 +99,11 @@ export function calculateScore(
   }
 
   try {
-    return math.evaluate(
-      formula,
-      createMathContext(reasonCounts, awardCounts, catalogCounts),
+    return Math.round(
+      math.evaluate(
+        formula,
+        createMathContext(reasonCounts, awardCounts, catalogCounts),
+      ) as number,
     );
   } catch {
     return null;

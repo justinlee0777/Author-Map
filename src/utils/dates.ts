@@ -30,7 +30,7 @@ export function formatDate(
       return `${getMonthName(month)} ${Number(day)}, ${year}`;
     }
   } else if (month) {
-    return `${getMonthName(date)}, ${year}`;
+    return `${getMonthName(month)}, ${year}`;
   } else {
     return year;
   }
