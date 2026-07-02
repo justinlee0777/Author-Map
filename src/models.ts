@@ -1,5 +1,4 @@
 import type { ImgHTMLAttributes } from 'react';
-import { AuthorMapFormulaFilter } from './models/formula';
 
 export enum USState {
   ALABAMA = 'Alabama',
@@ -364,4 +363,66 @@ export interface AuthorMapFilters {
   groupId?: AuthorGroup['id'];
 }
 
-export * from './models/formula';
+export interface AuthorMapProps {
+  authors: Array<Author>;
+
+  /**
+   * Whether the client should be disabled from adding and editing authors / groups etc.
+   * If a string is provided, this is the error message shown to user explaining why they cannot take any actions.
+   */
+  disabled?: boolean | string;
+
+  groups?: Array<AuthorGroup>;
+
+  timeline?: Array<AuthorTimelineEvent>;
+
+  cityCoordinates?: Array<CityCoordinates>;
+
+  /**
+   * Use if you want to show a state's entry into the union, if you want to have a sense of time for the author.
+   * The value is a valid ISO datestring.
+   */
+  entriesIntoUnion?: {
+    [state in USState]: string;
+  };
+
+  /**
+   * Use if you want to show the state's most recent population count. Useful if you want to ask questions concerning population.
+   * Though population count over time would be useful, not supported ATM.
+   */
+  stateCensus?: {
+    [state in USState]: {
+      count: number;
+      /** ISO datestring. */
+      dateRecorded: string;
+    };
+  };
+
+  className?: string;
+  /**
+   * Used to update an external dataset.
+   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
+   * TODO: How should IDs be handled?
+   */
+  syncAuthorAdded?: (author: AuthorData) => void | Promise<void>;
+  /**
+   * Used to update an external dataset.
+   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
+   */
+  syncAuthorUpdate?: (changedAuthor: AuthorData) => void | Promise<void>;
+
+  onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
+
+  onGroupUpdated?: (authorGroup: AuthorGroup) => void | Promise<void>;
+
+  onTimelineEventCreated?: (event: AuthorTimelineEvent) => void | Promise<void>;
+
+  onTimelineEventUpdated?: (event: AuthorTimelineEvent) => void | Promise<void>;
+}
+
+export type AuthorMapFormulaEquation = string;
+
+export interface AuthorMapFormulaFilter {
+  equation: AuthorMapFormulaEquation;
+  threshold: number;
+}

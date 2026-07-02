@@ -4,7 +4,15 @@ import { AuthorMap } from './src/AuthorMap';
 import { useDemoData } from './useDemoData';
 
 const App = () => {
-  const { loading, authors, groups, timeline, cityCoordinates } = useDemoData({
+  const {
+    loading,
+    authors,
+    groups,
+    timeline,
+    cityCoordinates,
+    entriesIntoUnion,
+    stateCensus,
+  } = useDemoData({
     type: 'JSON',
   });
 
@@ -19,6 +27,8 @@ const App = () => {
           groups={groups}
           timeline={timeline}
           cityCoordinates={cityCoordinates}
+          entriesIntoUnion={entriesIntoUnion}
+          stateCensus={stateCensus}
           syncAuthorUpdate={async (author) => {
             console.log('author updated', author);
 

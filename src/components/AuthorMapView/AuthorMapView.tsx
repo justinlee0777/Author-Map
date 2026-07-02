@@ -48,9 +48,17 @@ export function AuthorMapView({
   onAuthorEdit,
   onAuthorView,
 }: Props): JSX.Element {
-  const { data: statesData, filters } = useContext(AuthorMapDataContext);
+  const {
+    data: statesData,
+    filters,
+    stateCensus,
+    entriesIntoUnion,
+  } = useContext(AuthorMapDataContext);
 
-  const tooltipId = useMemo(() => 'state-labels-tooltip', []);
+  const [stateTooltipId, cityTooltipId] = useMemo(
+    () => ['state-labels-tooltip', 'city-labels-tooltip'],
+    [],
+  );
 
   const STATE_COLORS = useMemo(
     () => [
@@ -142,7 +150,7 @@ export function AuthorMapView({
             <Marker
               key={toCityID(location)}
               coordinates={coordinates}
-              data-tooltip-id={tooltipId}
+              data-tooltip-id={cityTooltipId}
               data-tooltip-content={`${location.address}, ${location.state} (${numAuthors})`}
               onClick={() => {
                 setHighlightedCity(location);
@@ -172,7 +180,7 @@ export function AuthorMapView({
     MARKER_COLORS,
     filterArgs,
     cityCoordinates,
-    tooltipId,
+    cityTooltipId,
     toCityID,
     setHighlightedCity,
     setHighlightedState,
@@ -259,8 +267,8 @@ export function AuthorMapView({
                   return (
                     <Fragment key={geography.rsmKey}>
                       <Geography
-                        data-tooltip-id={tooltipId}
-                        data-tooltip-content={`${stateName} (${statesData.getAll({ ...filterArgs, state: stateName }).length})`}
+                        data-tooltip-id={stateTooltipId}
+                        data-tooltip-content={stateName}
                         geography={geography}
                         style={{
                           default: {
@@ -296,10 +304,38 @@ export function AuthorMapView({
         </ZoomableGroup>
       </ComposableMap>
       <Tooltip
-        id={tooltipId}
+        id={cityTooltipId}
         className={styles.authorMapViewTooltip}
         place="right"
         noArrow
+      />
+      <Tooltip
+        id={stateTooltipId}
+        className={styles.authorMapViewTooltip}
+        place="right"
+        noArrow
+        render={({ content }) => {
+          const stateName = content as USState | undefined;
+          if (stateName) {
+            const mainContent = `${stateName} (${statesData.getAll({ ...filterArgs, state: stateName }).length})`;
+            return (
+              <>
+                <p>{mainContent}</p>
+                {entriesIntoUnion && (
+                  <p>Entry into union: {entriesIntoUnion[stateName]}</p>
+                )}
+                {stateCensus && (
+                  <p>
+                    Population: {stateCensus[stateName].count.toLocaleString()}{' '}
+                    ({stateCensus[stateName].dateRecorded})
+                  </p>
+                )}
+              </>
+            );
+          } else {
+            return <></>;
+          }
+        }}
       />
       {stateDrawerElement}
     </>

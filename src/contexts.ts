@@ -3,6 +3,7 @@ import {
   AmericanLiteraryAward,
   AuthorGroup,
   AuthorMapFilters,
+  AuthorMapProps,
   ClassicPublisher,
 } from './models';
 import { AuthorMapStores } from './utils/stores';
@@ -12,6 +13,9 @@ interface AuthorMapDataContextValue {
   data: AuthorMapStores;
   filters: AuthorMapFilters;
   groups: Array<AuthorGroup>;
+
+  entriesIntoUnion?: AuthorMapProps['entriesIntoUnion'];
+  stateCensus?: AuthorMapProps['stateCensus'];
 }
 
 export const AuthorMapDataContext = createContext<AuthorMapDataContextValue>({

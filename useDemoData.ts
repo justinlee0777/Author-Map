@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import {
   Author,
   AuthorGroup,
+  AuthorMapProps,
   AuthorTimelineEvent,
   CityCoordinates,
 } from './src/models';
@@ -36,6 +37,9 @@ export function useDemoData(config: Config): {
   groups: Array<AuthorGroup>;
   timeline: Array<AuthorTimelineEvent>;
   cityCoordinates: Array<CityCoordinates>;
+
+  entriesIntoUnion?: AuthorMapProps['entriesIntoUnion'];
+  stateCensus?: AuthorMapProps['stateCensus'];
 } {
   const [groups, setGroups] = useState<Array<AuthorGroup>>(sampleGroups);
 
@@ -47,6 +51,14 @@ export function useDemoData(config: Config): {
   const [cityCoordinates, setCityCoordinates] = useState<
     Array<CityCoordinates>
   >(sampleCityCoordinates);
+
+  const [entriesIntoUnion, setEntriesIntoUnion] = useState<
+    AuthorMapProps['entriesIntoUnion'] | undefined
+  >();
+
+  const [stateCensus, setStateCensus] = useState<
+    AuthorMapProps['stateCensus'] | undefined
+  >();
 
   const [loading, setLoading] = useState(config.type !== 'static');
 
@@ -78,6 +90,8 @@ export function useDemoData(config: Config): {
               timelineEvents,
               cityCoordinates,
               majorEvents,
+              stateCensus,
+              entriesIntoUnion,
             } = json;
 
             setAuthors(jsonAuthors as any);
@@ -94,6 +108,8 @@ export function useDemoData(config: Config): {
                 (coordinate) => coordinate.location.state !== 'Puerto Rico',
               ) as Array<CityCoordinates>,
             );
+            setStateCensus(stateCensus);
+            setEntriesIntoUnion(entriesIntoUnion);
 
             setLoading(false);
           })();
@@ -116,5 +132,7 @@ export function useDemoData(config: Config): {
     authors,
     timeline,
     cityCoordinates,
+    stateCensus,
+    entriesIntoUnion,
   };
 }

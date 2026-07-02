@@ -114,7 +114,7 @@ export function AuthorFilterTag(props: Props): JSX.Element {
       break;
     case 'formula':
       const { threshold } = props;
-      tagContents = `Score threshold: ${threshold}`;
+      tagContents = `Threshold: ${threshold}`;
       break;
   }
 

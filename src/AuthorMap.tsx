@@ -4,16 +4,16 @@ import Modal from 'react-modal';
 
 import {
   AmericanLiteraryAward,
-  AuthorMapFilters,
+  type AuthorMapFilters,
   ClassicPublisher,
   type Author,
   type AuthorData,
   type AuthorGroup,
   type AuthorTimelineEvent,
   type BirthEvent,
-  type CityCoordinates,
   type DeathEvent,
   type MilestoneEvent,
+  type AuthorMapProps,
 } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { AuthorMapStores } from './utils/stores';
@@ -31,43 +31,6 @@ import { ViewAuthorModal } from './components/ViewAuthorModal/ViewAuthorModal';
 import { AuthorFilterView } from './components/AuthorFilterView';
 import { AuthorFilterDrawer } from './components/AuthorFilterDrawer';
 import { defaultFormula } from './consts/formula.const';
-
-interface Props {
-  authors: Array<Author>;
-
-  /**
-   * Whether the client should be disabled from adding and editing authors / groups etc.
-   * If a string is provided, this is the error message shown to user explaining why they cannot take any actions.
-   */
-  disabled?: boolean | string;
-
-  groups?: Array<AuthorGroup>;
-
-  timeline?: Array<AuthorTimelineEvent>;
-
-  cityCoordinates?: Array<CityCoordinates>;
-
-  className?: string;
-  /**
-   * Used to update an external dataset.
-   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
-   * TODO: How should IDs be handled?
-   */
-  syncAuthorAdded?: (author: AuthorData) => void | Promise<void>;
-  /**
-   * Used to update an external dataset.
-   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
-   */
-  syncAuthorUpdate?: (changedAuthor: AuthorData) => void | Promise<void>;
-
-  onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
-
-  onGroupUpdated?: (authorGroup: AuthorGroup) => void | Promise<void>;
-
-  onTimelineEventCreated?: (event: AuthorTimelineEvent) => void | Promise<void>;
-
-  onTimelineEventUpdated?: (event: AuthorTimelineEvent) => void | Promise<void>;
-}
 
 enum ViewType {
   MAP = 'Map',
@@ -136,6 +99,8 @@ export function AuthorMap({
   groups = [],
   timeline = [],
   cityCoordinates = [],
+  stateCensus,
+  entriesIntoUnion,
   className,
   disabled,
   syncAuthorAdded,
@@ -144,7 +109,7 @@ export function AuthorMap({
   onGroupUpdated,
   onTimelineEventCreated,
   onTimelineEventUpdated,
-}: Props): JSX.Element {
+}: AuthorMapProps): JSX.Element {
   const componentRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(false);
@@ -278,7 +243,13 @@ export function AuthorMap({
 
   return (
     <AuthorMapDataContext.Provider
-      value={{ data: statesData, filters, groups }}
+      value={{
+        data: statesData,
+        filters,
+        groups,
+        stateCensus,
+        entriesIntoUnion,
+      }}
     >
       <div
         className={clsx('authorMapComponentContainer', className)}
