@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './AddAuthorGroup.module.css';
-
 import { MdAdd } from 'react-icons/md';
 import { clsx } from 'clsx';
 import { JSX, ReactNode } from 'react';
@@ -22,7 +19,7 @@ export function AddAuthorGroup({
 }: Props): JSX.Element {
   return (
     <button
-      className={clsx(commonStyles.button, styles.addAuthorGroup, className)}
+      className={clsx('button', 'addAuthorGroup', className)}
       onClick={onClick}
     >
       {children?.left}

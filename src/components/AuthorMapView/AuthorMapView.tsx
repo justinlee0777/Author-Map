@@ -1,4 +1,3 @@
-import commonStyles from '../../common.module.css';
 import styles from './AuthorMapView.module.css';
 
 import {
@@ -17,19 +16,13 @@ import {
   ZoomableGroup,
 } from 'react-simple-maps';
 import { Tooltip } from 'react-tooltip';
-import clsx from 'clsx';
 
 import { geography } from '../../consts/states.const';
-import {
-  Author,
-  AuthorEventType,
-  AuthorLocation,
-  CityCoordinates,
-  USState,
-} from '../../models';
+import { Author, AuthorLocation, CityCoordinates, USState } from '../../models';
 import { StateDrawer } from '../StateDrawer/StateDrawer';
-import { Tabs } from '../Tabs/Tabs';
 import { AuthorMapDataContext } from '../../contexts';
+import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
+import { AuthorMapStores } from '../../utils/stores';
 
 interface Geography {
   rsmKey: string;
@@ -43,23 +36,29 @@ interface MapPosition {
   zoom: number;
 }
 
-interface Filters {
-  eventType?: AuthorEventType;
-}
-
 interface Props {
   cityCoordinates: Array<CityCoordinates>;
 
   onAuthorEdit?: (author: Partial<Author>) => void;
+  onAuthorView?: (author: Author) => void;
 }
 
 export function AuthorMapView({
   cityCoordinates,
   onAuthorEdit,
+  onAuthorView,
 }: Props): JSX.Element {
-  const { data: statesData } = useContext(AuthorMapDataContext);
+  const {
+    data: statesData,
+    filters,
+    stateCensus,
+    entriesIntoUnion,
+  } = useContext(AuthorMapDataContext);
 
-  const tooltipId = useMemo(() => 'state-labels-tooltip', []);
+  const [stateTooltipId, cityTooltipId] = useMemo(
+    () => ['state-labels-tooltip', 'city-labels-tooltip'],
+    [],
+  );
 
   const STATE_COLORS = useMemo(
     () => [
@@ -120,9 +119,19 @@ export function AuthorMapView({
   const [highlightedCity, setHighlightedCity] =
     useState<Required<AuthorLocation> | null>(null);
 
-  const [filters, setFilters] = useState<Filters>({
-    eventType: AuthorEventType.BIRTHS,
-  });
+  const { eventTypes, inclusionReasons, search, groupId, yearRange, formula } =
+    filters;
+
+  const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
+
+  const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
+    yearRange,
+    eventTypes,
+    inclusionReasons: inclusionReasonFilter,
+    search,
+    groupId,
+    formula,
+  };
 
   const renderedCityCoordinates: Array<
     CityCoordinates & { marker: JSX.Element }
@@ -130,18 +139,18 @@ export function AuthorMapView({
     return cityCoordinates.reduce(
       (acc, cityCoordinate, i) => {
         const { location, coordinates } = cityCoordinate;
-        const numAuthors = statesData.getAuthors(
-          location.state,
-          filters.eventType,
-          location.address,
-        ).length;
+        const numAuthors = statesData.getAll({
+          ...filterArgs,
+          address: location.address,
+          state: location.state,
+        }).length;
 
         if (numAuthors > 0) {
           const marker = (
             <Marker
               key={toCityID(location)}
               coordinates={coordinates}
-              data-tooltip-id={tooltipId}
+              data-tooltip-id={cityTooltipId}
               data-tooltip-content={`${location.address}, ${location.state} (${numAuthors})`}
               onClick={() => {
                 setHighlightedCity(location);
@@ -169,31 +178,30 @@ export function AuthorMapView({
     );
   }, [
     MARKER_COLORS,
-    filters,
+    filterArgs,
     cityCoordinates,
-    tooltipId,
+    cityTooltipId,
     toCityID,
     setHighlightedCity,
     setHighlightedState,
   ]);
 
   const stateDrawerElement = useMemo(() => {
-    let title: string | undefined,
-      authors: Array<Author> | undefined,
-      state: USState | undefined;
+    let title: string | undefined, authors: Array<Author> | undefined;
 
     if (highlightedState) {
       title = highlightedState;
-      authors = statesData.getAuthors(highlightedState, filters.eventType);
-      state = highlightedState;
+      authors = statesData.getAll({
+        ...filterArgs,
+        state: highlightedState,
+      });
     } else if (highlightedCity) {
       title = `${highlightedCity.address}, ${highlightedCity.state}`;
-      authors = statesData.getAuthors(
-        highlightedCity.state,
-        filters.eventType,
-        highlightedCity.address,
-      );
-      state = highlightedCity.state;
+      authors = statesData.getAll({
+        ...filterArgs,
+        state: highlightedCity.state,
+        address: highlightedCity.address,
+      });
     }
 
     if (title && authors) {
@@ -201,13 +209,13 @@ export function AuthorMapView({
         <StateDrawer
           title={title}
           authors={authors}
-          eventType={filters.eventType}
-          showContext={!filters.eventType}
+          eventTypes={filters.eventTypes}
           onClose={() => {
             setHighlightedState(null);
             setHighlightedCity(null);
           }}
           onEdit={onAuthorEdit}
+          onView={onAuthorView}
           onAddAuthor={() => {
             onAuthorEdit?.({
               authorFirstName: '',
@@ -227,7 +235,7 @@ export function AuthorMapView({
     statesData,
     highlightedState,
     highlightedCity,
-    filters,
+    filterArgs,
     setHighlightedState,
     setHighlightedCity,
     onAuthorEdit,
@@ -259,8 +267,8 @@ export function AuthorMapView({
                   return (
                     <Fragment key={geography.rsmKey}>
                       <Geography
-                        data-tooltip-id={tooltipId}
-                        data-tooltip-content={`${stateName} (${statesData.getAuthors(stateName, filters.eventType).length})`}
+                        data-tooltip-id={stateTooltipId}
+                        data-tooltip-content={stateName}
                         geography={geography}
                         style={{
                           default: {
@@ -296,36 +304,40 @@ export function AuthorMapView({
         </ZoomableGroup>
       </ComposableMap>
       <Tooltip
-        id={tooltipId}
+        id={cityTooltipId}
         className={styles.authorMapViewTooltip}
         place="right"
         noArrow
       />
-      {stateDrawerElement}
-      <Tabs<AuthorEventType>
-        className={clsx(
-          commonStyles.floatingAction,
-          styles.authorMapViewFilterPane,
-        )}
-        highlightedValue={filters.eventType}
-        values={Object.values(AuthorEventType).map((value) => ({
-          value,
-          label: value,
-        }))}
-        onChange={(value) => {
-          if (value) {
-            setFilters({
-              ...filters,
-              eventType: value,
-            });
+      <Tooltip
+        id={stateTooltipId}
+        className={styles.authorMapViewTooltip}
+        place="right"
+        noArrow
+        render={({ content }) => {
+          const stateName = content as USState | undefined;
+          if (stateName) {
+            const mainContent = `${stateName} (${statesData.getAll({ ...filterArgs, state: stateName }).length})`;
+            return (
+              <>
+                <p>{mainContent}</p>
+                {entriesIntoUnion && (
+                  <p>Entry into union: {entriesIntoUnion[stateName]}</p>
+                )}
+                {stateCensus && (
+                  <p>
+                    Population: {stateCensus[stateName].count.toLocaleString()}{' '}
+                    ({stateCensus[stateName].dateRecorded})
+                  </p>
+                )}
+              </>
+            );
           } else {
-            setFilters({
-              ...filters,
-              eventType: undefined,
-            });
+            return <></>;
           }
         }}
       />
+      {stateDrawerElement}
     </>
   );
 }

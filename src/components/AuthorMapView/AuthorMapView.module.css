@@ -1,9 +1,3 @@
 .authorMapViewTooltip {
   /* This must be kept for client convenience. */
 }
-
-.authorMapViewFilterPane {
-  flex-direction: column;
-  right: 1em;
-  top: 1em;
-}

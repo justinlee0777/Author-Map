@@ -1,7 +1,11 @@
 .authorMapComponentContainer {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   position: relative;
+
+  --floating-element-color: white;
 }
 
 .authorMapComponentContainer h3,
@@ -9,7 +13,13 @@
   margin: 0;
 }
 
-.authorMapContainer,
+.authorMapContainer {
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
 .authorMapContainer > svg {
   height: 100%;
   width: 100%;
@@ -22,9 +32,6 @@
 
 .authorMapViewSwitch {
   flex-direction: row;
-  left: 50%;
-  top: 1em;
-  transform: translateX(-50%);
 }
 
 .authorMapAddButtons {
@@ -38,5 +45,16 @@
   border: none;
   border-radius: 0;
   justify-content: flex-start;
+  padding: 1em;
+}
+
+.authorMapActions {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 1em;
   padding: 1em;
 }

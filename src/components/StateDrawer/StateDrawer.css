@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 1em;
+  left: 1em;
   padding-bottom: 3em;
 }
 
@@ -21,31 +22,28 @@
   overflow-y: auto;
 }
 
-.stateDrawerClose {
-  align-items: center;
-  align-self: flex-end;
-  border-radius: 50%;
-  display: flex;
-  font-size: 1em;
-  height: 1.5em;
-  position: sticky;
-  top: 0;
-  width: 1.5em;
-}
-
 .stateDrawerEdit {
   left: 0;
+}
+
+.stateDrawerView {
+  right: 0;
+}
+
+.stateDrawerEdit,
+.stateDrawerView {
+  background-color: var(--floating-element-color);
   position: absolute;
   top: 1em;
   transition: 0.3s opacity;
-}
 
-.stateDrawerAuthorRow .stateDrawerEdit {
-  opacity: 0;
-}
+  .stateDrawerAuthorRow & {
+    opacity: 0;
+  }
 
-.stateDrawerAuthorRow:hover .stateDrawerEdit {
-  opacity: 1;
+  .stateDrawerAuthorRow:hover & {
+    opacity: 1;
+  }
 }
 
 .stateDrawerAdd {

@@ -1,34 +1,32 @@
-import styles from './StateDrawer.module.css';
-import commonStyles from '../../common.module.css';
-
 import clsx from 'clsx';
 import { JSX, ReactNode, useContext, useMemo } from 'react';
-import { Author, AuthorEventType, AuthorTimelineEvent } from '../../models';
+
+import { Author, AuthorTimelineEvent } from '../../models';
 import { createKeyGenerator } from '../../utils/stores';
-import { MdClose } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { AuthorRow } from '../AuthorRow/AuthorRow';
 import { AddAuthor } from '../AddAuthor/AddAuthor';
 import { AuthorMapDataContext } from '../../contexts';
+import { SideDrawer } from '../SideDrawer';
 
 interface Props {
   title: string;
   authors: Array<Author>;
+  eventTypes: Array<AuthorTimelineEvent['type']>;
 
-  eventType?: AuthorEventType;
-  showContext?: boolean;
   onClose?: () => void;
   onEdit?: (author: Author) => void;
+  onView?: (author: Author) => void;
   onAddAuthor?: () => void;
 }
 
 export function StateDrawer({
   title,
   authors,
-  eventType,
-  showContext,
+  eventTypes,
   onClose,
   onEdit,
+  onView,
   onAddAuthor,
 }: Props): JSX.Element {
   const { data } = useContext(AuthorMapDataContext);
@@ -36,19 +34,10 @@ export function StateDrawer({
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   return (
-    <div className={clsx(styles.stateDrawerUSState, commonStyles.sideDrawer)}>
-      <AddAuthor className={styles.stateDrawerAdd} onClick={onAddAuthor} />
-      <h3>
-        {title}
+    <SideDrawer className="stateDrawerUSState" title={title} onClose={onClose}>
+      <AddAuthor className="stateDrawerAdd" onClick={onAddAuthor} />
 
-        <button
-          className={clsx(commonStyles.button, styles.stateDrawerClose)}
-          onClick={onClose}
-        >
-          <MdClose />
-        </button>
-      </h3>
-      <div className={styles.stateDrawerList}>
+      <div className="stateDrawerList">
         {authors.map((author) => {
           let authorName: ReactNode = getAuthorName(author);
 
@@ -65,37 +54,44 @@ export function StateDrawer({
 
           let events: Array<AuthorTimelineEvent> = [];
 
-          switch (eventType) {
-            case AuthorEventType.BIRTHS:
-              if (birthDate) {
-                events = [birthDate];
-              }
-              break;
-            case AuthorEventType.DEATHS:
-              if (deathDate) {
-                events = [deathDate];
-              }
-              break;
+          for (const eventType of eventTypes) {
+            switch (eventType) {
+              case 'Birth':
+                if (birthDate) {
+                  events.push(birthDate);
+                }
+                break;
+              case 'Death':
+                if (deathDate) {
+                  events.push(deathDate);
+                }
+                break;
+            }
           }
 
           return (
             <AuthorRow
               key={authorKeyGenerator.getKey(author.id)}
-              className={styles.stateDrawerAuthorRow}
+              className="stateDrawerAuthorRow"
               author={author}
               events={events}
-              showContext={showContext}
             >
               <button
-                className={clsx(commonStyles.button, styles.stateDrawerEdit)}
+                className={clsx('button', 'stateDrawerEdit')}
                 onClick={() => onEdit?.(author)}
               >
                 Edit
+              </button>
+              <button
+                className={clsx('button', 'stateDrawerView')}
+                onClick={() => onView?.(author)}
+              >
+                View
               </button>
             </AuthorRow>
           );
         })}
       </div>
-    </div>
+    </SideDrawer>
   );
 }

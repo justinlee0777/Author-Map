@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './RegisterAuthorGroup.module.css';
-
 import { JSX, useMemo, useState } from 'react';
 import { AuthorGroup } from '../../models';
 import { DatePicker } from '../DatePicker/DatePicker';
@@ -57,7 +54,7 @@ export function RegisterAuthorGroup({
   const inputsValid = Object.values(validity).every((value) => value);
 
   return (
-    <div className={styles.registerAuthorGroup}>
+    <div className="registerAuthorGroup">
       <label htmlFor={nameId}>Name *</label>
       <input
         ref={(inputElement) => {
@@ -192,7 +189,7 @@ export function RegisterAuthorGroup({
       />
 
       <button
-        className={clsx(commonStyles.button, styles.registerAuthorGroupCreate)}
+        className={clsx('button', 'registerAuthorGroupCreate')}
         type="button"
         onClick={() => {
           const { span, ...authorGroupAttributes } = authorGroup;

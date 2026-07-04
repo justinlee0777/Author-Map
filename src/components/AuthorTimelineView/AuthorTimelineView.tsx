@@ -1,65 +1,119 @@
-import styles from './AuthorTimelineView.module.css';
-
-import {
-  Fragment,
-  JSX,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { JSX, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 
-import { controlForTimezone, formatDate } from '../../utils/dates';
-import { getAuthorName } from '../../utils/names';
-import { AuthorGroup, AuthorTimelineEvent, TimelineEvent } from '../../models';
+import type { Author, AuthorGroup, AuthorTimelineEvent } from '../../models';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
-import infiniteScroll from '../../utils/infinite-scroll';
 import { AuthorMapDataContext } from '../../contexts';
+import { AuthorTimelineEntry } from './AuthorTimelineEntry';
+import infiniteScroll from '../../utils/infinite-scroll';
+import { AuthorMapStores } from '../../utils/stores';
+import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
+import { sortMap } from '../../utils/sort';
 
 interface Props {
   groups?: Array<AuthorGroup>;
   className?: string;
+  onAuthorView?: (author: Author) => void;
 }
 
 interface AppearanceSettings {
   removeEmptyYears?: boolean;
+  includeMajorEvents?: boolean;
 }
 
 /**
  * TODO: Filter by months? Allow a day / month / year filter?
  */
-export function AuthorTimelineView({ className }: Props): JSX.Element {
-  const { data: statesData } = useContext(AuthorMapDataContext);
+export function AuthorTimelineView({
+  className,
+  onAuthorView,
+}: Props): JSX.Element {
+  const {
+    data: statesData,
+    filters: {
+      eventTypes,
+      yearRange,
+      search,
+      groupId,
+      inclusionReasons,
+      formula,
+    },
+  } = useContext(AuthorMapDataContext);
 
   const [startingYear, endingYear] = statesData.dateRange;
 
   const entriesRef = useRef<HTMLUListElement>(null);
 
-  const timelineEvents = statesData.timelineEvents.filter((event) => {
-    switch (event.type) {
-      case 'Birth':
-      case 'Death':
-        return true;
-      default:
-        return false;
-    }
-  }) as Array<Exclude<AuthorTimelineEvent, TimelineEvent>>;
+  const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
-  const [settings, setSettings] = useState<AppearanceSettings>({});
-
-  const timelineEventsByYear = new Map<number, typeof timelineEvents>();
-
-  timelineEvents.forEach((timelineEvent) => {
-    const year = controlForTimezone(timelineEvent.date).getFullYear();
-
-    if (timelineEventsByYear.has(year)) {
-      timelineEventsByYear.get(year)!.push(timelineEvent);
-    } else {
-      timelineEventsByYear.set(year, [timelineEvent]);
-    }
+  const [settings, setSettings] = useState<AppearanceSettings>({
+    removeEmptyYears: true,
+    includeMajorEvents: false,
   });
+
+  const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
+    yearRange,
+    eventTypes,
+    inclusionReasons: inclusionReasonFilter,
+    search,
+    groupId,
+    formula,
+  };
+
+  if (settings.includeMajorEvents) {
+    filterArgs.eventTypes = [...filterArgs.eventTypes, 'Major event'];
+  }
+
+  const timelineEvents = statesData.getTimelineEvents(filterArgs);
+
+  const timelineEventsByYear = useMemo(() => {
+    const map = new Map();
+
+    timelineEvents.forEach((timelineEvent) => {
+      const appendedEvents = [];
+
+      if ('date' in timelineEvent) {
+        appendedEvents.push(timelineEvent);
+      } else if (timelineEvent.type !== 'Timeline') {
+        // TODO: I'm honestly not sure what to do with the 'Timeline' type.
+        const { startDate, endDate, notes, ...remainingEvent } = timelineEvent;
+
+        appendedEvents.push(
+          {
+            ...remainingEvent,
+            date: startDate,
+            notes: `(Start) ${notes}`,
+          },
+          {
+            ...remainingEvent,
+            date: endDate,
+            notes: `(End) ${notes}`,
+          },
+        );
+      }
+
+      appendedEvents.forEach((event) => {
+        const year = Number(event.date.split('-').at(0)!);
+
+        if (map.has(year)) {
+          const existingEvents = map.get(year)!;
+          map.set(
+            year,
+            existingEvents
+              .concat(event)
+              .sort(
+                (a: { date: string }, b: { date: string }) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime(),
+              ),
+          );
+        } else {
+          map.set(year, [event]);
+        }
+      });
+    });
+
+    return sortMap(map, ([year]) => year);
+  }, [timelineEvents]);
 
   const eventElements: Array<JSX.Element> = useMemo(() => {
     const temp: Array<JSX.Element> = [];
@@ -80,90 +134,43 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
       }
 
       temp.push(
-        <li className={styles.authorTimelineViewEntry} key={year}>
-          <h4 className={styles.authorTimelineViewYear}>{year}</h4>
-          <div className={styles.authorTimelineViewEntryBullet}></div>
-          {events?.map((event, i) => {
-            const author = event.authorId
-              ? statesData.getAuthor(event.authorId)
-              : undefined;
-
-            let note: string;
-
-            switch (event.type) {
-              case 'Birth':
-                note = 'Birth';
-                break;
-              case 'Death':
-                note = 'Death';
-                break;
-              default:
-                note = event.notes ?? '';
-                break;
-            }
-
-            return (
-              <Fragment key={i}>
-                <div className={styles.authorTimelineEventDate}>
-                  {formatDate(event.date, event.location?.state, {
-                    dateOnly: true,
-                  })}
-                </div>
-
-                <div className={styles.authorTimelineEntryBisector}></div>
-
-                <div className={styles.authorTimelineViewEntryDetails}>
-                  {author && (
-                    <h4 className={styles.authorTimelineViewAuthorHeader}>
-                      {getAuthorName(author)}
-                      {author.portrait?.src && (
-                        <img
-                          className={styles.authorTimelineViewPortrait}
-                          {...author.portrait}
-                          loading="lazy"
-                        />
-                      )}
-                    </h4>
-                  )}
-
-                  <p>{note}</p>
-                </div>
-              </Fragment>
-            );
-          })}
-        </li>,
+        <AuthorTimelineEntry
+          key={year}
+          year={year}
+          events={events as any}
+          onAuthorView={onAuthorView}
+        />,
       );
     }
 
     return temp;
-  }, [settings, statesData]);
+  }, [timelineEventsByYear, settings]);
 
-  const initialEntriesShown = 20;
+  const initialEntriesShown = 10;
 
   const [entriesShown, setEntriesShown] = useState(initialEntriesShown);
 
   useEffect(() => {
     if (entriesRef.current) {
-      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () =>
+      const destroyInfiniteScroll = infiniteScroll(entriesRef.current, () => {
         setEntriesShown(
           Math.min(entriesShown + initialEntriesShown, eventElements.length),
-        ),
-      );
+        );
+      });
 
       return () => {
         destroyInfiniteScroll();
       };
     }
-  }, [entriesRef.current, entriesShown]);
+  }, [entriesRef.current, setEntriesShown, entriesShown, eventElements.length]);
 
   return (
-    <div className={clsx(styles.authorTimelineView, className)}>
-      <ul className={styles.authorTimelineViewEntries} ref={entriesRef}>
+    <div className={clsx('authorTimelineView', className)}>
+      <ul className="authorTimelineViewEntries" ref={entriesRef}>
         {eventElements.slice(0, entriesShown)}
       </ul>
-      <div className={styles.authorTimelineViewSettings}>
+      <div className="authorTimelineViewSettings">
         <Radiogroup<keyof AppearanceSettings>
-          className={styles.authorTimelineViewAppearance}
           header="Appearance"
           id="timeline-settings"
           type="checkbox"
@@ -171,6 +178,10 @@ export function AuthorTimelineView({ className }: Props): JSX.Element {
             {
               label: 'Remove empty years',
               value: 'removeEmptyYears',
+            },
+            {
+              label: 'Show major events',
+              value: 'includeMajorEvents',
             },
           ]}
           selected={Object.entries(settings).reduce(

@@ -1,4 +1,5 @@
 .tabs {
+  background-color: var(--floating-element-color);
   display: flex;
 }
 

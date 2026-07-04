@@ -1,5 +1,4 @@
 import { monthOptions } from '../../models';
-import styles from './DatePicker.module.css';
 
 import { InputHTMLAttributes, JSX, ReactNode, useMemo, useState } from 'react';
 
@@ -38,7 +37,7 @@ export function DatePicker({
 
   if (dayKnown) {
     inputs = (
-      <div className={styles.datePickerColumn}>
+      <div className="datePickerColumn">
         <input
           id={fullDateId}
           type="date"
@@ -63,7 +62,7 @@ export function DatePicker({
 
     inputs = (
       <>
-        <div className={styles.datePickerColumn}>
+        <div className="datePickerColumn">
           <label htmlFor={yearId}>Year</label>
           <input
             id={yearId}
@@ -83,12 +82,12 @@ export function DatePicker({
               onChange(finalDate);
             }}
           />
-          <p className={styles.datePickerHint}>
+          <p className="datePickerHint">
             Only years between 1000 and 2999 are allowed, inclusive.
           </p>
         </div>
 
-        <div className={styles.datePickerColumn}>
+        <div className="datePickerColumn">
           <label htmlFor={monthId}>Month</label>
           <select
             id={monthId}
@@ -112,7 +111,7 @@ export function DatePicker({
 
   return (
     <div
-      className={styles.datePicker}
+      className="datePicker"
       ref={(element) => {
         if (element && ref) {
           ref({
@@ -125,7 +124,7 @@ export function DatePicker({
     >
       {inputs}
 
-      <div className={styles.datePickerDateKnown}>
+      <div className="datePickerDateKnown">
         <input
           id={dateKnownId}
           type="checkbox"

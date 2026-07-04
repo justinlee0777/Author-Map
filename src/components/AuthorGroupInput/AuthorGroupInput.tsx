@@ -1,8 +1,5 @@
-import commonStyles from '../../common.module.css';
-import styles from './AuthorGroupInput.module.css';
-
 import { JSX, useCallback, useContext, useMemo, useState } from 'react';
-import { AuthorGroupContext } from '../../contexts';
+import { AuthorMapDataContext } from '../../contexts';
 import { RegisterAuthorGroup } from '../RegisterAuthorGroup/RegisterAuthorGroup';
 import { AuthorGroup } from '../../models';
 import { MdAdd, MdClear } from 'react-icons/md';
@@ -28,7 +25,7 @@ export function AuthorGroupInput({
   onChange,
   registerAuthorGroup,
 }: Props): JSX.Element {
-  const { groups } = useContext(AuthorGroupContext);
+  const { groups } = useContext(AuthorMapDataContext);
 
   const [creatingAuthorGroupId, selectAuthorGroupId] = useMemo(
     () => ['create-author-group', 'select-existing-author-group'],
@@ -43,7 +40,7 @@ export function AuthorGroupInput({
   const AuthorGroupTag = useCallback(
     ({ item, RemoveButton, index }: ItemProps<AuthorGroup>): JSX.Element => {
       return (
-        <div className={styles.authorGroupInputTag}>
+        <div className="authorGroupInputTag">
           {item.name} <RemoveButton item={item} index={index} />
         </div>
       );
@@ -56,7 +53,7 @@ export function AuthorGroupInput({
   if (groups.length === 0) {
     content = (
       <>
-        <p className={styles.authorGroupInputNoneMessage}>
+        <p className="authorGroupInputNoneMessage">
           No groups found. Please create one.
         </p>
       </>
@@ -64,9 +61,9 @@ export function AuthorGroupInput({
   } else {
     content = (
       <>
+        <label htmlFor={selectAuthorGroupId}>Pick group</label>
         <SelectAuthorGroup
           id={selectAuthorGroupId}
-          label="Pick group"
           onSelect={(group) => {
             if (
               group &&
@@ -86,12 +83,12 @@ export function AuthorGroupInput({
     creatingGroupContent = (
       <>
         <label
-          className={styles.authorGroupInputNewGroupLabel}
+          className="authorGroupInputNewGroupLabel"
           htmlFor={creatingAuthorGroupId}
         >
           New group{' '}
           <button
-            className={commonStyles.button}
+            className="button"
             type="button"
             onClick={() => setCreatingGroup(null)}
             disabled={disabled}
@@ -114,7 +111,7 @@ export function AuthorGroupInput({
   } else {
     creatingGroupContent = (
       <button
-        className={clsx(commonStyles.button, styles.authorGroupCreateGroup)}
+        className={clsx('button', 'authorGroupCreateGroup')}
         type="button"
         onClick={() => setCreatingGroup({})}
         disabled={disabled}
@@ -125,12 +122,12 @@ export function AuthorGroupInput({
   }
 
   return (
-    <div className={clsx(styles.authorGroupInput, className)}>
+    <div className={clsx('authorGroupInput', className)}>
       {content}
 
       <DynamicList<AuthorGroup>
         classes={{
-          listItems: styles.authorGroupInputTags,
+          listItems: 'authorGroupInputTags',
         }}
         items={values.map((id) => groups.find((group) => group.id === id)!)}
         ItemTemplate={AuthorGroupTag}

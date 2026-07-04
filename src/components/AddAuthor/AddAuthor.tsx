@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './AddAuthor.module.css';
-
 import clsx from 'clsx';
 import { JSX, ReactNode } from 'react';
 import { MdAdd } from 'react-icons/md';
@@ -22,7 +19,7 @@ export function AddAuthor({
 }: Props): JSX.Element {
   return (
     <button
-      className={clsx(commonStyles.button, styles.addAuthor, className)}
+      className={clsx('button', 'addAuthor', className)}
       onClick={onClick}
     >
       {children?.left}

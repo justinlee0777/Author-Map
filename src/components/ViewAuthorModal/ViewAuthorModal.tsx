@@ -1,16 +1,13 @@
-import styles from './ViewAuthorModal.module.css';
-
 import { Fragment, JSX, ReactNode, useContext } from 'react';
 import { Author } from '../../models';
-import Modal from 'react-modal';
-import { MdClear } from 'react-icons/md';
 import { getAuthorName } from '../../utils/names';
 import { formatDate } from '../../utils/dates';
 import { getAddress } from '../../utils/address';
-import { AuthorGroupContext, AuthorMapDataContext } from '../../contexts';
+import { AuthorMapDataContext } from '../../contexts';
+import { CommonModal } from '../CommonModal/CommonModal';
+import { calculateScore } from '../../utils/formula';
 
 interface Props {
-  appElement: HTMLElement;
   opened: boolean;
   author: Author;
 
@@ -18,14 +15,11 @@ interface Props {
 }
 
 export function ViewAuthorModal({
-  appElement,
   opened,
   onClose,
   author,
 }: Props): JSX.Element {
-  const { data } = useContext(AuthorMapDataContext);
-
-  const { groups } = useContext(AuthorGroupContext);
+  const { data, filters, groups } = useContext(AuthorMapDataContext);
 
   let authorNameElement: ReactNode = getAuthorName(author);
 
@@ -42,17 +36,15 @@ export function ViewAuthorModal({
   const birthDate = data.getBirthDate(author.id),
     deathDate = data.getDeathDate(author.id);
 
+  const score = calculateScore(
+    author.inclusionReasons,
+    filters.formula.equation,
+  );
+
   return (
-    <Modal isOpen={opened} appElement={appElement}>
-      <div className={styles.viewAuthorModal}>
-        <button
-          className={styles.viewAuthorCloseModal}
-          type="button"
-          onClick={onClose}
-        >
-          <MdClear />
-        </button>
-        <div className={styles.viewAuthorPortraitContainer}>
+    <CommonModal opened={opened} onClose={onClose}>
+      <div className="viewAuthorModal">
+        <div className="viewAuthorPortraitContainer">
           {author.portrait?.src && (
             <img src={author.portrait?.src} loading="lazy" />
           )}
@@ -79,6 +71,85 @@ export function ViewAuthorModal({
           </>
         )}
 
+        <h4>Reasons for inclusion</h4>
+        {author.inclusionReasons.map((inclusionReason, i) => {
+          switch (inclusionReason.type) {
+            case 'Poet Laureate':
+              return (
+                <p key="poet-laureate">
+                  <a href={inclusionReason.referenceUrl}>Poet laureate</a> -{' '}
+                  {inclusionReason.dates
+                    .map(
+                      ({ startYear, endYear }) =>
+                        `${startYear}${endYear ? ` - ${endYear}` : ''}`,
+                    )
+                    .join(', ')}
+                </p>
+              );
+            case 'Published as classical literature':
+              return (
+                <Fragment key="publisher">
+                  <p>Published by:</p>
+                  {Object.entries(inclusionReason.publishers).map(
+                    ([publisher, catalog]) => {
+                      return (
+                        <div key={publisher} className="publisherList">
+                          <p>
+                            <b>{publisher}</b>
+                          </p>
+                          <ul>
+                            {catalog.books.map((book) => (
+                              <li key={book.name}>
+                                <a href={book.referenceUrl}>{book.name}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    },
+                  )}
+                </Fragment>
+              );
+            case 'award':
+              return (
+                <p
+                  key={`${inclusionReason.type}-${inclusionReason.award}-${i}`}
+                >
+                  Awarded{' '}
+                  <a href={inclusionReason.referenceUrl}>
+                    {inclusionReason.award}
+                  </a>{' '}
+                  {inclusionReason.year}
+                  {inclusionReason.book && (
+                    <> for {`"${inclusionReason.book}"`}</>
+                  )}
+                </p>
+              );
+            case 'Belongs to a renowned group':
+              const group = groups.find(
+                (g) => g.id === inclusionReason.groupId,
+              )!;
+              return (
+                <div
+                  key={`author-group-${group.name}`}
+                  className="viewAuthorModalAuthorGroup"
+                >
+                  <p>Belongs to a renowned group</p>
+                  <p>
+                    <b>{group.name}</b>
+                  </p>
+                  <p>{group.description}</p>
+                </div>
+              );
+            default:
+              console.log(
+                'Inclusion reason has no rendering code.',
+                inclusionReason,
+              );
+              throw new Error('Cannot render.');
+          }
+        })}
+
         {events.length > 0 && (
           <>
             <h4>Timeline</h4>
@@ -86,14 +157,10 @@ export function ViewAuthorModal({
             {events.map((event, i) => {
               let eventElement: ReactNode;
 
-              switch (event.type) {
-                case 'Timeline':
-                  eventElement = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
-                  break;
-                case 'Milestone':
-                default:
-                  eventElement = formatDate(event.date);
-                  break;
+              if ('date' in event) {
+                eventElement = formatDate(event.date);
+              } else {
+                eventElement = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
               }
 
               if (event.notes) {
@@ -151,7 +218,14 @@ export function ViewAuthorModal({
             })}
           </>
         )}
+
+        {score && (
+          <>
+            <h4>Calculation</h4>
+            {score.toFixed(2)}
+          </>
+        )}
       </div>
-    </Modal>
+    </CommonModal>
   );
 }

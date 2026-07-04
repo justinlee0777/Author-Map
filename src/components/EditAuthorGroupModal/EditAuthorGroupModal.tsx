@@ -1,14 +1,10 @@
-import styles from './EditAuthorGroupModal.module.css';
+import { JSX, useState } from 'react';
 
-import { JSX, useEffect, useState } from 'react';
-
-import Modal from 'react-modal';
 import { AuthorGroup } from '../../models';
 import { RegisterAuthorGroup } from '../RegisterAuthorGroup/RegisterAuthorGroup';
-import { MdClear } from 'react-icons/md';
+import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
-  appElement: HTMLElement;
   opened: boolean;
 
   initialAuthorGroup: Partial<AuthorGroup>;
@@ -19,7 +15,6 @@ interface Props {
 }
 
 export function EditAuthorGroupModal({
-  appElement,
   opened,
   initialAuthorGroup,
   disabled,
@@ -31,16 +26,8 @@ export function EditAuthorGroupModal({
   const [authorGroup, setAuthorGroup] = useState(initialAuthorGroup);
 
   return (
-    <Modal isOpen={opened} appElement={appElement}>
-      <div className={styles.editAuthorGroupModal}>
-        <button
-          className={styles.editAuthorGroupCloseModal}
-          type="button"
-          onClick={onClose}
-        >
-          <MdClear />
-        </button>
-
+    <CommonModal opened={opened} onClose={onClose}>
+      <div className="editAuthorGroupModal">
         <RegisterAuthorGroup
           id="create-author-group"
           value={authorGroup}
@@ -56,6 +43,6 @@ export function EditAuthorGroupModal({
           }}
         />
       </div>
-    </Modal>
+    </CommonModal>
   );
 }

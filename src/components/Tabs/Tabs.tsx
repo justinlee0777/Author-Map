@@ -1,6 +1,3 @@
-import commonStyles from '../../common.module.css';
-import styles from './Tabs.module.css';
-
 import clsx from 'clsx';
 import { JSX } from 'react';
 
@@ -19,15 +16,15 @@ export function Tabs<T extends string>({
   onChange,
 }: Props<T>): JSX.Element {
   return (
-    <div className={clsx(styles.tabs, className)}>
+    <div className={clsx('tabs', className)}>
       {values.map(({ label, value }) => {
         const isHighlighted = highlightedValue === value;
 
         return (
           <button
             key={value}
-            className={clsx(commonStyles.button, {
-              [styles.highlightedTab]: isHighlighted,
+            className={clsx('button', {
+              highlightedTab: isHighlighted,
             })}
             onClick={() => {
               if (isHighlighted) {

@@ -1,0 +1,19 @@
+.inclusionReasonOption {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  font-size: 0.8em;
+  gap: 0.5em;
+
+  & > button {
+    border: none;
+  }
+
+  &.inclusionReasonOptionChild {
+    margin-left: 0.5em;
+  }
+
+  &.inclusionReasonOptionCollapsed {
+    display: none;
+  }
+}

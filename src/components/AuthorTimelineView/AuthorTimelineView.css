@@ -3,8 +3,8 @@
   display: flex;
   flex-direction: row;
   gap: 1em;
-  height: 100%;
-  padding: 4em 1em 2em 1em;
+  height: 95%;
+  padding: 1em 1em 0;
   position: relative;
 }
 
@@ -15,9 +15,6 @@
   flex-direction: column;
 }
 
-.authorTimelineViewAppearance {
-}
-
 .authorTimelineViewAdd {
   border: none;
   border-radius: 0;
@@ -25,25 +22,40 @@
 }
 
 .authorTimelineViewEntries {
+  align-items: flex-start;
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 1em;
   height: 100%;
+  justify-content: flex-start;
   list-style-type: none;
   overflow-y: auto;
   position: relative;
+  will-change: contents;
 }
 
 .authorTimelineViewEntry {
   align-items: center;
+  contain-intrinsic-size: 100px;
+  content-visibility: auto;
   display: grid;
+  flex: 0 0 auto;
   grid-template-columns: min-content min-content 1fr;
-  gap: 0 1em;
+  gap: 0.5em 1em;
+  min-height: 100px;
+}
+
+.authorTimelineViewAction {
+  opacity: 0;
+  transition: 0.3s opacity;
+
+  .authorTimelineViewAuthorHeader:hover > & {
+    opacity: 1;
+  }
 }
 
 .authorTimelineViewYear {
-  align-self: flex-start;
   position: sticky;
   top: 1em;
   width: 100px;
@@ -51,7 +63,6 @@
 
 .authorTimelineEventDate {
   grid-column: 1;
-  padding-top: 1em;
 }
 
 .authorTimelineEntryBisector {
@@ -65,15 +76,13 @@
   background-color: black;
   border-radius: 50%;
   height: 1em;
-  margin-bottom: 1em;
   width: 1em;
 }
 
 .authorTimelineViewEntryDetails {
-  align-self: flex-start;
   justify-self: start;
   gap: 1em;
-  padding-top: 1em;
+  padding: 1em 0;
 }
 
 .authorTimelineViewEntryDetails > p {

@@ -1,5 +1,4 @@
-import { MdAdd, MdClear, MdRemove } from 'react-icons/md';
-import styles from './DynamicList.module.css';
+import { MdAdd, MdClear } from 'react-icons/md';
 
 import { JSX, useCallback } from 'react';
 import clsx from 'clsx';
@@ -41,10 +40,7 @@ export function DynamicList<ItemType>({
       return (
         <button
           type="button"
-          className={clsx(
-            styles.dynamicListButton,
-            styles.dynamicListRemoveButton,
-          )}
+          className={clsx('dynamicListButton', 'dynamicListRemoveButton')}
           onClick={() => {
             onRemove?.(props);
           }}
@@ -57,8 +53,8 @@ export function DynamicList<ItemType>({
   );
 
   return (
-    <div className={clsx(styles.dynamicList, classes?.component)}>
-      <div className={clsx(styles.dynamicListItems, classes?.listItems)}>
+    <div className={clsx('dynamicList', classes?.component)}>
+      <div className={clsx('dynamicListItems', classes?.listItems)}>
         {items.map((item, index) => {
           return (
             <ItemTemplate
@@ -72,10 +68,7 @@ export function DynamicList<ItemType>({
       </div>
       {onAdd && (
         <button
-          className={clsx(
-            styles.dynamicListButton,
-            styles.dynamicListAddButton,
-          )}
+          className={clsx('dynamicListButton', 'dynamicListAddButton')}
           type="button"
           onClick={onAdd}
         >

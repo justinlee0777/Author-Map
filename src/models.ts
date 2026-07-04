@@ -1,5 +1,13 @@
 import type { ImgHTMLAttributes } from 'react';
 
+export type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+    ? RecursivePartial<U>[]
+    : T[P] extends object | undefined
+      ? RecursivePartial<T[P]>
+      : T[P];
+};
+
 export enum USState {
   ALABAMA = 'Alabama',
   ALASKA = 'Alaska',
@@ -134,11 +142,6 @@ export interface AuthorLocation {
   address?: string;
 }
 
-export enum AuthorEventType {
-  BIRTHS = 'Births',
-  DEATHS = 'Deaths',
-}
-
 export interface PortraitData extends ImgHTMLAttributes<HTMLImageElement> {
   /** Use to properly credit the photo source. */
   attribution?: string;
@@ -151,27 +154,6 @@ export interface TimeSpan {
   endDate: string;
 }
 
-/* TODO: Not sure what to do with this or how to do it organically.
-Seems to me that this should be flattened and its own model, mostly because "achievement" is a separate concept from what the author has actually done.
-export enum AuthorAchievementType {
-  RENOWNED_WORK = 'Renowned work',
-  AWARD = 'Award',
-}
-
-export interface AuthorWorkAchievement {
-  workTitle: string;
-  type: AuthorAchievementType.RENOWNED_WORK;
-  referenceUrl?: string;
-}
-
-export interface AuthorAwardAchievement {
-  awardName: string;
-  type: AuthorAchievementType.AWARD;
-}
-
-export type AuthorAchievement = AuthorWorkAchievement | AuthorAwardAchievement;
-*/
-
 export interface BaseTimelineEvent {
   id: string | Symbol;
 
@@ -182,13 +164,17 @@ export interface BaseTimelineEvent {
   referenceUrl?: string;
 }
 
-export interface BirthEvent extends BaseTimelineEvent {
+type MakeRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
+export interface BirthEvent
+  extends MakeRequired<BaseTimelineEvent, 'authorId'> {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   date: string;
   type: 'Birth';
 }
 
-export interface DeathEvent extends BaseTimelineEvent {
+export interface DeathEvent
+  extends MakeRequired<BaseTimelineEvent, 'authorId'> {
   /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
   date: string;
   type: 'Death';
@@ -204,18 +190,30 @@ export interface MilestoneEvent extends BaseTimelineEvent {
   type: 'Milestone';
 }
 
+export interface MajorTimelineEvent extends BaseTimelineEvent, TimeSpan {}
+
+export interface MajorMilestoneEvent extends BaseTimelineEvent {
+  /** ISO YYYY-MM-DD datestring. Any more precision seems unneeded. */
+  date: string;
+}
+
+export type MajorEvent = (MajorMilestoneEvent | MajorTimelineEvent) & {
+  type: 'Major event';
+};
+
 export type AuthorTimelineEvent =
   | BirthEvent
   | DeathEvent
   | TimelineEvent
-  | MilestoneEvent;
+  | MilestoneEvent
+  | MajorEvent;
 
 /**
  * Does not refer to a group in a physical sense. "Group" is arbitrary and can refer to any possible interesting category.
  * For example, "Jewish American writers", "Belonging to the Harlem Renaissance", "pre-Republic", etc.
  */
 export interface AuthorGroup {
-  id: string | Symbol;
+  id: string;
 
   /** Assumed to be unique. */
   name: string;
@@ -224,22 +222,28 @@ export interface AuthorGroup {
   link?: string;
 }
 
-export interface BaseInclusionReason {
+export interface PoetLaureateReason {
+  type: 'Poet Laureate';
   /** Meaning, a reference to the webpage where the info was scraped. */
   referenceUrl: string;
-}
-
-export interface PoetLaureateReason extends BaseInclusionReason {
-  type: 'Poet Laureate';
   dates: Array<{
     startYear: number;
     endYear?: number;
   }>;
 }
 
+export interface AuthorGroupReason {
+  type: 'Belongs to a renowned group';
+  referenceUrl: string;
+  groupId: AuthorGroup['id'];
+}
+
 export enum AmericanLiteraryAward {
   NOBEL_PRIZE_IN_LITERATURE = 'Nobel Prize in Literature',
-  PULITZER = 'Pulitzer',
+  PULITZER_FICTION = 'Pulitzer Prize for Fiction',
+  PULITZER_POETRY = 'Pulitzer Prize for Poetry',
+  NATIONAL_BOOK_FICTION = 'National Book Award for Fiction',
+  NATIONAL_BOOK_POETRY = 'National Book Award for Poetry',
 }
 
 export enum ClassicPublisher {
@@ -247,32 +251,43 @@ export enum ClassicPublisher {
   PENGUIN_CLASSIC = 'Penguin Classic',
   NORTON = 'Norton',
   LIBRARY_OF_AMERICA = 'Library of America',
+  DALKEY = 'Dalkey Archive Press',
 }
 
 export interface ClassicPublisherCatalog {
   books: Array<{
+    /** Meaning, a reference to the webpage where the info was scraped. */
+    referenceUrl: string;
     name: string;
   }>;
 }
 
-export interface ClassicPublisherReason extends BaseInclusionReason {
+export interface ClassicPublisherReason {
   type: 'Published as classical literature';
   publishers: Partial<{
     [publisher in ClassicPublisher]: ClassicPublisherCatalog;
   }>;
 }
 
-export interface AcademicCitationReason extends BaseInclusionReason {
+export interface AcademicCitationReason {
+  /** Meaning, a reference to the webpage where the info was scraped. */
+  referenceUrl: string;
   type: 'Academia citation';
   count: number;
 }
 
-export interface AwardInclusionReason extends BaseInclusionReason {
+export interface AwardInclusionReason {
+  /** Meaning, a reference to the webpage where the info was scraped. */
+  referenceUrl: string;
   award: AmericanLiteraryAward;
   year: number;
   type: 'award';
 
   book?: string;
+}
+
+export interface PersonalReason {
+  type: 'Because I said so; source: me';
 }
 
 /**
@@ -282,8 +297,10 @@ export interface AwardInclusionReason extends BaseInclusionReason {
 export type AuthorInclusionReason =
   | PoetLaureateReason
   | ClassicPublisherReason
-  | AcademicCitationReason
-  | AwardInclusionReason;
+  /*| AcademicCitationReason*/ // TODO
+  | AwardInclusionReason
+  | PersonalReason
+  | AuthorGroupReason;
 
 export interface Author {
   id: string | Symbol;
@@ -323,4 +340,97 @@ export interface AuthorData {
 
   deathDate?: DeathEvent;
   timeline?: Array<AuthorTimelineEvent>;
+}
+
+export interface InclusionReasonValues {
+  poetLaureates: boolean;
+  personal: boolean;
+  authorGroup: boolean;
+  publishers: {
+    collapsed: boolean;
+    checked: boolean;
+    specific: {
+      [key in ClassicPublisher]: boolean;
+    };
+  };
+  awards: {
+    collapsed: boolean;
+    checked: boolean;
+    specific: {
+      [key in AmericanLiteraryAward]: boolean;
+    };
+  };
+}
+export interface AuthorMapFilters {
+  inclusionReasons: InclusionReasonValues;
+  yearRange: [number, number];
+  eventTypes: Array<AuthorTimelineEvent['type']>;
+  formula: AuthorMapFormulaFilter;
+
+  search?: string;
+  groupId?: AuthorGroup['id'];
+}
+
+export interface AuthorMapProps {
+  authors: Array<Author>;
+
+  /**
+   * Whether the client should be disabled from adding and editing authors / groups etc.
+   * If a string is provided, this is the error message shown to user explaining why they cannot take any actions.
+   */
+  disabled?: boolean | string;
+
+  groups?: Array<AuthorGroup>;
+
+  timeline?: Array<AuthorTimelineEvent>;
+
+  cityCoordinates?: Array<CityCoordinates>;
+
+  /**
+   * Use if you want to show a state's entry into the union, if you want to have a sense of time for the author.
+   * The value is a valid ISO datestring.
+   */
+  entriesIntoUnion?: {
+    [state in USState]: string;
+  };
+
+  /**
+   * Use if you want to show the state's most recent population count. Useful if you want to ask questions concerning population.
+   * Though population count over time would be useful, not supported ATM.
+   */
+  stateCensus?: {
+    [state in USState]: {
+      count: number;
+      /** ISO datestring. */
+      dateRecorded: string;
+    };
+  };
+
+  className?: string;
+  /**
+   * Used to update an external dataset.
+   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
+   * TODO: How should IDs be handled?
+   */
+  syncAuthorAdded?: (author: AuthorData) => void | Promise<void>;
+  /**
+   * Used to update an external dataset.
+   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
+   */
+  syncAuthorUpdate?: (changedAuthor: AuthorData) => void | Promise<void>;
+
+  onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
+
+  onGroupUpdated?: (authorGroup: AuthorGroup) => void | Promise<void>;
+
+  onTimelineEventCreated?: (event: AuthorTimelineEvent) => void | Promise<void>;
+
+  onTimelineEventUpdated?: (event: AuthorTimelineEvent) => void | Promise<void>;
+}
+
+export type AuthorMapFormulaEquation = string;
+
+export interface AuthorMapFormulaFilter {
+  equation: AuthorMapFormulaEquation;
+  threshold: number;
 }

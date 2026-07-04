@@ -3,6 +3,7 @@
   flex-direction: row;
   font-size: 0.8em;
   gap: 1em;
+  min-height: 100px;
   padding: 1em 0;
   position: relative;
 }

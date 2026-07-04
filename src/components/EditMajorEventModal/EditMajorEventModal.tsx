@@ -1,18 +1,15 @@
-import styles from './EditMajorEventModal.module.css';
-
 import { JSX, useMemo, useState } from 'react';
 
 import { Formik } from 'formik';
-import Modal from 'react-modal';
 import { PulseLoader } from 'react-spinners';
 import { MdClear } from 'react-icons/md';
 
 import { BaseTimelineEvent, MilestoneEvent } from '../../models';
 import { TimelineEvent } from '../EditAuthorModal/TimelineEvent/TimelineEvent';
 import { Tooltip } from 'react-tooltip';
+import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
-  appElement: HTMLElement;
   opened: boolean;
 
   disabled?: boolean | string;
@@ -22,7 +19,6 @@ interface Props {
 }
 
 export function EditMajorEventModal({
-  appElement,
   opened,
   disabled,
   onSubmit,
@@ -37,7 +33,7 @@ export function EditMajorEventModal({
   );
 
   return (
-    <Modal isOpen={opened} appElement={appElement}>
+    <CommonModal opened={opened} onClose={onClose}>
       <Formik<Partial<MilestoneEvent>>
         initialValues={initialEvent}
         onSubmit={async (finalEvent) => {
@@ -52,9 +48,9 @@ export function EditMajorEventModal({
       >
         {({ handleSubmit, values, handleChange, setFieldValue, isValid }) => {
           return (
-            <form className={styles.editMajorEventForm} onSubmit={handleSubmit}>
+            <form className="editMajorEventForm" onSubmit={handleSubmit}>
               <button
-                className={styles.editMajorEventCloseModal}
+                className="editMajorEventCloseModal"
                 type="button"
                 onClick={onClose}
               >
@@ -102,6 +98,6 @@ export function EditMajorEventModal({
           );
         }}
       </Formik>
-    </Modal>
+    </CommonModal>
   );
 }

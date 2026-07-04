@@ -1,18 +1,20 @@
-import styles from './AuthorMap.module.css';
-import commonStyles from './common.module.css';
-
-import { useMemo, useRef, useState, JSX, useCallback } from 'react';
+import { useMemo, useRef, useState, JSX, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
+import Modal from 'react-modal';
 
-import type {
-  Author,
-  AuthorData,
-  AuthorGroup,
-  AuthorTimelineEvent,
-  BirthEvent,
-  CityCoordinates,
-  DeathEvent,
-  MilestoneEvent,
+import {
+  AmericanLiteraryAward,
+  type AuthorMapFilters,
+  ClassicPublisher,
+  type Author,
+  type AuthorData,
+  type AuthorGroup,
+  type AuthorTimelineEvent,
+  type BirthEvent,
+  type DeathEvent,
+  type MilestoneEvent,
+  type AuthorMapProps,
+  RecursivePartial,
 } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { AuthorMapStores } from './utils/stores';
@@ -22,54 +24,51 @@ import { AuthorListView } from './components/AuthorListView/AuthorListView';
 import { AuthorTimelineView } from './components/AuthorTimelineView/AuthorTimelineView';
 import { AddAuthor } from './components/AddAuthor/AddAuthor';
 import { AddAuthorGroup } from './components/AddAuthorGroup/AddAuthorGroup';
-import { AuthorGroupContext, AuthorMapDataContext } from './contexts';
+import { AuthorMapDataContext } from './contexts';
 import { EditAuthorGroupModal } from './components/EditAuthorGroupModal/EditAuthorGroupModal';
 import { AddMajorEvent } from './components/AddMajorEvent/AddMajorEvent';
 import { EditMajorEventModal } from './components/EditMajorEventModal/EditMajorEventModal';
 import { ViewAuthorModal } from './components/ViewAuthorModal/ViewAuthorModal';
-
-interface Props {
-  authors: Array<Author>;
-
-  /**
-   * Whether the client should be disabled from adding and editing authors / groups etc.
-   * If a string is provided, this is the error message shown to user explaining why they cannot take any actions.
-   */
-  disabled?: boolean | string;
-
-  groups?: Array<AuthorGroup>;
-
-  timeline?: Array<AuthorTimelineEvent>;
-
-  cityCoordinates?: Array<CityCoordinates>;
-
-  className?: string;
-  /**
-   * Used to update an external dataset.
-   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
-   * TODO: How should IDs be handled?
-   */
-  syncAuthorAdded?: (author: AuthorData) => void | Promise<void>;
-  /**
-   * Used to update an external dataset.
-   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
-   */
-  syncAuthorUpdate?: (changedAuthor: AuthorData) => void | Promise<void>;
-
-  onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
-
-  onGroupUpdated?: (authorGroup: AuthorGroup) => void | Promise<void>;
-
-  onTimelineEventCreated?: (event: AuthorTimelineEvent) => void | Promise<void>;
-
-  onTimelineEventUpdated?: (event: AuthorTimelineEvent) => void | Promise<void>;
-}
+import { AuthorFilterView } from './components/AuthorFilterView';
+import { AuthorFilterDrawer } from './components/AuthorFilterDrawer';
+import { defaultFormula } from './consts/formula.const';
 
 enum ViewType {
   MAP = 'Map',
   LIST = 'List',
   TIMELINE = 'Timeline',
 }
+
+interface EditingAuthorModal {
+  editingAuthor: RecursivePartial<AuthorData>;
+  type: 'editingAuthor';
+}
+
+interface EditingGroupModal {
+  editingGroup: Partial<AuthorGroup>;
+  type: 'editingGroup';
+}
+
+interface ViewingAuthorModal {
+  viewingAuthor: Author;
+  type: 'viewingAuthor';
+}
+
+interface EditingMajorEventModal {
+  editingMajorEvent: Partial<MilestoneEvent>;
+  type: 'editingMajorEvent';
+}
+
+interface FilterEditingModal {
+  type: 'filterEditing';
+}
+
+type ModalState =
+  | EditingAuthorModal
+  | EditingGroupModal
+  | ViewingAuthorModal
+  | EditingMajorEventModal
+  | FilterEditingModal;
 
 /**
  * This is not pure. This will internally update authors.
@@ -101,6 +100,8 @@ export function AuthorMap({
   groups = [],
   timeline = [],
   cityCoordinates = [],
+  stateCensus,
+  entriesIntoUnion,
   className,
   disabled,
   syncAuthorAdded,
@@ -109,29 +110,25 @@ export function AuthorMap({
   onGroupUpdated,
   onTimelineEventCreated,
   onTimelineEventUpdated,
-}: Props): JSX.Element {
+}: AuthorMapProps): JSX.Element {
   const componentRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(false);
 
   const [viewType, setViewType] = useState<ViewType>(ViewType.MAP);
 
-  const [editingAuthor, setEditingAuthor] =
-    useState<RecursivePartial<AuthorData> | null>(null);
+  const [modalState, setModalState] = useState<ModalState | null>(null);
 
-  const [editingGroup, setEditingGroup] = useState<Partial<AuthorGroup> | null>(
-    null,
-  );
-
-  const [viewingAuthor, setViewingAuthor] = useState<Author | null>(null);
-
-  const [editingMajorEvent, setEditingMajorEvent] =
-    useState<Partial<MilestoneEvent> | null>(null);
+  useEffect(() => {
+    if (componentRef.current) {
+      Modal.setAppElement(componentRef.current);
+    }
+  }, [componentRef]);
 
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => {
     return new AuthorMapStores(authors, timeline);
-  }, [authors]);
+  }, [authors, timeline]);
 
   const onAuthorEdit = useCallback(
     (author: Partial<Author>) => {
@@ -145,15 +142,54 @@ export function AuthorMap({
         timeline = statesData.getAuthorTimeline(author.id, true);
       }
 
-      setEditingAuthor({
-        author,
-        birthDate,
-        deathDate,
-        timeline,
+      setModalState({
+        type: 'editingAuthor',
+        editingAuthor: {
+          author,
+          birthDate,
+          deathDate,
+          timeline,
+        },
       });
     },
-    [statesData, setEditingAuthor],
+    [statesData, setModalState],
   );
+
+  const [filters, setFilters] = useState<AuthorMapFilters>({
+    eventTypes: ['Birth'],
+    inclusionReasons: {
+      poetLaureates: true,
+      publishers: {
+        checked: true,
+        collapsed: true,
+        specific: {
+          [ClassicPublisher.DALKEY]: true,
+          [ClassicPublisher.LIBRARY_OF_AMERICA]: true,
+          [ClassicPublisher.NORTON]: true,
+          [ClassicPublisher.NYRB]: true,
+          [ClassicPublisher.PENGUIN_CLASSIC]: true,
+        },
+      },
+      awards: {
+        checked: true,
+        collapsed: true,
+        specific: {
+          [AmericanLiteraryAward.NATIONAL_BOOK_FICTION]: true,
+          [AmericanLiteraryAward.NATIONAL_BOOK_POETRY]: true,
+          [AmericanLiteraryAward.NOBEL_PRIZE_IN_LITERATURE]: true,
+          [AmericanLiteraryAward.PULITZER_FICTION]: true,
+          [AmericanLiteraryAward.PULITZER_POETRY]: true,
+        },
+      },
+      personal: false,
+      authorGroup: true,
+    },
+    formula: {
+      equation: defaultFormula,
+      threshold: 0,
+    },
+    yearRange: statesData.dateRange,
+  });
 
   let viewElement: JSX.Element;
 
@@ -163,6 +199,12 @@ export function AuthorMap({
         <AuthorMapView
           cityCoordinates={cityCoordinates}
           onAuthorEdit={onAuthorEdit}
+          onAuthorView={(viewingAuthor) =>
+            setModalState({
+              viewingAuthor,
+              type: 'viewingAuthor',
+            })
+          }
         />
       );
       break;
@@ -170,29 +212,53 @@ export function AuthorMap({
       viewElement = (
         <AuthorListView
           onAuthorEdit={onAuthorEdit}
-          onAuthorView={setViewingAuthor}
-          onAuthorGroupEdit={setEditingGroup}
+          onAuthorView={(viewingAuthor) =>
+            setModalState({
+              viewingAuthor,
+              type: 'viewingAuthor',
+            })
+          }
+          onAuthorGroupEdit={(editingGroup) =>
+            setModalState({
+              editingGroup,
+              type: 'editingGroup',
+            })
+          }
         />
       );
       break;
     case ViewType.TIMELINE:
     default:
-      viewElement = <AuthorTimelineView />;
+      viewElement = (
+        <AuthorTimelineView
+          onAuthorView={(viewingAuthor) =>
+            setModalState({
+              viewingAuthor,
+              type: 'viewingAuthor',
+            })
+          }
+        />
+      );
       break;
   }
 
   return (
-    <AuthorMapDataContext.Provider value={{ data: statesData }}>
-      <AuthorGroupContext.Provider value={{ groups }}>
-        <div
-          className={clsx(styles.authorMapComponentContainer, className)}
-          ref={componentRef}
-        >
+    <AuthorMapDataContext.Provider
+      value={{
+        data: statesData,
+        filters,
+        groups,
+        stateCensus,
+        entriesIntoUnion,
+      }}
+    >
+      <div
+        className={clsx('authorMapComponentContainer', className)}
+        ref={componentRef}
+      >
+        <div className="authorMapActions">
           <Tabs<ViewType>
-            className={clsx(
-              commonStyles.floatingAction,
-              styles.authorMapViewSwitch,
-            )}
+            className={clsx('authorMapViewSwitch')}
             highlightedValue={viewType}
             values={Object.values(ViewType).map((value) => ({
               value,
@@ -204,17 +270,19 @@ export function AuthorMap({
               }
             }}
           />
-          <div className={styles.authorMapContainer}>{viewElement}</div>
-          <div
-            className={clsx(
-              commonStyles.floatingAction,
-              styles.authorMapAddButtons,
-            )}
-          >
-            <AddAuthor
-              children={{ right: 'Add author' }}
-              onClick={() => {
-                setEditingAuthor({
+          <AuthorFilterView
+            filters={filters}
+            onClick={() => setModalState({ type: 'filterEditing' })}
+          />
+        </div>
+        <div className="authorMapContainer">{viewElement}</div>
+        <div className={clsx('floatingAction', 'authorMapAddButtons')}>
+          <AddAuthor
+            children={{ right: 'Add author' }}
+            onClick={() => {
+              setModalState({
+                type: 'editingAuthor',
+                editingAuthor: {
                   author: {
                     authorFirstName: '',
                     authorLastName: '',
@@ -228,194 +296,203 @@ export function AuthorMap({
                     type: 'Birth',
                   },
                   timeline: [],
-                });
-              }}
-            />
+                },
+              });
+            }}
+          />
 
-            <AddAuthorGroup
-              children={{ right: 'Add group' }}
-              onClick={() => {
-                setEditingGroup({
+          <AddAuthorGroup
+            children={{ right: 'Add group' }}
+            onClick={() => {
+              setModalState({
+                editingGroup: {
                   name: '',
                   description: '',
                   span: {
                     startDate: '',
                     endDate: '',
                   },
+                },
+                type: 'editingGroup',
+              });
+            }}
+          />
+
+          {viewType === ViewType.TIMELINE && (
+            <AddMajorEvent
+              children={{ right: 'Add major event' }}
+              onClick={() => {
+                setModalState({
+                  type: 'editingMajorEvent',
+                  editingMajorEvent: {
+                    location: {},
+                  },
                 });
               }}
             />
-
-            {viewType === ViewType.TIMELINE && (
-              <AddMajorEvent
-                children={{ right: 'Add major event' }}
-                onClick={() => {
-                  setEditingMajorEvent({
-                    location: {},
-                  });
-                }}
-              />
-            )}
-          </div>
-
-          {editingAuthor && (
-            <EditAuthorModal
-              appElement={componentRef.current!}
-              opened={Boolean(editingAuthor)}
-              initialData={editingAuthor}
-              disabled={loading || disabled}
-              onClose={() => setEditingAuthor(null)}
-              onGroupCreated={onGroupCreated}
-              onSubmit={async (data) => {
-                if (disabled) {
-                  return;
-                }
-
-                setLoading(true);
-
-                const updating = Boolean(data.author.id);
-
-                try {
-                  const fullTimeline: Array<AuthorTimelineEvent> = [
-                    data.birthDate,
-                    ...(data.timeline ?? []),
-                  ];
-
-                  if (data.deathDate) {
-                    fullTimeline.push(data.deathDate);
-                  }
-
-                  if (updating) {
-                    await syncAuthorUpdate?.(data);
-
-                    statesData.update(data.author);
-                  } else {
-                    await syncAuthorAdded?.(data);
-
-                    statesData.add(data.author);
-                  }
-
-                  statesData.setAuthorTimeline(data.author.id, fullTimeline);
-                  statesData.setBirthDate(data.author.id, data.birthDate);
-
-                  if (data.deathDate) {
-                    statesData.setDeathDate(data.author.id, data.deathDate);
-                  } else {
-                    statesData.removeDeathDate(data.author.id);
-                  }
-
-                  setEditingAuthor(null);
-                } catch (error) {
-                  console.error(
-                    `Author could not be ${updating ? 'updated' : 'added'}.`,
-                    error,
-                  );
-                  alert(
-                    `Author could not be ${updating ? 'updated' : 'added'}. Please try again.`,
-                  );
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            />
-          )}
-
-          {editingGroup && (
-            <EditAuthorGroupModal
-              appElement={componentRef.current!}
-              opened={Boolean(editingGroup)}
-              initialAuthorGroup={editingGroup}
-              disabled={loading || disabled}
-              onClose={() => setEditingGroup(null)}
-              onSubmit={async (group) => {
-                if (disabled) {
-                  return;
-                }
-
-                setLoading(true);
-
-                const updating = Boolean(group.id);
-
-                try {
-                  if (updating) {
-                    await onGroupUpdated?.(group);
-                  } else {
-                    await onGroupCreated?.(group);
-
-                    if (!group.id) {
-                      group.id = Symbol(`ID for ${group.name}`);
-                    }
-                  }
-
-                  setEditingGroup(null);
-                } catch (error) {
-                  console.error(
-                    `Group could not be ${updating ? 'updated' : 'added'}.`,
-                    error,
-                  );
-                  alert(
-                    `Group could not be ${updating ? 'updated' : 'added'}. Please try again.`,
-                  );
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            />
-          )}
-
-          {editingMajorEvent && (
-            <EditMajorEventModal
-              appElement={componentRef.current!}
-              opened={Boolean(editingMajorEvent)}
-              initialEvent={editingMajorEvent}
-              disabled={loading || disabled}
-              onClose={() => setEditingMajorEvent(null)}
-              onSubmit={async (event) => {
-                if (disabled) {
-                  return;
-                }
-
-                setLoading(true);
-
-                const updating = Boolean(event.id);
-
-                try {
-                  if (updating) {
-                    await onTimelineEventUpdated?.(event);
-                  } else {
-                    await onTimelineEventCreated?.(event);
-
-                    if (!event.id) {
-                      event.id = Symbol(`ID for a major event: ${event.notes}`);
-                    }
-                  }
-
-                  setEditingMajorEvent(null);
-                } catch (error) {
-                  console.error(
-                    `Major event could not be ${updating ? 'updated' : 'added'}.`,
-                    error,
-                  );
-                  alert(
-                    `Major event could not be ${updating ? 'updated' : 'added'}. Please try again.`,
-                  );
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            />
-          )}
-
-          {viewingAuthor && (
-            <ViewAuthorModal
-              appElement={componentRef.current!}
-              opened={Boolean(viewingAuthor)}
-              author={viewingAuthor}
-              onClose={() => setViewingAuthor(null)}
-            />
           )}
         </div>
-      </AuthorGroupContext.Provider>
+
+        {modalState?.type === 'editingAuthor' && (
+          <EditAuthorModal
+            opened
+            initialData={modalState.editingAuthor}
+            disabled={loading || disabled}
+            onClose={() => setModalState(null)}
+            onGroupCreated={onGroupCreated}
+            onSubmit={async (data) => {
+              if (disabled) {
+                return;
+              }
+
+              setLoading(true);
+
+              const updating = Boolean(data.author.id);
+
+              try {
+                const fullTimeline: Array<AuthorTimelineEvent> = [
+                  data.birthDate,
+                  ...(data.timeline ?? []),
+                ];
+
+                if (data.deathDate) {
+                  fullTimeline.push(data.deathDate);
+                }
+
+                if (updating) {
+                  await syncAuthorUpdate?.(data);
+
+                  statesData.update(data.author);
+                } else {
+                  await syncAuthorAdded?.(data);
+
+                  statesData.add(data.author);
+                }
+
+                statesData.setAuthorTimeline(data.author.id, fullTimeline);
+                statesData.setBirthDate(data.author.id, data.birthDate);
+
+                if (data.deathDate) {
+                  statesData.setDeathDate(data.author.id, data.deathDate);
+                } else {
+                  statesData.removeDeathDate(data.author.id);
+                }
+
+                setModalState(null);
+              } catch (error) {
+                console.error(
+                  `Author could not be ${updating ? 'updated' : 'added'}.`,
+                  error,
+                );
+                alert(
+                  `Author could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+                );
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
+        )}
+
+        {modalState?.type === 'editingGroup' && (
+          <EditAuthorGroupModal
+            opened
+            initialAuthorGroup={modalState.editingGroup}
+            disabled={loading || disabled}
+            onClose={() => setModalState(null)}
+            onSubmit={async (group) => {
+              if (disabled) {
+                return;
+              }
+
+              setLoading(true);
+
+              const updating = Boolean(group.id);
+
+              try {
+                if (updating) {
+                  await onGroupUpdated?.(group);
+                } else {
+                  await onGroupCreated?.(group);
+
+                  if (!group.id) {
+                    group.id = `ID for ${group.name}`;
+                  }
+                }
+
+                setModalState(null);
+              } catch (error) {
+                console.error(
+                  `Group could not be ${updating ? 'updated' : 'added'}.`,
+                  error,
+                );
+                alert(
+                  `Group could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+                );
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
+        )}
+
+        {modalState?.type === 'editingMajorEvent' && (
+          <EditMajorEventModal
+            opened
+            initialEvent={modalState.editingMajorEvent}
+            disabled={loading || disabled}
+            onClose={() => setModalState(null)}
+            onSubmit={async (event) => {
+              if (disabled) {
+                return;
+              }
+
+              setLoading(true);
+
+              const updating = Boolean(event.id);
+
+              try {
+                if (updating) {
+                  await onTimelineEventUpdated?.(event);
+                } else {
+                  await onTimelineEventCreated?.(event);
+
+                  if (!event.id) {
+                    event.id = Symbol(`ID for a major event: ${event.notes}`);
+                  }
+                }
+
+                setModalState(null);
+              } catch (error) {
+                console.error(
+                  `Major event could not be ${updating ? 'updated' : 'added'}.`,
+                  error,
+                );
+                alert(
+                  `Major event could not be ${updating ? 'updated' : 'added'}. Please try again.`,
+                );
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
+        )}
+
+        {modalState?.type === 'viewingAuthor' && (
+          <ViewAuthorModal
+            opened
+            author={modalState.viewingAuthor}
+            onClose={() => setModalState(null)}
+          />
+        )}
+        {modalState?.type === 'filterEditing' && (
+          <AuthorFilterDrawer
+            className={clsx('floatingAction', 'authorMapFilterSideDrawer')}
+            onFiltersChange={setFilters}
+            onClose={() => setModalState(null)}
+          />
+        )}
+      </div>
     </AuthorMapDataContext.Provider>
   );
 }
