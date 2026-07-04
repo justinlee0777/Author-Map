@@ -181,7 +181,7 @@ export function AuthorMap({
         },
       },
       personal: false,
-      authorGroup: false,
+      authorGroup: true,
     },
     formula: {
       equation: defaultFormula,

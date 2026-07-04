@@ -22,9 +22,9 @@ export function SelectAuthorGroup({ id, value, onSelect }: Props): JSX.Element {
       value={value}
       onChange={(event) => {
         if (event.currentTarget.value) {
-          const index = Number(event.currentTarget.value);
+          const id = event.currentTarget.value;
 
-          const group = groups[index];
+          const group = groups.find((g) => g.id === id)!;
 
           onSelect(group);
         } else {
@@ -43,7 +43,7 @@ export function SelectAuthorGroup({ id, value, onSelect }: Props): JSX.Element {
         }
 
         return (
-          <option key={keyGenerator.getKey(id)} value={index}>
+          <option key={keyGenerator.getKey(id)} value={id}>
             {name} {spanString}: {description.slice(0, 100)}
           </option>
         );

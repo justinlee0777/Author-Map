@@ -44,3 +44,13 @@ p {
 .publisherList {
   margin-left: 1em;
 }
+
+.viewAuthorModalAuthorGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+
+  & > p:nth-of-type(n + 2) {
+    margin-left: 1em;
+  }
+}

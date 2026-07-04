@@ -48,7 +48,7 @@ export const AuthorMapDataContext = createContext<AuthorMapDataContextValue>({
         },
       },
       personal: false,
-      authorGroup: false,
+      authorGroup: true,
     },
     formula: {
       equation: defaultFormula,

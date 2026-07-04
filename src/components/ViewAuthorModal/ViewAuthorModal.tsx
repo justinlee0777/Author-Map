@@ -19,9 +19,7 @@ export function ViewAuthorModal({
   onClose,
   author,
 }: Props): JSX.Element {
-  const { data, filters } = useContext(AuthorMapDataContext);
-
-  const { groups } = useContext(AuthorMapDataContext);
+  const { data, filters, groups } = useContext(AuthorMapDataContext);
 
   let authorNameElement: ReactNode = getAuthorName(author);
 
@@ -126,6 +124,22 @@ export function ViewAuthorModal({
                     <> for {`"${inclusionReason.book}"`}</>
                   )}
                 </p>
+              );
+            case 'Belongs to a renowned group':
+              const group = groups.find(
+                (g) => g.id === inclusionReason.groupId,
+              )!;
+              return (
+                <div
+                  key={`author-group-${group.name}`}
+                  className="viewAuthorModalAuthorGroup"
+                >
+                  <p>Belongs to a renowned group</p>
+                  <p>
+                    <b>{group.name}</b>
+                  </p>
+                  <p>{group.description}</p>
+                </div>
               );
             default:
               console.log(

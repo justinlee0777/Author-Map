@@ -92,10 +92,11 @@ export function useDemoData(config: Config): {
               majorEvents,
               stateCensus,
               entriesIntoUnion,
+              authorGroups,
             } = json;
 
             setAuthors(jsonAuthors as any);
-            setGroups([]);
+            setGroups(authorGroups);
             setTimeline([
               ...birthEvents,
               ...deathEvents,
