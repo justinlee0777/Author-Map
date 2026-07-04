@@ -14,6 +14,7 @@ import {
   type DeathEvent,
   type MilestoneEvent,
   type AuthorMapProps,
+  RecursivePartial,
 } from './models';
 import { EditAuthorModal } from './components/EditAuthorModal/EditAuthorModal';
 import { AuthorMapStores } from './utils/stores';

@@ -11,6 +11,7 @@ import {
   BaseTimelineEvent,
   BirthEvent,
   DeathEvent,
+  RecursivePartial,
 } from '../../models';
 import { DynamicList, ItemProps } from '../DynamicList/DynamicList';
 import { TimelineEvent as TimelineEventComponent } from './TimelineEvent/TimelineEvent';
