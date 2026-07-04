@@ -33,6 +33,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     minify: true,
+    sourcemap: true,
     lib: {
       // Define multiple inputs as a key-value object
       entry: {
