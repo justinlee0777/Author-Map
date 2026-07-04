@@ -8,7 +8,7 @@ import {
 
 export const groups: Array<AuthorGroup> = [
   {
-    id: Symbol('ID for American Renaissance'),
+    id: 'ID for American Renaissance',
     name: 'American Renaissance',
     description:
       'The American Renaissance period in American literature ran from about 1830 to around the Civil War. A central term in American studies, the American Renaissance was for a while considered synonymous with American Romanticism and was closely associated with Transcendentalism.',
@@ -19,7 +19,7 @@ export const groups: Array<AuthorGroup> = [
     link: 'https://en.wikipedia.org/wiki/American_Renaissance_(literature)',
   },
   {
-    id: Symbol('ID for Harlem Renaissance'),
+    id: 'ID for Harlem Renaissance',
     name: 'Harlem Renaissance',
     description:
       'The Harlem Renaissance was an intellectual and cultural movement of African-American music, dance, art, fashion, literature, theater, politics, and scholarship centered in Harlem, Manhattan, New York City, spanning the 1920s and 1930s.',

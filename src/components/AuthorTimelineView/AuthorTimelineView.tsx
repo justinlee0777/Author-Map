@@ -102,7 +102,7 @@ export function AuthorTimelineView({
             existingEvents
               .concat(event)
               .sort(
-                (a, b) =>
+                (a: { date: string }, b: { date: string }) =>
                   new Date(a.date).getTime() - new Date(b.date).getTime(),
               ),
           );
