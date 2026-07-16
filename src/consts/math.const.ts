@@ -13,11 +13,12 @@ const cos = Math.cos;
 const cosh = Math.cosh;
 const tan = Math.tan;
 const tanh = Math.tanh;
+const log = Math.log;
 
 const trigonometric = { sin, sinh, cos, cosh, tan, tanh };
 
 const math = create(evaluateDependencies);
 
-math.import({ ...arithmetic, ...trigonometric }, { override: true });
+math.import({ ...arithmetic, ...trigonometric, log }, { override: true });
 
 export { math };

@@ -374,12 +374,6 @@ export interface AuthorMapFilters {
 export interface AuthorMapProps {
   authors: Array<Author>;
 
-  /**
-   * Whether the client should be disabled from adding and editing authors / groups etc.
-   * If a string is provided, this is the error message shown to user explaining why they cannot take any actions.
-   */
-  disabled?: boolean | string;
-
   groups?: Array<AuthorGroup>;
 
   timeline?: Array<AuthorTimelineEvent>;
@@ -407,25 +401,6 @@ export interface AuthorMapProps {
   };
 
   className?: string;
-  /**
-   * Used to update an external dataset.
-   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
-   * TODO: How should IDs be handled?
-   */
-  syncAuthorAdded?: (author: AuthorData) => void | Promise<void>;
-  /**
-   * Used to update an external dataset.
-   * The component keeps a local state; if this callback throws an error, then this local state will not be updated.
-   */
-  syncAuthorUpdate?: (changedAuthor: AuthorData) => void | Promise<void>;
-
-  onGroupCreated?: (authorGroup: AuthorGroup) => void | Promise<void>;
-
-  onGroupUpdated?: (authorGroup: AuthorGroup) => void | Promise<void>;
-
-  onTimelineEventCreated?: (event: AuthorTimelineEvent) => void | Promise<void>;
-
-  onTimelineEventUpdated?: (event: AuthorTimelineEvent) => void | Promise<void>;
 }
 
 export type AuthorMapFormulaEquation = string;

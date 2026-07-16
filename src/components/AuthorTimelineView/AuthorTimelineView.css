@@ -44,6 +44,22 @@
   grid-template-columns: min-content min-content 1fr;
   gap: 0.5em 1em;
   min-height: 100px;
+
+  & h2,
+  h3,
+  h4 {
+    font-size: 1em;
+    margin: 0;
+  }
+
+  & h2 {
+    font-size: 1.2em;
+  }
+
+  & h3,
+  h4 {
+    font-size: 1em;
+  }
 }
 
 .authorTimelineViewAction {

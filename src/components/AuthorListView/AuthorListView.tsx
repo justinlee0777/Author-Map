@@ -24,6 +24,7 @@ import {
 import { Radiogroup } from '../Radiogroup/Radiogroup';
 import { AuthorMapDataContext } from '../../contexts';
 import infiniteScroll from '../../utils/infinite-scroll';
+import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
 
 interface Props {
   onAuthorEdit?: (author: Partial<Author>) => void;
@@ -73,7 +74,14 @@ export function AuthorListView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: { eventTypes, search, groupId, yearRange, formula },
+    filters: {
+      eventTypes,
+      search,
+      groupId,
+      yearRange,
+      formula,
+      inclusionReasons,
+    },
     groups,
   } = useContext(AuthorMapDataContext);
 
@@ -133,12 +141,15 @@ export function AuthorListView({
 
   let listElements: Array<JSX.Element>;
 
+  const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
+
   const filterArg: Parameters<AuthorMapStores['getAll']>[0] = {
     yearRange,
     eventTypes,
     search,
     groupId,
     formula,
+    inclusionReasons: inclusionReasonFilter,
   };
 
   switch (viewType) {

@@ -22,7 +22,11 @@ export function AuthorFilterView({
 
   return (
     <div className={clsx('authorFilterView', className)}>
-      <button className="button" onClick={onClick}>
+      <button
+        className="button"
+        onClick={onClick}
+        aria-label="Open filter view"
+      >
         <MdFilterList />
       </button>
 

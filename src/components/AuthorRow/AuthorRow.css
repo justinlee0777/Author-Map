@@ -25,6 +25,11 @@
   flex: 3;
   flex-direction: column;
   gap: 1em;
+
+  & h2 {
+    font-size: 1.2em;
+    margin: 0;
+  }
 }
 
 .authorRowRelevantEvent {

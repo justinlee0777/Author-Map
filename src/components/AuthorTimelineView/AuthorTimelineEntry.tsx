@@ -28,7 +28,7 @@ export function AuthorTimelineEntry({
     <li className="authorTimelineViewEntry" key={year}>
       {
         <>
-          <h4 className="authorTimelineViewYear">{year}</h4>
+          <h2 className="authorTimelineViewYear">{year}</h2>
           <div className="authorTimelineViewEntryBullet"></div>
           {events?.map((event, i) => {
             const author = event.authorId
@@ -61,7 +61,7 @@ export function AuthorTimelineEntry({
 
                 <div className="authorTimelineViewEntryDetails">
                   {author && (
-                    <h4 className="authorTimelineViewAuthorHeader">
+                    <h3 className="authorTimelineViewAuthorHeader">
                       {getAuthorName(author)}
                       <img
                         className="authorTimelineViewPortrait"
@@ -69,6 +69,7 @@ export function AuthorTimelineEntry({
                         height={48}
                         width={48}
                         loading="lazy"
+                        alt={`Portrait of ${getAuthorName(author)}`}
                       />
                       <button
                         className="authorTimelineViewAction"
@@ -76,7 +77,7 @@ export function AuthorTimelineEntry({
                       >
                         View
                       </button>
-                    </h4>
+                    </h3>
                   )}
 
                   {author ? <p>{note}</p> : <h4>{note}</h4>}

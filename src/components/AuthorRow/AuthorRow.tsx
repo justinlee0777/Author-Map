@@ -29,10 +29,16 @@ export function AuthorRow({
   return (
     <div className={clsx('authorRow', className)}>
       {author.portrait && author.portrait.src && (
-        <img {...author.portrait} loading="lazy" height={100} width={100} />
+        <img
+          {...author.portrait}
+          loading="lazy"
+          height={100}
+          width={100}
+          alt={`Portrait of ${getAuthorName(author)}`}
+        />
       )}
       <div className="authorRowDetails">
-        <h4>{authorName}</h4>
+        <h2>{authorName}</h2>
         {finalEvents.map(({ notes, date, location }, index) => {
           let contextElement: JSX.Element | undefined;
           /*

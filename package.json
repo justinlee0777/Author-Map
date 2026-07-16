@@ -6,7 +6,8 @@
     "start": "rm -rf .parcel-cache && parcel index.html",
     "format": "prettier -w .",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "build": "rm -rf dist && vite build && node ./post-vite.js"
+    "build": "rm -rf dist && vite build && node ./post-vite.js",
+    "test:e2e": "npm run test --prefix ./tests"
   },
   "exports": {
     ".": {
