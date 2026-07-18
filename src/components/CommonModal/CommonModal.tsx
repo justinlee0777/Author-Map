@@ -1,18 +1,50 @@
 import clsx from 'clsx';
-import { JSX, ReactNode } from 'react';
+import { type JSX, type ReactNode, useEffect, useRef } from 'react';
 import { MdClear } from 'react-icons/md';
-import Modal from 'react-modal';
 
 interface Props {
   children: ReactNode;
   opened: boolean;
 
+  className?: string;
   onClose?: () => void;
 }
 
-export function CommonModal({ children, opened, onClose }: Props): JSX.Element {
+export function CommonModal({
+  children,
+  opened,
+  className,
+  onClose,
+}: Props): JSX.Element {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog) {
+      if (opened && !dialog.open) {
+        dialog.showModal();
+      } else if (!opened && dialog.open) {
+        dialog.close();
+      }
+    }
+  }, [opened, dialogRef]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog) {
+      const handleCancel = (event: Event) => {
+        event.preventDefault();
+        onClose?.();
+      };
+
+      dialog.addEventListener('cancel', handleCancel);
+
+      return () => dialog.removeEventListener('cancel', handleCancel);
+    }
+  }, [onClose]);
+
   return (
-    <Modal className="modal" isOpen={opened}>
+    <dialog className={clsx('modal', className)} ref={dialogRef}>
       <button
         className={clsx('button', 'closeModal')}
         type="button"
@@ -21,6 +53,6 @@ export function CommonModal({ children, opened, onClose }: Props): JSX.Element {
         <MdClear />
       </button>
       {children}
-    </Modal>
+    </dialog>
   );
 }

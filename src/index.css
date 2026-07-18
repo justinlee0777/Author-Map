@@ -1,4 +1,4 @@
-@layer author-map-common, author-map-components, author-map-base;
+@layer author-map-base, author-map-common, author-map-components;
 
 @import './AuthorMap.css' layer(author-map-base);
 @import './components/index.css' layer(author-map-components);

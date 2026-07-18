@@ -1,9 +1,9 @@
 import { JSX, useMemo, useState } from 'react';
 import { MdHelpOutline } from 'react-icons/md';
-import Modal from 'react-modal';
 
 import { AuthorMapFormulaFilter } from '../../models';
 import { evaluateFormula, mathDocumentation } from '../../utils/formula';
+import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
   value: AuthorMapFormulaFilter;
@@ -69,10 +69,10 @@ export function Formula({ value, onChange }: Props): JSX.Element {
         />
       </div>
 
-      <Modal
+      <CommonModal
         className="formulaHelpModal"
-        isOpen={helpOpened}
-        onRequestClose={() => setHelpOpened(false)}
+        opened={helpOpened}
+        onClose={() => setHelpOpened(false)}
       >
         <p>
           The intent of this project was not to settle on hard criteria to
@@ -120,7 +120,7 @@ export function Formula({ value, onChange }: Props): JSX.Element {
           Reference:
           <code>{mathDocumentation}</code>
         </p>
-      </Modal>
+      </CommonModal>
     </div>
   );
 }

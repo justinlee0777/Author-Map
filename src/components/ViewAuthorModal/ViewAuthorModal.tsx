@@ -9,8 +9,8 @@ import { calculateScore } from '../../utils/formula';
 
 interface Props {
   opened: boolean;
-  author: Author;
 
+  author?: Author;
   onClose?: () => void;
 }
 
@@ -21,29 +21,31 @@ export function ViewAuthorModal({
 }: Props): JSX.Element {
   const { data, filters, groups } = useContext(AuthorMapDataContext);
 
-  let authorNameElement: ReactNode = getAuthorName(author);
+  let content: JSX.Element | undefined;
 
-  if (author.link) {
-    authorNameElement = (
-      <a href={author.link} target="_blank" rel="noopener noreferrer">
-        {authorNameElement}
-      </a>
+  if (author) {
+    let authorNameElement: ReactNode = getAuthorName(author);
+
+    if (author.link) {
+      authorNameElement = (
+        <a href={author.link} target="_blank" rel="noopener noreferrer">
+          {authorNameElement}
+        </a>
+      );
+    }
+
+    const events = data.getAuthorTimeline(author.id, true);
+
+    const birthDate = data.getBirthDate(author.id),
+      deathDate = data.getDeathDate(author.id);
+
+    const score = calculateScore(
+      author.inclusionReasons,
+      filters.formula.equation,
     );
-  }
 
-  const events = data.getAuthorTimeline(author.id, true);
-
-  const birthDate = data.getBirthDate(author.id),
-    deathDate = data.getDeathDate(author.id);
-
-  const score = calculateScore(
-    author.inclusionReasons,
-    filters.formula.equation,
-  );
-
-  return (
-    <CommonModal opened={opened} onClose={onClose}>
-      <div className="viewAuthorModal">
+    content = (
+      <>
         <div className="viewAuthorPortraitContainer">
           {author.portrait?.src && (
             <img src={author.portrait?.src} loading="lazy" />
@@ -225,7 +227,13 @@ export function ViewAuthorModal({
             {score.toFixed(2)}
           </>
         )}
-      </div>
+      </>
+    );
+  }
+
+  return (
+    <CommonModal opened={opened} onClose={onClose}>
+      <div className="viewAuthorModal">{content}</div>
     </CommonModal>
   );
 }

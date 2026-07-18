@@ -186,60 +186,22 @@ export function AuthorMapView({
     setHighlightedState,
   ]);
 
-  const stateDrawerElement = useMemo(() => {
-    let title: string | undefined, authors: Array<Author> | undefined;
+  let title: string | undefined, authors: Array<Author> | undefined;
 
-    if (highlightedState) {
-      title = highlightedState;
-      authors = statesData.getAll({
-        ...filterArgs,
-        state: highlightedState,
-      });
-    } else if (highlightedCity) {
-      title = `${highlightedCity.address}, ${highlightedCity.state}`;
-      authors = statesData.getAll({
-        ...filterArgs,
-        state: highlightedCity.state,
-        address: highlightedCity.address,
-      });
-    }
-
-    if (title && authors) {
-      return (
-        <StateDrawer
-          title={title}
-          authors={authors}
-          eventTypes={filters.eventTypes}
-          onClose={() => {
-            setHighlightedState(null);
-            setHighlightedCity(null);
-          }}
-          onEdit={onAuthorEdit}
-          onView={onAuthorView}
-          onAddAuthor={() => {
-            onAuthorEdit?.({
-              authorFirstName: '',
-              authorLastName: '',
-              authorFullName: '',
-              portrait: {
-                src: '',
-              },
-            });
-          }}
-        />
-      );
-    } else {
-      return <></>;
-    }
-  }, [
-    statesData,
-    highlightedState,
-    highlightedCity,
-    filterArgs,
-    setHighlightedState,
-    setHighlightedCity,
-    onAuthorEdit,
-  ]);
+  if (highlightedState) {
+    title = highlightedState;
+    authors = statesData.getAll({
+      ...filterArgs,
+      state: highlightedState,
+    });
+  } else if (highlightedCity) {
+    title = `${highlightedCity.address}, ${highlightedCity.state}`;
+    authors = statesData.getAll({
+      ...filterArgs,
+      state: highlightedCity.state,
+      address: highlightedCity.address,
+    });
+  }
 
   return (
     <>
@@ -337,7 +299,27 @@ export function AuthorMapView({
           }
         }}
       />
-      {stateDrawerElement}
+      <StateDrawer
+        opened={Boolean(title && authors)}
+        title={title}
+        authors={authors}
+        eventTypes={filters.eventTypes}
+        onClose={() => {
+          setHighlightedState(null);
+          setHighlightedCity(null);
+        }}
+        onView={onAuthorView}
+        onAddAuthor={() => {
+          onAuthorEdit?.({
+            authorFirstName: '',
+            authorLastName: '',
+            authorFullName: '',
+            portrait: {
+              src: '',
+            },
+          });
+        }}
+      />
     </>
   );
 }

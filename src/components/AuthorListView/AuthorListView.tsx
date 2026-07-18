@@ -59,10 +59,6 @@ function AuthorListRow({
       <button className={clsx('button', 'authorListViewEdit')} onClick={onView}>
         View
       </button>
-
-      <button className={clsx('button', 'authorListViewEdit')} onClick={onEdit}>
-        Edit
-      </button>
     </AuthorRow>
   );
 }

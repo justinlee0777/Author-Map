@@ -7,10 +7,10 @@ import { AuthorMapFilters, AuthorTimelineEvent } from '../../models';
 import { SelectAuthorGroup } from '../SelectAuthorGroup/SelectAuthorGroup';
 import { YearRange } from '../YearRange/YearRange';
 import { Radiogroup } from '../Radiogroup/Radiogroup';
-import { CollapsibleSection } from '../CollapsibleSection';
 import { Formula } from '../Formula';
 
 interface Props {
+  opened: boolean;
   onFiltersChange: (filters: AuthorMapFilters) => void;
 
   className?: string;
@@ -18,6 +18,7 @@ interface Props {
 }
 
 export function AuthorFilterDrawer({
+  opened,
   onFiltersChange,
   className,
   onClose,
@@ -44,11 +45,14 @@ export function AuthorFilterDrawer({
   const { inclusionReasons, groupId, eventTypes, search, yearRange } = filters;
 
   return (
-    <SideDrawer className={className} title="Filters" onClose={onClose}>
-      <CollapsibleSection
-        initialOpened
-        header={<label htmlFor={eventTypeId}>Events</label>}
-      >
+    <SideDrawer
+      className={className}
+      title="Filters"
+      opened={opened}
+      onClose={onClose}
+    >
+      <details>
+        <summary>Events</summary>
         <Radiogroup<AuthorTimelineEvent['type']>
           id={eventTypeId}
           className="authorFilterDrawerEventType"
@@ -72,14 +76,10 @@ export function AuthorFilterDrawer({
             }
           }}
         />
-      </CollapsibleSection>
+      </details>
 
-      <CollapsibleSection
-        initialOpened={false}
-        header={
-          <label htmlFor={inclusionFilterId}>Reasons for inclusion</label>
-        }
-      >
+      <details>
+        <summary>Reasons for inclusion</summary>
         <InclusionReasonSelect
           id={inclusionFilterId}
           selected={inclusionReasons}
@@ -87,19 +87,18 @@ export function AuthorFilterDrawer({
             onFiltersChange({ ...filters, inclusionReasons });
           }}
         />
-      </CollapsibleSection>
+      </details>
 
-      <CollapsibleSection initialOpened={false} header={<label>Formula</label>}>
+      <details>
+        <summary>Formula</summary>
         <Formula
           value={filters.formula}
           onChange={(formula) => onFiltersChange({ ...filters, formula })}
         />
-      </CollapsibleSection>
+      </details>
 
-      <CollapsibleSection
-        initialOpened={false}
-        header={<label htmlFor={searchId}>Search</label>}
-      >
+      <details>
+        <summary>Search</summary>
         <input
           id={searchId}
           value={search ?? ''}
@@ -115,12 +114,10 @@ export function AuthorFilterDrawer({
             }
           }}
         />
-      </CollapsibleSection>
+      </details>
 
-      <CollapsibleSection
-        initialOpened={false}
-        header={<label htmlFor={groupId}>Groups</label>}
-      >
+      <details>
+        <summary>Groups</summary>
         <SelectAuthorGroup
           id={groupsFilterId}
           value={groupId}
@@ -131,12 +128,10 @@ export function AuthorFilterDrawer({
             });
           }}
         />
-      </CollapsibleSection>
+      </details>
 
-      <CollapsibleSection
-        initialOpened={false}
-        header={<label htmlFor={yearRangeId}>Year range</label>}
-      >
+      <details>
+        <summary>Year range</summary>
         <YearRange
           id={yearRangeId}
           startingYear={data.dateRange[0]}
@@ -149,7 +144,7 @@ export function AuthorFilterDrawer({
             });
           }}
         />
-      </CollapsibleSection>
+      </details>
     </SideDrawer>
   );
 }

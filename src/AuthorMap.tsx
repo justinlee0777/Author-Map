@@ -1,6 +1,5 @@
-import { useMemo, useRef, useState, JSX, useCallback, useEffect } from 'react';
+import { useMemo, useState, JSX, useCallback } from 'react';
 import clsx from 'clsx';
-import Modal from 'react-modal';
 
 import {
   AmericanLiteraryAward,
@@ -98,19 +97,9 @@ export function AuthorMap({
   entriesIntoUnion,
   className,
 }: AuthorMapProps): JSX.Element {
-  const componentRef = useRef<HTMLDivElement>(null);
-
-  const [loading, setLoading] = useState(false);
-
   const [viewType, setViewType] = useState<ViewType>(ViewType.MAP);
 
   const [modalState, setModalState] = useState<ModalState | null>(null);
-
-  useEffect(() => {
-    if (componentRef.current) {
-      Modal.setAppElement(componentRef.current);
-    }
-  }, [componentRef]);
 
   // TODO: If it's a lot of data, do async? Return a promise?
   const statesData = useMemo(() => {
@@ -239,10 +228,7 @@ export function AuthorMap({
         entriesIntoUnion,
       }}
     >
-      <div
-        className={clsx('authorMapComponentContainer', className)}
-        ref={componentRef}
-      >
+      <div className={clsx('authorMapComponentContainer', className)}>
         <div className="authorMapActions">
           <Tabs<ViewType>
             className={clsx('authorMapViewSwitch')}
@@ -264,20 +250,18 @@ export function AuthorMap({
         </div>
         <div className="authorMapContainer">{viewElement}</div>
 
-        {modalState?.type === 'viewingAuthor' && (
-          <ViewAuthorModal
-            opened
-            author={modalState.viewingAuthor}
-            onClose={() => setModalState(null)}
-          />
-        )}
-        {modalState?.type === 'filterEditing' && (
-          <AuthorFilterDrawer
-            className={clsx('floatingAction', 'authorMapFilterSideDrawer')}
-            onFiltersChange={setFilters}
-            onClose={() => setModalState(null)}
-          />
-        )}
+        <ViewAuthorModal
+          opened={modalState?.type === 'viewingAuthor'}
+          author={(modalState as ViewingAuthorModal)?.viewingAuthor}
+          onClose={() => setModalState(null)}
+        />
+
+        <AuthorFilterDrawer
+          className={clsx('floatingAction', 'authorMapFilterSideDrawer')}
+          opened={modalState?.type === 'filterEditing'}
+          onFiltersChange={setFilters}
+          onClose={() => setModalState(null)}
+        />
       </div>
     </AuthorMapDataContext.Provider>
   );

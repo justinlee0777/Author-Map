@@ -1,8 +1,10 @@
 import clsx from 'clsx';
 import { JSX, ReactNode } from 'react';
 import { MdClose } from 'react-icons/md';
+import { CommonModal } from '../CommonModal/CommonModal';
 
 interface Props {
+  opened: boolean;
   title: string;
 
   children?: ReactNode;
@@ -11,21 +13,20 @@ interface Props {
 }
 
 export function SideDrawer({
+  opened,
   title,
   children,
   className,
   onClose,
 }: Props): JSX.Element {
   return (
-    <div className={clsx('sideDrawer', className)}>
-      <h3>
-        {title}
-
-        <button className={clsx('button', 'sideDrawerClose')} onClick={onClose}>
-          <MdClose />
-        </button>
-      </h3>
+    <CommonModal
+      className={clsx('sideDrawer', className)}
+      opened={opened}
+      onClose={onClose}
+    >
+      <h3>{title}</h3>
       {children}
-    </div>
+    </CommonModal>
   );
 }

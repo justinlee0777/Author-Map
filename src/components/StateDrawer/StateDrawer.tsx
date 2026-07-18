@@ -10,12 +10,12 @@ import { AuthorMapDataContext } from '../../contexts';
 import { SideDrawer } from '../SideDrawer';
 
 interface Props {
-  title: string;
-  authors: Array<Author>;
   eventTypes: Array<AuthorTimelineEvent['type']>;
+  opened: boolean;
 
+  title?: string;
+  authors?: Array<Author>;
   onClose?: () => void;
-  onEdit?: (author: Author) => void;
   onView?: (author: Author) => void;
   onAddAuthor?: () => void;
 }
@@ -24,8 +24,8 @@ export function StateDrawer({
   title,
   authors,
   eventTypes,
+  opened,
   onClose,
-  onEdit,
   onView,
   onAddAuthor,
 }: Props): JSX.Element {
@@ -34,64 +34,63 @@ export function StateDrawer({
   const authorKeyGenerator = useMemo(() => createKeyGenerator(), []);
 
   return (
-    <SideDrawer className="stateDrawerUSState" title={title} onClose={onClose}>
-      <AddAuthor className="stateDrawerAdd" onClick={onAddAuthor} />
+    <SideDrawer
+      className="stateDrawerUSState"
+      opened={opened}
+      title={title ?? ''}
+      onClose={onClose}
+    >
+      {authors && (
+        <div className="stateDrawerList">
+          {authors.map((author) => {
+            let authorName: ReactNode = getAuthorName(author);
 
-      <div className="stateDrawerList">
-        {authors.map((author) => {
-          let authorName: ReactNode = getAuthorName(author);
-
-          if (author.link) {
-            authorName = (
-              <a href={author.link} target="_blank" rel="noopener noreferrer">
-                {authorName}
-              </a>
-            );
-          }
-
-          const birthDate = data.getBirthDate(author.id),
-            deathDate = data.getDeathDate(author.id);
-
-          let events: Array<AuthorTimelineEvent> = [];
-
-          for (const eventType of eventTypes) {
-            switch (eventType) {
-              case 'Birth':
-                if (birthDate) {
-                  events.push(birthDate);
-                }
-                break;
-              case 'Death':
-                if (deathDate) {
-                  events.push(deathDate);
-                }
-                break;
+            if (author.link) {
+              authorName = (
+                <a href={author.link} target="_blank" rel="noopener noreferrer">
+                  {authorName}
+                </a>
+              );
             }
-          }
 
-          return (
-            <AuthorRow
-              key={authorKeyGenerator.getKey(author.id)}
-              className="stateDrawerAuthorRow"
-              author={author}
-              events={events}
-            >
-              <button
-                className={clsx('button', 'stateDrawerEdit')}
-                onClick={() => onEdit?.(author)}
+            const birthDate = data.getBirthDate(author.id),
+              deathDate = data.getDeathDate(author.id);
+
+            let events: Array<AuthorTimelineEvent> = [];
+
+            for (const eventType of eventTypes) {
+              switch (eventType) {
+                case 'Birth':
+                  if (birthDate) {
+                    events.push(birthDate);
+                  }
+                  break;
+                case 'Death':
+                  if (deathDate) {
+                    events.push(deathDate);
+                  }
+                  break;
+              }
+            }
+
+            return (
+              <AuthorRow
+                key={authorKeyGenerator.getKey(author.id)}
+                className="stateDrawerAuthorRow"
+                author={author}
+                events={events}
               >
-                Edit
-              </button>
-              <button
-                className={clsx('button', 'stateDrawerView')}
-                onClick={() => onView?.(author)}
-              >
-                View
-              </button>
-            </AuthorRow>
-          );
-        })}
-      </div>
+                <button
+                  className={clsx('button', 'stateDrawerView')}
+                  onClick={() => onView?.(author)}
+                >
+                  View
+                </button>
+              </AuthorRow>
+            );
+          })}
+        </div>
+      )}
     </SideDrawer>
   );
 }
