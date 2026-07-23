@@ -44,7 +44,15 @@ export function CommonModal({
   }, [onClose]);
 
   return (
-    <dialog className={clsx('modal', className)} ref={dialogRef}>
+    <dialog
+      className={clsx('modal', className)}
+      ref={dialogRef}
+      onClick={(event) => {
+        if (event.target === dialogRef.current) {
+          onClose?.();
+        }
+      }}
+    >
       <button
         className={clsx('button', 'closeModal')}
         type="button"

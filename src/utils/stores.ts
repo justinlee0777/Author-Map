@@ -109,8 +109,8 @@ export class AuthorMapStores {
     }: AuthorStoreFilters,
     sort?: AuthorSort,
   ): Array<Author> {
-    function filterEvent(event: BirthEvent | DeathEvent): boolean {
-      const dateYear = new Date(event.date).getFullYear();
+    function filterEvent(event: AuthorTimelineEvent): boolean {
+      const dateYear = new Date(getStartingDate(event)).getFullYear();
       let value = yearRange[0] <= dateYear && yearRange[1] >= dateYear;
 
       if (state) {
@@ -136,6 +136,11 @@ export class AuthorMapStores {
         case 'Death':
           [...this.deathEventsByAuthor.entries()]
             .filter(([, deathEvent]) => filterEvent(deathEvent))
+            .forEach(([authorId]) => uniqueAuthorIds.add(authorId));
+          break;
+        case 'Timeline':
+          [...this.authorTimelines.entries()]
+            .filter(([, events]) => [...events.values()].some(filterEvent))
             .forEach(([authorId]) => uniqueAuthorIds.add(authorId));
           break;
         default:
@@ -520,46 +525,6 @@ export class AuthorMapStores {
     } else {
       return authors;
     }
-  }
-
-  private hasAuthorResided(
-    authorId: Author['id'],
-    usState: USState,
-    [yearStart, yearEnd]: [number, number] = [0, Infinity],
-    address?: string,
-  ): boolean {
-    const timeline = this.getAuthorTimeline(authorId);
-
-    return timeline
-      .filter((event) => {
-        if ('date' in event) {
-          const dateYear = new Date(event.date).getFullYear();
-          return yearStart <= dateYear && dateYear <= yearEnd;
-        } else {
-          const dateStartYear = new Date(event.startDate).getFullYear(),
-            dateEndYear = new Date(event.endDate).getFullYear();
-          return dateStartYear >= yearStart && dateEndYear <= yearEnd;
-        }
-      })
-      .some((event) => {
-        const { location } = event;
-
-        if (location) {
-          if (location.state) {
-            const value = location.state === usState;
-
-            if (address) {
-              return value && location.address === address;
-            } else {
-              return value;
-            }
-          } else {
-            return false;
-          }
-        } else {
-          return false;
-        }
-      });
   }
 }
 

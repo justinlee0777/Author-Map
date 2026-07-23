@@ -51,7 +51,7 @@ export function AuthorFilterView({
         onClick={onClick}
       />
 
-      {filters.eventTypes && (
+      {filters.eventTypes.length > 0 && (
         <AuthorFilterTag
           type="event"
           eventTypes={filters.eventTypes}

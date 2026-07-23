@@ -4,6 +4,7 @@ import { MdHelpOutline } from 'react-icons/md';
 import { AuthorMapFormulaFilter } from '../../models';
 import { evaluateFormula, mathDocumentation } from '../../utils/formula';
 import { CommonModal } from '../CommonModal/CommonModal';
+import { HelpButton } from '../HelpButton';
 
 interface Props {
   value: AuthorMapFormulaFilter;
@@ -22,12 +23,7 @@ export function Formula({ value, onChange }: Props): JSX.Element {
 
   return (
     <div className="formula">
-      <button
-        className="formulaHelp button"
-        onClick={() => setHelpOpened(true)}
-      >
-        <MdHelpOutline />
-      </button>
+      <HelpButton className="formulaHelp" onClick={() => setHelpOpened(true)} />
 
       <div className="formulaRow">
         <label htmlFor={equationId}>Equation</label>

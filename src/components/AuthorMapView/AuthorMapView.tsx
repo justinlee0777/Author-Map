@@ -23,6 +23,7 @@ import { StateDrawer } from '../StateDrawer/StateDrawer';
 import { AuthorMapDataContext } from '../../contexts';
 import { convertValuesToFilters } from '../InclusionReasonSelect/InclusionReasonSelect';
 import { AuthorMapStores } from '../../utils/stores';
+import { useAuthorMapChunker } from '../../hooks/useAuthorMapChunker';
 
 interface Geography {
   rsmKey: string;
@@ -124,14 +125,19 @@ export function AuthorMapView({
 
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
-  const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = {
-    yearRange,
-    eventTypes,
-    inclusionReasons: inclusionReasonFilter,
-    search,
-    groupId,
-    formula,
-  };
+  const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = useMemo(
+    () => ({
+      yearRange,
+      eventTypes,
+      inclusionReasons: inclusionReasonFilter,
+      search,
+      groupId,
+      formula,
+    }),
+    [filters],
+  );
+
+  const chunks = useAuthorMapChunker(cityCoordinates, filterArgs);
 
   const renderedCityCoordinates: Array<
     CityCoordinates & { marker: JSX.Element }
@@ -139,11 +145,8 @@ export function AuthorMapView({
     return cityCoordinates.reduce(
       (acc, cityCoordinate, i) => {
         const { location, coordinates } = cityCoordinate;
-        const numAuthors = statesData.getAll({
-          ...filterArgs,
-          address: location.address,
-          state: location.state,
-        }).length;
+        const numAuthors =
+          chunks[location.state].addresses[location.address]?.length ?? 0;
 
         if (numAuthors > 0) {
           const marker = (
@@ -179,6 +182,7 @@ export function AuthorMapView({
   }, [
     MARKER_COLORS,
     filterArgs,
+    chunks,
     cityCoordinates,
     cityTooltipId,
     toCityID,
@@ -190,17 +194,11 @@ export function AuthorMapView({
 
   if (highlightedState) {
     title = highlightedState;
-    authors = statesData.getAll({
-      ...filterArgs,
-      state: highlightedState,
-    });
+    authors = chunks[highlightedState].authors;
   } else if (highlightedCity) {
     title = `${highlightedCity.address}, ${highlightedCity.state}`;
-    authors = statesData.getAll({
-      ...filterArgs,
-      state: highlightedCity.state,
-      address: highlightedCity.address,
-    });
+    authors =
+      chunks[highlightedCity.state].addresses[highlightedCity.address] ?? [];
   }
 
   return (
@@ -279,7 +277,9 @@ export function AuthorMapView({
         render={({ content }) => {
           const stateName = content as USState | undefined;
           if (stateName) {
-            const mainContent = `${stateName} (${statesData.getAll({ ...filterArgs, state: stateName }).length})`;
+            const numAuthors = chunks[stateName].authors.length;
+
+            const mainContent = `${stateName} (${numAuthors})`;
             return (
               <>
                 <p>{mainContent}</p>

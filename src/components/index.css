@@ -1,24 +1,38 @@
-@import './AddAuthor/AddAuthor.css';
-@import './AddAuthorGroup/AddAuthorGroup.css';
-@import './AddMajorEvent/AddMajorEvent.css';
-@import './AuthorFilterDrawer/index.css';
-@import './AuthorFilterView/index.css';
-@import './AuthorGroupInput/AuthorGroupInput.css';
-@import './AuthorListView/AuthorListView.css';
-@import './AuthorRow/AuthorRow.css';
-@import './AuthorTimelineView/AuthorTimelineView.css';
-@import './CommonModal/CommonModal.css';
-@import './DatePicker/DatePicker.css';
-@import './DynamicList/DynamicList.css';
-@import './EditAuthorGroupModal/EditAuthorGroupModal.css';
-@import './EditAuthorModal/EditAuthorModal.css';
-@import './EditMajorEventModal/EditMajorEventModal.css';
-@import './Formula/index.css';
-@import './InclusionReasonSelect/InclusionReasonSelect.css';
-@import './Radiogroup/Radiogroup.css';
-@import './RegisterAuthorGroup/RegisterAuthorGroup.css';
-@import './SideDrawer/index.css';
-@import './StateDrawer/StateDrawer.css';
-@import './Tabs/Tabs.css';
-@import './ViewAuthorModal/ViewAuthorModal.css';
-@import './YearRange/YearRange.css';
+@layer author-map-common-components, author-map-specific-components;
+
+@import './AddAuthor/AddAuthor.css' layer(author-map-common-components);
+@import './AddAuthorGroup/AddAuthorGroup.css'
+  layer(author-map-common-components);
+@import './AddMajorEvent/AddMajorEvent.css' layer(author-map-common-components);
+@import './CommonModal/CommonModal.css' layer(author-map-common-components);
+@import './DatePicker/DatePicker.css' layer(author-map-common-components);
+@import './DynamicList/DynamicList.css' layer(author-map-common-components);
+@import './HelpButton/index.css' layer(author-map-common-components);
+@import './SideDrawer/index.css' layer(author-map-common-components);
+@import './StateDrawer/StateDrawer.css' layer(author-map-common-components);
+@import './Tabs/Tabs.css' layer(author-map-common-components);
+@import './YearRange/YearRange.css' layer(author-map-common-components);
+
+@import './AuthorFilterDrawer/index.css' layer(author-map-specific-components);
+@import './AuthorFilterView/index.css' layer(author-map-specific-components);
+@import './AuthorGroupInput/AuthorGroupInput.css'
+  layer(author-map-specific-components);
+@import './AuthorListView/AuthorListView.css'
+  layer(author-map-specific-components);
+@import './AuthorRow/AuthorRow.css' layer(author-map-specific-components);
+@import './AuthorTimelineView/AuthorTimelineView.css'
+  layer(author-map-specific-components);
+@import './EditAuthorGroupModal/EditAuthorGroupModal.css'
+  layer(author-map-specific-components);
+@import './EditAuthorModal/EditAuthorModal.css'
+  layer(author-map-specific-components);
+@import './EditMajorEventModal/EditMajorEventModal.css'
+  layer(author-map-specific-components);
+@import './Formula/index.css' layer(author-map-specific-components);
+@import './InclusionReasonSelect/InclusionReasonSelect.css'
+  layer(author-map-specific-components);
+@import './Radiogroup/Radiogroup.css' layer(author-map-specific-components);
+@import './RegisterAuthorGroup/RegisterAuthorGroup.css'
+  layer(author-map-specific-components);
+@import './ViewAuthorModal/ViewAuthorModal.css'
+  layer(author-map-specific-components);

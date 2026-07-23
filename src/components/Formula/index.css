@@ -1,35 +1,19 @@
 .formulaHelp {
-  border: none;
   margin-left: auto;
-  padding: 0.5em;
 }
 
 .formulaHelpModal {
-  background-color: white;
-  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
-  container-name: help-modal;
-  container-type: inline-size;
   height: min(90%, 400px);
-  left: 50%;
   line-height: 1.5;
   overflow-y: auto;
   padding: 1em;
-  position: absolute;
   text-indent: 1.5em;
-  top: 50%;
-  transform: translate(-50%, -50%);
   width: min(90%, 600px);
 
   & code {
     display: block;
     white-space: break-spaces;
-  }
-}
-
-@container help-modal (width < 400px) {
-  p {
-    font-size: 0.8em;
   }
 }
 

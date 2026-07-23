@@ -175,7 +175,8 @@ export function ViewAuthorModal({
 
               return (
                 <Fragment key={i}>
-                  <p>{eventElement}</p>
+                  {event.location && <h5>{getAddress(event.location)}</h5>}
+                  <p className="timelineEventPeriod">{eventElement}</p>
                 </Fragment>
               );
             })}
