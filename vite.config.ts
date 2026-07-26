@@ -39,6 +39,7 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
         models: resolve(__dirname, 'src/models.ts'),
+        schemas: resolve(__dirname, 'src/schemas.ts'),
       },
       // Output as modern ES Modules
       formats: ['es'],

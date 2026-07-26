@@ -155,7 +155,7 @@ export interface TimeSpan {
 }
 
 export interface BaseTimelineEvent {
-  id: string | Symbol;
+  id: string;
 
   authorId?: Author['id'];
   location?: AuthorLocation;
@@ -303,7 +303,7 @@ export type AuthorInclusionReason =
   | AuthorGroupReason;
 
 export interface Author {
-  id: string | Symbol;
+  id: string;
 
   authorFirstName: string;
   authorLastName: string;
@@ -317,6 +317,8 @@ export interface Author {
   authorDisplayName?: string;
 
   link?: string;
+  wikimediaId?: string;
+
   portrait?: PortraitData;
 
   groups?: Array<AuthorGroup['id']>;

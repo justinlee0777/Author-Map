@@ -17,8 +17,16 @@ const log = Math.log;
 
 const trigonometric = { sin, sinh, cos, cosh, tan, tanh };
 
+const max = Math.max;
+const min = Math.min;
+
+const extrema = { max, min };
+
 const math = create(evaluateDependencies);
 
-math.import({ ...arithmetic, ...trigonometric, log }, { override: true });
+math.import(
+  { ...arithmetic, ...trigonometric, ...extrema, log },
+  { override: true },
+);
 
 export { math };
