@@ -102,7 +102,7 @@ export function InclusionReasonSelect({
         }));
 
       const awardOption: RadiogroupOption<AwardInclusionReason['type']> = {
-        label: 'American literary awards',
+        label: 'Literary awards',
         value: awardValue,
         render: (OptionComponent) => (
           <OptionComponent key="awards" className="inclusionReasonOption">

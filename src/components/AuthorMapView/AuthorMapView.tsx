@@ -49,12 +49,8 @@ export function AuthorMapView({
   onAuthorEdit,
   onAuthorView,
 }: Props): JSX.Element {
-  const {
-    data: statesData,
-    filters,
-    stateCensus,
-    entriesIntoUnion,
-  } = useContext(AuthorMapDataContext);
+  const { filters, stateCensus, entriesIntoUnion } =
+    useContext(AuthorMapDataContext);
 
   const [stateTooltipId, cityTooltipId] = useMemo(
     () => ['state-labels-tooltip', 'city-labels-tooltip'],
@@ -120,19 +116,14 @@ export function AuthorMapView({
   const [highlightedCity, setHighlightedCity] =
     useState<Required<AuthorLocation> | null>(null);
 
-  const { eventTypes, inclusionReasons, search, groupId, yearRange, formula } =
-    filters;
+  const { inclusionReasons, ...filterValues } = filters;
 
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
   const filterArgs: Parameters<AuthorMapStores['getAll']>[0] = useMemo(
     () => ({
-      yearRange,
-      eventTypes,
+      ...filterValues,
       inclusionReasons: inclusionReasonFilter,
-      search,
-      groupId,
-      formula,
     }),
     [filters],
   );

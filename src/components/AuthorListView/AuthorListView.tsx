@@ -70,14 +70,7 @@ export function AuthorListView({
 }: Props): JSX.Element {
   const {
     data: statesData,
-    filters: {
-      eventTypes,
-      search,
-      groupId,
-      yearRange,
-      formula,
-      inclusionReasons,
-    },
+    filters: { inclusionReasons, ...filters },
     groups,
   } = useContext(AuthorMapDataContext);
 
@@ -140,11 +133,7 @@ export function AuthorListView({
   const inclusionReasonFilter = convertValuesToFilters(inclusionReasons);
 
   const filterArg: Parameters<AuthorMapStores['getAll']>[0] = {
-    yearRange,
-    eventTypes,
-    search,
-    groupId,
-    formula,
+    ...filters,
     inclusionReasons: inclusionReasonFilter,
   };
 
@@ -200,7 +189,7 @@ export function AuthorListView({
               {authors.map((author) => {
                 let events: Array<AuthorTimelineEvent> = [];
 
-                for (const eventType of eventTypes) {
+                for (const eventType of filters.eventTypes) {
                   switch (eventType) {
                     case 'Birth':
                       const birthDate = statesData.getBirthDate(author.id);
@@ -236,7 +225,7 @@ export function AuthorListView({
     }
   }
 
-  const filteringGroup = groups.find((group) => group.id === groupId);
+  const filteringGroup = groups.find((group) => group.id === filters.groupId);
 
   return (
     <div className="authorListView">

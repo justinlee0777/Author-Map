@@ -14,7 +14,7 @@ import {
   USState,
 } from '../models';
 import { getAuthorName } from './names';
-import { getStartingDate } from './dates';
+import { getDifferenceInMonths, getEndingDate, getStartingDate } from './dates';
 import { sortMap } from './sort';
 import { calculateScore } from './formula';
 
@@ -106,19 +106,32 @@ export class AuthorMapStores {
       state,
       yearRange,
       formula,
+      minimumResidence,
+      timeUntilImmigration,
     }: AuthorStoreFilters,
     sort?: AuthorSort,
   ): Array<Author> {
     function filterEvent(event: AuthorTimelineEvent): boolean {
-      const dateYear = new Date(getStartingDate(event)).getFullYear();
+      const startDate = new Date(getStartingDate(event));
+      const dateYear = startDate.getFullYear();
       let value = yearRange[0] <= dateYear && yearRange[1] >= dateYear;
 
-      if (state) {
-        value = value && event.location?.state === state;
-      }
+      if (state || address) {
+        if (state) {
+          value = value && event.location?.state === state;
+        }
 
-      if (address) {
-        value = value && event.location?.address === address;
+        if (address) {
+          value = value && event.location?.address === address;
+        }
+
+        if (value && typeof minimumResidence === 'number') {
+          const endDate = new Date(getEndingDate(event));
+
+          const monthsDifference = getDifferenceInMonths(startDate, endDate);
+
+          value = value && monthsDifference >= minimumResidence;
+        }
       }
 
       return value;
@@ -169,6 +182,38 @@ export class AuthorMapStores {
 
       authors = authors.filter((author) => {
         return searchRegex.test(getAuthorName(author));
+      });
+    }
+
+    if (timeUntilImmigration) {
+      authors = authors.filter((author) => {
+        const birthEvent = this.birthEventsByAuthor.get(author.id)!;
+
+        if (birthEvent.location?.state) {
+          // If the author is born here, this passes automatically.
+          return true;
+        } else {
+          const authorTimeline = this.getAuthorTimeline(author.id).filter(
+            (event) => event.location?.state,
+          );
+
+          const firstEvent = authorTimeline.at(0);
+
+          if (firstEvent) {
+            const birthDate = new Date(birthEvent.date),
+              firstEventDate = new Date(getStartingDate(firstEvent));
+
+            const monthsDifference = getDifferenceInMonths(
+              birthDate,
+              firstEventDate,
+            );
+
+            return monthsDifference <= timeUntilImmigration;
+          } else {
+            // It's not "fair", but we frankly can't tell at this point.
+            return false;
+          }
+        }
       });
     }
 

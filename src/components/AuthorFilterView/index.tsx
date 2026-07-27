@@ -78,6 +78,24 @@ export function AuthorFilterView({
         />
       )}
 
+      {filters.minimumResidence && (
+        <AuthorFilterTag
+          type="minimumResidence"
+          value={filters.minimumResidence}
+          tooltipId={tooltipId}
+          onClick={onClick}
+        />
+      )}
+
+      {filters.timeUntilImmigration && (
+        <AuthorFilterTag
+          type="timeUntilImmigration"
+          value={filters.timeUntilImmigration}
+          tooltipId={tooltipId}
+          onClick={onClick}
+        />
+      )}
+
       <Tooltip className="authorFilterViewTooltip" id={tooltipId} noArrow />
     </div>
   );

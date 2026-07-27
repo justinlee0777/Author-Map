@@ -369,6 +369,18 @@ export interface AuthorMapFilters {
   eventTypes: Array<AuthorTimelineEvent['type']>;
   formula: AuthorMapFormulaFilter;
 
+  /**
+   * In months.
+   * This is only relevant for searches including state and address.
+   * For the time being, this refers to continuous residence - as in, an author must stay at a specific place for a continuous duration of time.
+   */
+  minimumResidence?: number;
+
+  /**
+   * In months.
+   */
+  timeUntilImmigration?: number;
+
   search?: string;
   groupId?: AuthorGroup['id'];
 }

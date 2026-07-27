@@ -38,13 +38,25 @@ interface FormulaProps {
   type: 'formula';
 }
 
+interface MinimumResidenceProps {
+  value: number;
+  type: 'minimumResidence';
+}
+
+interface TimeUntilImmigrationProps {
+  value: number;
+  type: 'timeUntilImmigration';
+}
+
 type TagProps =
   | EventTypeProps
   | InclusionReasonProps
   | SearchProps
   | AuthorGroupProps
   | YearRangeProps
-  | FormulaProps;
+  | FormulaProps
+  | MinimumResidenceProps
+  | TimeUntilImmigrationProps;
 
 type Props = TagProps & {
   tooltipId: string;
@@ -115,6 +127,14 @@ export function AuthorFilterTag(props: Props): JSX.Element {
     case 'formula':
       const { threshold } = props;
       tagContents = `Threshold: ${threshold}`;
+      break;
+    case 'minimumResidence':
+      const { value: minimumResidenceValue } = props;
+      tagContents = `Minimum residence: ${minimumResidenceValue} months`;
+      break;
+    case 'timeUntilImmigration':
+      const { value: timeUntilImmigrationValue } = props;
+      tagContents = `Time until immigration: ${timeUntilImmigrationValue} months`;
       break;
   }
 

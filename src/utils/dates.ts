@@ -43,3 +43,18 @@ export function getStartingDate(event: AuthorTimelineEvent): string {
     return event.startDate;
   }
 }
+
+export function getEndingDate(event: AuthorTimelineEvent): string {
+  if ('date' in event) {
+    return event.date;
+  } else {
+    return event.endDate;
+  }
+}
+
+export function getDifferenceInMonths(startDate: Date, endDate: Date): number {
+  return (
+    (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+    (endDate.getMonth() - startDate.getMonth())
+  );
+}

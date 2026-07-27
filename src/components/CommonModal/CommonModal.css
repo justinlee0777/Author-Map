@@ -1,5 +1,5 @@
 .modal {
-  background-color: white;
+  background-color: var(--floating-element-color);
   border: none;
   border-radius: 4px;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);

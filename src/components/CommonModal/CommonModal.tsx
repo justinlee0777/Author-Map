@@ -48,8 +48,19 @@ export function CommonModal({
       className={clsx('modal', className)}
       ref={dialogRef}
       onClick={(event) => {
-        if (event.target === dialogRef.current) {
-          onClose?.();
+        const dialog = dialogRef.current;
+
+        if (dialog && event.target === dialog) {
+          const rect = dialog.getBoundingClientRect();
+
+          const clickedOutside =
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom;
+          if (clickedOutside) {
+            onClose?.();
+          }
         }
       }}
     >

@@ -64,28 +64,13 @@ type ModalState =
   | FilterEditingModal;
 
 /**
- * This is not pure. This will internally update authors.
- * This is up for debate. The component cannot know what changes are made to the 'authors' prop. Therefore, for any change,
- * every author needs to be scanned and the stores need to be updated. This can be costly for performance.
- * TODO: There is a strategy to block data change if the external datastore fails, but there also needs to be a fallback strategy
- * if the client prefers to update now and correct later.
- *
- * TODO: If author residence dates are recorded, then we can do month / year filters of "who was in this state at so and so time"
- *
- * TODO: Support TimeSpan events.
- * TODO: It's fine if TimelineView by default includes Birth and Death, but should be able to select for specific Author timelines.
- *    Similarly, other Author Timeline events should be lazy loaded.
- * TODO: Filter timeline by births / deaths / milestones
- * TODO: It may be wise to specify a year for "Residing authors", rather than storing them all. Alternatively, providing a city to see which authors have lived here works too.
+ * TODO: Filter timeline by milestones
  *
  * TODO: Books model
- * TODO: Really need to figure out how to distinguish authors i.e. "What are they known for - genre, masterpieces, blah"
  * TODO: Links to bibliography (bibliography can be part of Timeline, and a special tag can be assigned to the event for filtering)
  *
  * TODO: Genre (History / Philosophy / Fiction / Poetry)
  * TODO: Discussion system?
- * TODO: Show who is in a state on hover? Need to see some data early
- * TODO: Sort on startup? Async? Will it be a lot of data? Hmm.
  * TODO: Accept a stream?
  */
 export function AuthorMap({
@@ -257,7 +242,6 @@ export function AuthorMap({
         />
 
         <AuthorFilterDrawer
-          className={clsx('floatingAction', 'authorMapFilterSideDrawer')}
           opened={modalState?.type === 'filterEditing'}
           onFiltersChange={setFilters}
           onClose={() => setModalState(null)}
